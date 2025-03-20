@@ -10,6 +10,7 @@
   <properties>
     <gson-version>2.12.1</gson-version>
     <jaxws-rt-version>2.3.3</jaxws-rt-version>
+    <javafx-version>17.0.1</javafx-version>
   </properties>
   
   <dependencies>
@@ -17,6 +18,8 @@
 
   <modules>
     <module>Simulator</module>
+    <module>SimpleAdaptationWithSimulation</module>
+    <module>SimulatorGUI</module>
   </modules>
   
   <build>
