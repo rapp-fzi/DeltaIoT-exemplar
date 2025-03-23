@@ -3,6 +3,7 @@
 version.ini
 .plugins/org.eclipse.core.resources/
 .plugins/org.eclipse.e4.workbench/
+.plugins/org.eclipse.e4.ui.workbench.swt/
 .plugins/org.eclipse.egit.core/
 .plugins/org.eclipse.jdt.*
 .plugins/org.eclipse.oomph.setup.ui/
