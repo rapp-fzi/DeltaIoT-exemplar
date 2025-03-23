@@ -24,9 +24,9 @@
   </dependencies>
 
   <modules>
-    <module>Simulator</module>
-    <module>SimpleAdaptationWithSimulation</module>
-    <module>SimulatorGUI</module>
+    <module>../Simulator</module>
+    <module>../SimpleAdaptationWithSimulation</module>
+    <module>../SimulatorGUI</module>
   </modules>
   
   <build>
