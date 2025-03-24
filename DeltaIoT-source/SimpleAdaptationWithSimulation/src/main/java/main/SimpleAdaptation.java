@@ -21,6 +21,7 @@ public class SimpleAdaptation {
 
         // Create Feedback loop
         FeedbackLoop feedbackLoop = new FeedbackLoop();
+        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
 
         // get probe and effectors
         Probe probe = networkMgmt.getProbe();
