@@ -69,7 +69,7 @@ public class DeltaIoTEmulatorMain extends Application {
                     for (int i = 0; i < DeltaIoTSimulator.NUM_OF_RUNS; i++)
                         simul.doSingleRun();
 
-                    ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(96);
+                    ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(DeltaIoTSimulator.NUM_OF_RUNS);
                     CsvFileWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
 
                     btnDisplay.setDisable(false);

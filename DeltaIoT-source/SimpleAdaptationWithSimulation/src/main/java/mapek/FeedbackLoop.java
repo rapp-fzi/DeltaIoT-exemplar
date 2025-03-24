@@ -40,7 +40,7 @@ public class FeedbackLoop {
     void monitor() {
         motes = probe.getAllMotes();
 
-        counter = (counter + 1) % 96;
+        counter = (counter + 1) % DeltaIoTSimulator.NUM_OF_RUNS;
         CsvFileWriter.logAndSaveConfiguration(motes, counter, getId());
 
         // perform analysis
