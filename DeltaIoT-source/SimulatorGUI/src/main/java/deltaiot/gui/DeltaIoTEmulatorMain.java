@@ -148,7 +148,11 @@ public class DeltaIoTEmulatorMain extends Application {
     @FXML
     void btnDisplay(ActionEvent event) {
         try {
-            URL url = new URL("file://" + System.getProperty("user.dir") + "/resources/DeltaIoTModel.fxml");
+            Path userPath = Paths.get(System.getProperty("user.dir"));
+            Path guifxml = userPath.resolve("resources")
+                .resolve("DeltaIoTModel.fxml");
+            URL url = guifxml.toUri()
+                .toURL();
             FXMLLoader fxmlLoader = new FXMLLoader(url);
             Parent root1 = (Parent) fxmlLoader.load();
             DeltaIoTClientMain main = fxmlLoader.getController();
