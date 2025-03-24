@@ -6,6 +6,7 @@ import deltaiot.client.Effector;
 import deltaiot.client.Probe;
 import deltaiot.client.SimulationClient;
 import mapek.FeedbackLoop;
+import mapek.QualityBasedFeedbackLoop;
 import simulator.QoS;
 import simulator.Simulator;
 import util.CsvFileWriter;
@@ -20,8 +21,8 @@ public class SimpleAdaptation {
         networkMgmt = new SimulationClient();
 
         // Create Feedback loop
-        FeedbackLoop feedbackLoop = new FeedbackLoop();
-        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
+        // FeedbackLoop feedbackLoop = new FeedbackLoop();
+        FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
 
         // get probe and effectors
         Probe probe = networkMgmt.getProbe();

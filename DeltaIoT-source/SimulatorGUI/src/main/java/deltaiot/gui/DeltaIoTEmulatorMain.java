@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.SimulationClient;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -65,7 +66,7 @@ public class DeltaIoTEmulatorMain extends Application {
                 protected Object call() throws Exception {
                     btnDisplay.setDisable(true);
                     simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT();
-                    for (int i = 0; i < 96; i++)
+                    for (int i = 0; i < DeltaIoTSimulator.NUM_OF_RUNS; i++)
                         simul.doSingleRun();
 
                     ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(96);
