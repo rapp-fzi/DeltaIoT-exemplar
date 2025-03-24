@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import deltaiot.client.SimulationClient;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
@@ -30,6 +32,7 @@ import javafx.stage.Stage;
 import main.SimpleAdaptation;
 import simulator.QoS;
 import simulator.Simulator;
+import util.CsvFileWriter;
 
 public class DeltaIoTEmulatorMain extends Application {
     @FXML
@@ -64,6 +67,10 @@ public class DeltaIoTEmulatorMain extends Application {
                     simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT();
                     for (int i = 0; i < 96; i++)
                         simul.doSingleRun();
+
+                    ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(96);
+                    CsvFileWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
+
                     btnDisplay.setDisable(false);
                     return null;
                 }
