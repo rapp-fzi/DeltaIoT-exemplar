@@ -24,12 +24,6 @@
       <version>${javafx-version}</version>
     </dependency>
     <dependency>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-graphics </artifactId>
-        <version>${javafx-version}</version>
-        <classifier>linux</classifier>
-    </dependency>
-    <dependency>
       <groupId>deltaiot.exemplar</groupId>
       <artifactId>Simulator</artifactId>
       <version>${project.version}</version>
