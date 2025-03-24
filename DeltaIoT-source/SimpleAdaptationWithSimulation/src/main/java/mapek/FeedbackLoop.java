@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
 import deltaiot.services.Link;
@@ -31,7 +32,7 @@ public class FeedbackLoop {
     }
 
     public void start() {
-        for (int i = 0; i < 95; i++) {
+        for (int i = 0; i < DeltaIoTSimulator.NUM_OF_RUNS; i++) {
             monitor();
         }
     }
