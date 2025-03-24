@@ -12,7 +12,9 @@ import simulator.QoS;
 public class QualityBasedFeedbackLoop extends FeedbackLoop {
 
     private final static double LOWER_PACKET_LOSS = 0.1;
-    private final static double LOWER_ENERGY_CONSUMPTION = 15.5;
+    // private final static double LOWER_ENERGY_CONSUMPTION = 26;
+    private final static double LOWER_ENERGY_CONSUMPTION = 18;
+    // private final static double LOWER_ENERGY_CONSUMPTION = 10;
 
     private final SimulationClient networkMgmt;
 
