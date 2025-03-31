@@ -112,7 +112,7 @@ public class DeltaIoTEmulatorMain extends Application {
                             e.printStackTrace();
                         }
 
-                    } while (run < 96);
+                    } while (run < DeltaIoTSimulator.NUM_OF_RUNS);
 
                     return null;
                 }
