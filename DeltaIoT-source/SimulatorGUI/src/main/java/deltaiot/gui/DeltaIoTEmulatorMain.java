@@ -103,8 +103,8 @@ public class DeltaIoTEmulatorMain extends Application {
                         run = simul.getRunInfo()
                             .getRunNumber();
 
-                        updateProgress(run, 96);
-                        updateMessage("(" + run + "/96" + ")");
+                        updateProgress(run, DeltaIoTSimulator.NUM_OF_RUNS);
+                        updateMessage("(" + run + "/" + DeltaIoTSimulator.NUM_OF_RUNS + ")");
 
                         try {
                             Thread.sleep(1000);
