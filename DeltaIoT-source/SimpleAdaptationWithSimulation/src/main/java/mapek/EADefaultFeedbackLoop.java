@@ -16,6 +16,7 @@ public class EADefaultFeedbackLoop {
 
     private static int CHANGE_POWER_VALUE = 1;
     private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
+    private static int UNIFORM_DIST_VALUE = 50;
 
     Probe probe;
     Effector effector;
@@ -108,8 +109,8 @@ public class EADefaultFeedbackLoop {
                     // If distribution of all links is 100 then change it to 50
                     // 50
                     if (left.getDistribution() == 100 && right.getDistribution() == 100) {
-                        left.setDistribution(50);
-                        right.setDistribution(50);
+                        left.setDistribution(UNIFORM_DIST_VALUE);
+                        right.setDistribution(UNIFORM_DIST_VALUE);
                     }
                     if (left.getPower() > right.getPower() && left.getDistribution() < 100) {
                         steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() + CHANGE_DIST_VALUE));
