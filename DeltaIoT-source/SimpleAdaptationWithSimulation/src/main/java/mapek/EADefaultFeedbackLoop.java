@@ -15,8 +15,7 @@ import util.CsvFileWriter;
 public class EADefaultFeedbackLoop {
 
     private static int CHANGE_POWER_VALUE = 1;
-    private static int CHANGE_DIST_VALUE = 1; // original value from Paper: 10.0
-    private static int UNIFORM_DIST_VALUE = 5;
+    private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
 
     Probe probe;
     Effector effector;
@@ -113,11 +112,13 @@ public class EADefaultFeedbackLoop {
                         right.setDistribution(50);
                     }
                     if (left.getPower() > right.getPower() && left.getDistribution() < 100) {
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() + 10));
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() - 10));
+                        steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() + CHANGE_DIST_VALUE));
+                        steps.add(
+                                new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() - CHANGE_DIST_VALUE));
                     } else if (right.getDistribution() < 100) {
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() + 10));
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() - 10));
+                        steps.add(
+                                new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() + CHANGE_DIST_VALUE));
+                        steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() - CHANGE_DIST_VALUE));
                     }
                 }
             }
