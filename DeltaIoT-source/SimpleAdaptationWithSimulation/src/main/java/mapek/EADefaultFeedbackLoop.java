@@ -12,11 +12,12 @@ import deltaiot.services.LinkSettings;
 import deltaiot.services.Mote;
 import util.CsvFileWriter;
 
-public class EADefaultFeedbackLoop {
+public class EADefaultFeedbackLoop extends FeedbackLoop {
 
     private static int CHANGE_POWER_VALUE = 1;
     private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
     private static int UNIFORM_DIST_VALUE = 50;
+    private static int TOTAL_DIST_VALUE = 100;
 
     Probe probe;
     Effector effector;
@@ -27,20 +28,24 @@ public class EADefaultFeedbackLoop {
     ArrayList<Mote> motes;
     List<PlanningStep> steps = new LinkedList<>();
 
+    @Override
     public void setProbe(Probe probe) {
         this.probe = probe;
     }
 
+    @Override
     public void setEffector(Effector effector) {
         this.effector = effector;
     }
 
+    @Override
     public void start() {
         for (int i = 0; i < DeltaIoTSimulator.NUM_OF_RUNS; i++) {
             monitor();
         }
     }
 
+    @Override
     void monitor() {
         motes = probe.getAllMotes();
 
@@ -51,6 +56,7 @@ public class EADefaultFeedbackLoop {
         analysis();
     }
 
+    @Override
     void analysis() {
 
         // analyze all link settings
@@ -62,6 +68,7 @@ public class EADefaultFeedbackLoop {
         }
     }
 
+    @Override
     boolean analyzeLinkSettings() {
         // analyze all links for possible adaptation options
         for (Mote mote : motes) {
@@ -83,6 +90,7 @@ public class EADefaultFeedbackLoop {
         return false;
     }
 
+    @Override
     void planning() {
 
         // Go through all links
@@ -108,15 +116,15 @@ public class EADefaultFeedbackLoop {
                 if (left.getPower() != right.getPower()) {
                     // If distribution of all links is 100 then change it to 50
                     // 50
-                    if (left.getDistribution() == 100 && right.getDistribution() == 100) {
+                    if (left.getDistribution() == TOTAL_DIST_VALUE && right.getDistribution() == TOTAL_DIST_VALUE) {
                         left.setDistribution(UNIFORM_DIST_VALUE);
                         right.setDistribution(UNIFORM_DIST_VALUE);
                     }
-                    if (left.getPower() > right.getPower() && left.getDistribution() < 100) {
+                    if (left.getPower() > right.getPower() && left.getDistribution() < TOTAL_DIST_VALUE) {
                         steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() + CHANGE_DIST_VALUE));
                         steps.add(
                                 new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() - CHANGE_DIST_VALUE));
-                    } else if (right.getDistribution() < 100) {
+                    } else if (right.getDistribution() < TOTAL_DIST_VALUE) {
                         steps.add(
                                 new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() + CHANGE_DIST_VALUE));
                         steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() - CHANGE_DIST_VALUE));
@@ -130,6 +138,7 @@ public class EADefaultFeedbackLoop {
         }
     }
 
+    @Override
     void execution() {
         boolean addMote;
         List<Mote> motesEffected = new LinkedList<>();
@@ -162,6 +171,7 @@ public class EADefaultFeedbackLoop {
         steps.clear();
     }
 
+    @Override
     Mote findMote(int source, int destination) {
         for (Mote mote : motes) {
             if (mote.getMoteid() == source) {
@@ -171,6 +181,7 @@ public class EADefaultFeedbackLoop {
         return null;
     }
 
+    @Override
     public String getId() {
         return "DefaultDeltaIoTStrategy";
     }
