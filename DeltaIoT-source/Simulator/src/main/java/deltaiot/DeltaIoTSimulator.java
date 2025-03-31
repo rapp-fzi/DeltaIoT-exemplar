@@ -28,8 +28,7 @@ import simulator.Simulator;
 
 public class DeltaIoTSimulator {
 
-    public final static int NUM_OF_RUNS = 96;
-    // public final static int NUM_OF_RUNS = 500;
+    public final static int NUM_OF_RUNS = 500; // original value: 96
 
     final Lock lock = new ReentrantLock();
     final Condition adaptationCompleted = lock.newCondition();
