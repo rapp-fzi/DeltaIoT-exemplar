@@ -183,6 +183,6 @@ public class EADefaultFeedbackLoop extends FeedbackLoop {
 
     @Override
     public String getId() {
-        return "DefaultDeltaIoTStrategy";
+        return "DeltaIoTDefaultReconfigurationStrategy";
     }
 }
