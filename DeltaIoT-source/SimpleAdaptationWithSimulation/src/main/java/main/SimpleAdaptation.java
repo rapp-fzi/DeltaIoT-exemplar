@@ -6,7 +6,7 @@ import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
 import deltaiot.client.SimulationClient;
-import mapek.EADefaultFeedbackLoop;
+import mapek.EAStrategy1aFeedbackLoop;
 import mapek.FeedbackLoop;
 import simulator.QoS;
 import simulator.Simulator;
@@ -22,7 +22,7 @@ public class SimpleAdaptation {
         networkMgmt = new SimulationClient();
 
         // Create Feedback loop
-        FeedbackLoop feedbackLoop = new EADefaultFeedbackLoop();
+        FeedbackLoop feedbackLoop = new EAStrategy1aFeedbackLoop();
 
         // get probe and effectors
         Probe probe = networkMgmt.getProbe();
