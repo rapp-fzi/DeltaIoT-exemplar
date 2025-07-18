@@ -8,11 +8,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
 import simulator.QoS;
 
 public class CsvFileWriter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvFileWriter.class);
 
     public final static String CSV_DELIMITER = ";";
 
@@ -85,11 +89,11 @@ public class CsvFileWriter {
             csvRows.add(header);
         }
 
-        System.out.println("******** Network configuration of " + run + " *******");
+        LOGGER.info("******** Network configuration of {} *******", run);
 
         for (Mote mote : motes) {
             for (Link link : mote.getLinks()) {
-                System.out.println(link.toString());
+                LOGGER.info(link.toString());
 
                 String strLink = String.format("Link%1sto%2s", link.getSource(), link.getDest())
                     .replace(" ", "");
@@ -105,12 +109,12 @@ public class CsvFileWriter {
             }
         }
 
-        System.out.println("******** END *******");
+        LOGGER.info("******** END *******");
 
         try (PrintWriter pw = new PrintWriter(new FileWriter(location, csvFileExists))) {
             csvRows.forEach(pw::println);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

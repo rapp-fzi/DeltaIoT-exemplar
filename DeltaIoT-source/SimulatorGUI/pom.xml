@@ -33,6 +33,18 @@
       <artifactId>SimpleAdaptationWithSimulation</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
+	<dependency>
+	  <groupId>org.slf4j</groupId>
+	  <artifactId>slf4j-api</artifactId>
+	  <version>${slf4j-version}</version>
+	</dependency>
+	<dependency> 
+	  <groupId>org.slf4j</groupId>
+	  <artifactId>slf4j-simple</artifactId>
+	  <version>${slf4j-version}</version>
+	</dependency>
+
   </dependencies>
 
   <!-- https://stackoverflow.com/questions/52653836/maven-shade-javafx-runtime-components-are-missing -->

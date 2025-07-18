@@ -2,6 +2,9 @@ package main;
 
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
@@ -12,6 +15,8 @@ import simulator.Simulator;
 import util.CsvFileWriter;
 
 public class SimpleAdaptation {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAdaptation.class);
+
     private final int numOfRuns;
 
     SimulationClient networkMgmt;
@@ -42,8 +47,8 @@ public class SimpleAdaptation {
 
         ArrayList<QoS> result = networkMgmt.getNetworkQoS(numOfRuns);
 
-        System.out.println("Run, PacketLoss, EnergyConsumption");
-        result.forEach(qos -> System.out.println(qos));
+        LOGGER.info("Run, PacketLoss, EnergyConsumption");
+        result.forEach(qos -> LOGGER.info("{}", qos));
 
         CsvFileWriter.saveQoS(result, feedbackLoop.getId());
 

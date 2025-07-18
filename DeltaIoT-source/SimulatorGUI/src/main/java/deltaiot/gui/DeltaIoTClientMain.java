@@ -7,6 +7,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import domain.Link;
 import domain.Node;
 import javafx.application.Application;
@@ -30,6 +33,7 @@ import javafx.stage.Stage;
 import simulator.Simulator;
 
 public class DeltaIoTClientMain extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeltaIoTClientMain.class);
 
     @FXML
     Pane model;
@@ -58,7 +62,7 @@ public class DeltaIoTClientMain extends Application {
             return new Task() {
                 @Override
                 protected Object call() throws Exception {
-                    System.out.println("Starting Client");
+                    LOGGER.info("Starting Client");
                     return null;
                 }
             };
