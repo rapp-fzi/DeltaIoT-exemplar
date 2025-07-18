@@ -144,14 +144,17 @@ public class FeedbackLoop {
         for (Mote mote : motes) {
             addMote = false;
             for (PlanningStep step : steps) {
-                if (step.link.getSource() == mote.getMoteid()) {
+                if (step.getLink()
+                    .getSource() == mote.getMoteid()) {
                     addMote = true;
-                    if (step.step == Step.CHANGE_POWER) {
-                        mote.getLinkWithDest(step.link.getDest())
-                            .setPower(step.value);
-                    } else if (step.step == Step.CHANGE_DIST) {
-                        mote.getLinkWithDest(step.link.getDest())
-                            .setDistribution(step.value);
+                    if (step.getStep() == Step.CHANGE_POWER) {
+                        mote.getLinkWithDest(step.getLink()
+                            .getDest())
+                            .setPower(step.getValue());
+                    } else if (step.getStep() == Step.CHANGE_DIST) {
+                        mote.getLinkWithDest(step.getLink()
+                            .getDest())
+                            .setDistribution(step.getValue());
                     }
                 }
             }
