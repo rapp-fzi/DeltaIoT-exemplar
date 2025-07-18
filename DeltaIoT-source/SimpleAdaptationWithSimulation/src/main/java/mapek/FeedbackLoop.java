@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
 import deltaiot.services.Link;
@@ -13,6 +12,7 @@ import deltaiot.services.Mote;
 import util.CsvFileWriter;
 
 public class FeedbackLoop {
+    private final int numOfRuns;
 
     Probe probe;
     Effector effector;
@@ -23,6 +23,10 @@ public class FeedbackLoop {
     ArrayList<Mote> motes;
     List<PlanningStep> steps = new LinkedList<>();
 
+    public FeedbackLoop(int numOfRuns) {
+        this.numOfRuns = numOfRuns;
+    }
+
     public void setProbe(Probe probe) {
         this.probe = probe;
     }
@@ -32,7 +36,7 @@ public class FeedbackLoop {
     }
 
     public void start() {
-        for (int i = 0; i < DeltaIoTSimulator.NUM_OF_RUNS; i++) {
+        for (int i = 0; i < numOfRuns; i++) {
             monitor();
         }
     }
@@ -40,7 +44,7 @@ public class FeedbackLoop {
     void monitor() {
         motes = probe.getAllMotes();
 
-        counter = (counter + 1) % DeltaIoTSimulator.NUM_OF_RUNS;
+        counter = (counter + 1) % numOfRuns;
         CsvFileWriter.logAndSaveConfiguration(motes, counter, getId());
 
         // perform analysis

@@ -3,8 +3,6 @@ package deltaiot.client;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import javax.jws.WebMethod;
-import javax.jws.WebService;
 
 import deltaiot.DeltaIoTSimulator;
 import deltaiot.services.LinkSettings;
@@ -16,69 +14,71 @@ import simulator.Simulator;
 
 public class SimulationClient implements Probe, Effector {
 
-	private Simulator simulator;
+    private Simulator simulator;
 
-	List<String> log = new LinkedList<String>();
-	
-	public SimulationClient(){
-		this.simulator = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT();
-	}
-	
-	public SimulationClient(Simulator simulator) {
-		this.simulator = simulator;
-	}
+    List<String> log = new LinkedList<>();
 
-	@Override
-	public ArrayList<deltaiot.services.Mote> getAllMotes() {
-		simulator.doSingleRun();
-		List<Mote> motes = simulator.getMotes();
-		ArrayList<deltaiot.services.Mote> afMotes = new ArrayList<>();
-		for (Mote mote : motes) {
-			afMotes.add(DeltaIoTSimulator.getAfMote(mote, simulator));
-		}
-		return afMotes;
-	}
+    public SimulationClient(int numOfRuns) {
+        this.simulator = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(numOfRuns);
+    }
 
-	private Mote getMote(int moteId) {
-		return simulator.getMoteWithId(moteId);
-	}
+    public SimulationClient(Simulator simulator) {
+        this.simulator = simulator;
+    }
 
-	private domain.Link getLink(int src, int dest) {
-		Mote from = simulator.getMoteWithId(src);
-		Node to = simulator.getNodeWithId(dest);
-		domain.Link link = from.getLinkTo(to);
-		return link;
-	}
+    @Override
+    public ArrayList<deltaiot.services.Mote> getAllMotes() {
+        simulator.doSingleRun();
+        List<Mote> motes = simulator.getMotes();
+        ArrayList<deltaiot.services.Mote> afMotes = new ArrayList<>();
+        for (Mote mote : motes) {
+            afMotes.add(DeltaIoTSimulator.getAfMote(mote, simulator));
+        }
+        return afMotes;
+    }
 
-	@Override
-	public double getMoteEnergyLevel(int moteId) {
-		return getMote(moteId).getBatteryRemaining();
-	}
+    private Mote getMote(int moteId) {
+        return simulator.getMoteWithId(moteId);
+    }
 
-	@Override
-	public double getMoteTrafficLoad(int moteId) {
-		return getMote(moteId).getActivationProbability().get(simulator.getRunInfo().getRunNumber());
-	}
+    private domain.Link getLink(int src, int dest) {
+        Mote from = simulator.getMoteWithId(src);
+        Node to = simulator.getNodeWithId(dest);
+        domain.Link link = from.getLinkTo(to);
+        return link;
+    }
 
-	@Override
-	public int getLinkPowerSetting(int src, int dest) {
-		return getLink(src, dest).getPowerNumber();
-	}
+    @Override
+    public double getMoteEnergyLevel(int moteId) {
+        return getMote(moteId).getBatteryRemaining();
+    }
 
-	@Override
-	public int getLinkSpreadingFactor(int src, int dest) {
-		return getLink(src, dest).getSfTimeNumber();
-	}
+    @Override
+    public double getMoteTrafficLoad(int moteId) {
+        return getMote(moteId).getActivationProbability()
+            .get(simulator.getRunInfo()
+                .getRunNumber());
+    }
 
-	@Override
-	public double getLinkSignalNoise(int src, int dest) {
-		return getLink(src, dest).getSRN(simulator.getRunInfo());
-	}
+    @Override
+    public int getLinkPowerSetting(int src, int dest) {
+        return getLink(src, dest).getPowerNumber();
+    }
 
-	@Override
-	public double getLinkDistributionFactor(int src, int dest) {
-		return getLink(src, dest).getDistribution();
-	}
+    @Override
+    public int getLinkSpreadingFactor(int src, int dest) {
+        return getLink(src, dest).getSfTimeNumber();
+    }
+
+    @Override
+    public double getLinkSignalNoise(int src, int dest) {
+        return getLink(src, dest).getSRN(simulator.getRunInfo());
+    }
+
+    @Override
+    public double getLinkDistributionFactor(int src, int dest) {
+        return getLink(src, dest).getDistribution();
+    }
 
 //	@Override
 //	public void setLinkSF(int src, int dest, int sf) {
@@ -95,60 +95,60 @@ public class SimulationClient implements Probe, Effector {
 //		getLink(src, dest).setDistribution(distributionFactor);
 //	}
 
-	@Override
-	public void setMoteSettings(int moteId, List<LinkSettings> linkSettings) {
-		Mote mote = getMote(moteId);
-		Node node;
-		Link link;
-		for(LinkSettings setting: linkSettings){
-			node = simulator.getNodeWithId(setting.getDest());
-			link = mote.getLinkTo(node);
-			link.setPowerNumber(setting.getPowerSettings());
-			link.setDistribution(setting.getDistributionFactor());
-			link.setSfTimeNumber(setting.getSpreadingFactor());
-		}
-	}
+    @Override
+    public void setMoteSettings(int moteId, List<LinkSettings> linkSettings) {
+        Mote mote = getMote(moteId);
+        Node node;
+        Link link;
+        for (LinkSettings setting : linkSettings) {
+            node = simulator.getNodeWithId(setting.getDest());
+            link = mote.getLinkTo(node);
+            link.setPowerNumber(setting.getPowerSettings());
+            link.setDistribution(setting.getDistributionFactor());
+            link.setSfTimeNumber(setting.getSpreadingFactor());
+        }
+    }
 
-	@Override
-	public void setDefaultConfiguration() {
-		List<Mote> motes = simulator.getMotes();
-		for (Mote mote : motes) {
-			for (Link link : mote.getLinks()) {
-				link.setDistribution(100);
-				link.setPowerNumber(15);
-				link.setSfTimeNumber(11);
-			}
-		}
+    @Override
+    public void setDefaultConfiguration() {
+        List<Mote> motes = simulator.getMotes();
+        for (Mote mote : motes) {
+            for (Link link : mote.getLinks()) {
+                link.setDistribution(100);
+                link.setPowerNumber(15);
+                link.setSfTimeNumber(11);
+            }
+        }
 
-	}
+    }
 
-	@Override
-	public ArrayList<QoS> getNetworkQoS(int period) {
-		List<QoS> qosOrigList = simulator.getQosValues();
-		int qosSize = qosOrigList.size();
-		
-		if (period >= qosSize)
-			return (ArrayList<QoS>) qosOrigList;
-		
-		int startIndex = qosSize - period; 
-		
-		ArrayList<QoS> newList = new ArrayList<QoS>();
-		
-		for(int i = startIndex; i < qosSize; i++){
-			newList.add(qosOrigList.get(i));
-		}
-		return newList;
-	}
+    @Override
+    public ArrayList<QoS> getNetworkQoS(int period) {
+        List<QoS> qosOrigList = simulator.getQosValues();
+        int qosSize = qosOrigList.size();
 
-	public Probe getProbe() {
-		return this;
-	}
+        if (period >= qosSize)
+            return (ArrayList<QoS>) qosOrigList;
 
-	public Effector getEffector() {
-		return this;
-	}
+        int startIndex = qosSize - period;
 
-	public Simulator getSimulator() {
-		return this.simulator;
-	}
+        ArrayList<QoS> newList = new ArrayList<>();
+
+        for (int i = startIndex; i < qosSize; i++) {
+            newList.add(qosOrigList.get(i));
+        }
+        return newList;
+    }
+
+    public Probe getProbe() {
+        return this;
+    }
+
+    public Effector getEffector() {
+        return this;
+    }
+
+    public Simulator getSimulator() {
+        return this.simulator;
+    }
 }

@@ -12,16 +12,21 @@ import simulator.Simulator;
 import util.CsvFileWriter;
 
 public class SimpleAdaptation {
+    private final int numOfRuns;
 
     SimulationClient networkMgmt;
+
+    public SimpleAdaptation(int numOfRuns) {
+        this.numOfRuns = numOfRuns;
+    }
 
     public void start() {
 
         // Create a simulation client object
-        networkMgmt = new SimulationClient();
+        networkMgmt = new SimulationClient(numOfRuns);
 
         // Create Feedback loop
-        FeedbackLoop feedbackLoop = new FeedbackLoop();
+        FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns);
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
 
         // get probe and effectors
@@ -35,7 +40,7 @@ public class SimpleAdaptation {
         // StartFeedback loop
         feedbackLoop.start();
 
-        ArrayList<QoS> result = networkMgmt.getNetworkQoS(DeltaIoTSimulator.NUM_OF_RUNS);
+        ArrayList<QoS> result = networkMgmt.getNetworkQoS(numOfRuns);
 
         System.out.println("Run, PacketLoss, EnergyConsumption");
         result.forEach(qos -> System.out.println(qos));
@@ -45,7 +50,7 @@ public class SimpleAdaptation {
     }
 
     public static void main(String[] args) {
-        SimpleAdaptation client = new SimpleAdaptation();
+        SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS);
         client.start();
     }
 

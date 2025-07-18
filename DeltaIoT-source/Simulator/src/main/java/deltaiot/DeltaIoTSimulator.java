@@ -37,16 +37,16 @@ public class DeltaIoTSimulator {
 
     Simulator simul;
 
-    public DeltaIoTSimulator() {
-        this.simul = createSimulatorForDeltaIoT();
+    public DeltaIoTSimulator(int numOfRuns) {
+        this.simul = createSimulatorForDeltaIoT(numOfRuns);
     }
 
-    public static Simulator createSimulatorForDeltaIoT() {
-        return createExperimentSimulator();
+    public static Simulator createSimulatorForDeltaIoT(int numOfRuns) {
+        return createExperimentSimulator(numOfRuns);
     }
 
-    private static Simulator createExperimentSimulator() {
-        Simulator simul = new Simulator();
+    private static Simulator createExperimentSimulator(int numOfRuns) {
+        Simulator simul = new Simulator(numOfRuns);
 
         // Motes
         int load = 10;

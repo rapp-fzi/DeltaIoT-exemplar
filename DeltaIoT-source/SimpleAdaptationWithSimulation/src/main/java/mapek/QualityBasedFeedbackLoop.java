@@ -18,7 +18,8 @@ public class QualityBasedFeedbackLoop extends FeedbackLoop {
 
     private final SimulationClient networkMgmt;
 
-    public QualityBasedFeedbackLoop(SimulationClient networkMgmt) {
+    public QualityBasedFeedbackLoop(int numOfRuns, SimulationClient networkMgmt) {
+        super(numOfRuns);
         this.networkMgmt = networkMgmt;
     }
 

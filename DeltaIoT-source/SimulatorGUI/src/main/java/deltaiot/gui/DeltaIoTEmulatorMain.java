@@ -65,11 +65,12 @@ public class DeltaIoTEmulatorMain extends Application {
                 @Override
                 protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
-                    simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT();
-                    for (int i = 0; i < DeltaIoTSimulator.NUM_OF_RUNS; i++)
+                    simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(DeltaIoTSimulator.NUM_OF_RUNS);
+                    for (int i = 0; i < simul.getNumOfRuns(); i++) {
                         simul.doSingleRun();
+                    }
 
-                    ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(DeltaIoTSimulator.NUM_OF_RUNS);
+                    ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(simul.getNumOfRuns());
                     CsvFileWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
 
                     btnDisplay.setDisable(false);
@@ -103,8 +104,8 @@ public class DeltaIoTEmulatorMain extends Application {
                         run = simul.getRunInfo()
                             .getRunNumber();
 
-                        updateProgress(run, DeltaIoTSimulator.NUM_OF_RUNS);
-                        updateMessage("(" + run + "/" + DeltaIoTSimulator.NUM_OF_RUNS + ")");
+                        updateProgress(run, simul.getNumOfRuns());
+                        updateMessage("(" + run + "/" + simul.getNumOfRuns() + ")");
 
                         try {
                             Thread.sleep(1000);
@@ -112,7 +113,7 @@ public class DeltaIoTEmulatorMain extends Application {
                             e.printStackTrace();
                         }
 
-                    } while (run < DeltaIoTSimulator.NUM_OF_RUNS);
+                    } while (run < simul.getNumOfRuns());
 
                     return null;
                 }
@@ -133,7 +134,7 @@ public class DeltaIoTEmulatorMain extends Application {
                 @Override
                 protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
-                    SimpleAdaptation client = new SimpleAdaptation();
+                    SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS);
                     client.start();
                     simul = client.getSimulator();
                     btnDisplay.setDisable(false);
