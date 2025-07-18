@@ -65,7 +65,7 @@ public class DeltaIoTEmulatorMain extends Application {
                 @Override
                 protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
-                    simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(DeltaIoTSimulator.NUM_OF_RUNS);
+                    simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(getNumOfRuns());
                     for (int i = 0; i < simul.getNumOfRuns(); i++) {
                         simul.doSingleRun();
                     }
@@ -121,6 +121,10 @@ public class DeltaIoTEmulatorMain extends Application {
         }
     };
 
+    private int getNumOfRuns() {
+        return DeltaIoTSimulator.NUM_OF_RUNS;
+    }
+
     Service<Void> serviceAdaptation = new Service<>() {
 
         @Override
@@ -134,7 +138,7 @@ public class DeltaIoTEmulatorMain extends Application {
                 @Override
                 protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
-                    SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS);
+                    SimpleAdaptation client = new SimpleAdaptation(getNumOfRuns());
                     client.start();
                     simul = client.getSimulator();
                     btnDisplay.setDisable(false);
