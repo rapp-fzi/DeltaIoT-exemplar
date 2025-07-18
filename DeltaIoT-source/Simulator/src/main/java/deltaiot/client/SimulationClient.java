@@ -1,7 +1,6 @@
 package deltaiot.client;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import deltaiot.DeltaIoTSimulator;
@@ -14,12 +13,10 @@ import simulator.Simulator;
 
 public class SimulationClient implements Probe, Effector {
 
-    private Simulator simulator;
-
-    List<String> log = new LinkedList<>();
+    private final Simulator simulator;
 
     public SimulationClient(int numOfRuns) {
-        this.simulator = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(numOfRuns);
+        this(deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(numOfRuns));
     }
 
     public SimulationClient(Simulator simulator) {
