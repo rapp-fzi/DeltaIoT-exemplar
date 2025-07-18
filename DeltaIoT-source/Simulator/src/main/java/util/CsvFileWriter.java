@@ -15,12 +15,13 @@ import deltaiot.services.Link;
 import deltaiot.services.Mote;
 import simulator.QoS;
 
-public class CsvFileWriter {
+public class CsvFileWriter implements ICSVWriter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvFileWriter.class);
 
     public final static String CSV_DELIMITER = ";";
 
-    public static void saveQoS(ArrayList<QoS> result, String strategyId) {
+    @Override
+    public void saveQoS(ArrayList<QoS> result, String strategyId) {
         String csvFileName = strategyId + "Results.csv";
         String location = Paths.get(System.getProperty("user.dir"), "results", csvFileName)
             .toString();
@@ -62,7 +63,8 @@ public class CsvFileWriter {
         }
     }
 
-    public static void saveConfiguration(List<Mote> motes, int run, String strategyId) {
+    @Override
+    public void saveConfiguration(List<Mote> motes, int run, String strategyId) {
         String csvFileName = strategyId + "Configurations.csv";
         String location = Paths.get(System.getProperty("user.dir"), "results", csvFileName)
             .toString();

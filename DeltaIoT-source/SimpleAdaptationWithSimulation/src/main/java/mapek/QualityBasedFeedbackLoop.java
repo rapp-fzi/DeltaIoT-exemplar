@@ -8,6 +8,7 @@ import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
 import simulator.QoS;
+import util.ICSVWriter;
 
 public class QualityBasedFeedbackLoop extends FeedbackLoop {
 
@@ -18,8 +19,8 @@ public class QualityBasedFeedbackLoop extends FeedbackLoop {
 
     private final SimulationClient networkMgmt;
 
-    public QualityBasedFeedbackLoop(int numOfRuns, SimulationClient networkMgmt) {
-        super(numOfRuns);
+    public QualityBasedFeedbackLoop(int numOfRuns, ICSVWriter csvWriter, SimulationClient networkMgmt) {
+        super(numOfRuns, csvWriter);
         this.networkMgmt = networkMgmt;
     }
 

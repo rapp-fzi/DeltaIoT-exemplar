@@ -12,12 +12,13 @@ import deltaiot.client.Probe;
 import deltaiot.services.Link;
 import deltaiot.services.LinkSettings;
 import deltaiot.services.Mote;
-import util.CsvFileWriter;
+import util.ICSVWriter;
 
 public class FeedbackLoop {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackLoop.class);
 
     private final int numOfRuns;
+    private final ICSVWriter csvWriter;
 
     Probe probe;
     Effector effector;
@@ -28,8 +29,9 @@ public class FeedbackLoop {
     ArrayList<Mote> motes;
     List<PlanningStep> steps = new LinkedList<>();
 
-    public FeedbackLoop(int numOfRuns) {
+    public FeedbackLoop(int numOfRuns, ICSVWriter csvWriter) {
         this.numOfRuns = numOfRuns;
+        this.csvWriter = csvWriter;
     }
 
     public void setProbe(Probe probe) {
@@ -51,7 +53,7 @@ public class FeedbackLoop {
 
         counter = (counter + 1) % numOfRuns;
         logConfiguration(motes, counter, getId());
-        CsvFileWriter.saveConfiguration(motes, counter, getId());
+        csvWriter.saveConfiguration(motes, counter, getId());
 
         // perform analysis
         analysis();

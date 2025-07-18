@@ -13,16 +13,19 @@ import mapek.FeedbackLoop;
 import simulator.QoS;
 import simulator.Simulator;
 import util.CsvFileWriter;
+import util.ICSVWriter;
 
 public class SimpleAdaptation {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAdaptation.class);
 
     private final int numOfRuns;
+    private final ICSVWriter csvWriter;
 
     SimulationClient networkMgmt;
 
-    public SimpleAdaptation(int numOfRuns) {
+    public SimpleAdaptation(int numOfRuns, ICSVWriter csvWriter) {
         this.numOfRuns = numOfRuns;
+        this.csvWriter = csvWriter;
     }
 
     public void start() {
@@ -31,7 +34,7 @@ public class SimpleAdaptation {
         networkMgmt = new SimulationClient(numOfRuns);
 
         // Create Feedback loop
-        FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns);
+        FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, csvWriter);
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
 
         // get probe and effectors
@@ -50,12 +53,13 @@ public class SimpleAdaptation {
         LOGGER.info("Run, PacketLoss, EnergyConsumption");
         result.forEach(qos -> LOGGER.info("{}", qos));
 
-        CsvFileWriter.saveQoS(result, feedbackLoop.getId());
+        csvWriter.saveQoS(result, feedbackLoop.getId());
 
     }
 
     public static void main(String[] args) {
-        SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS);
+        ICSVWriter csvWriter = new CsvFileWriter();
+        SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS, csvWriter);
         client.start();
     }
 
