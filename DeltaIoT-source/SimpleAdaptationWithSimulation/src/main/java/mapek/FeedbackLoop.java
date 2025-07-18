@@ -40,8 +40,12 @@ public class FeedbackLoop {
 
     public void start() {
         for (int i = 0; i < numOfRuns; i++) {
+            initRun();
             monitor();
         }
+    }
+
+    protected void initRun() {
     }
 
     void monitor() {
