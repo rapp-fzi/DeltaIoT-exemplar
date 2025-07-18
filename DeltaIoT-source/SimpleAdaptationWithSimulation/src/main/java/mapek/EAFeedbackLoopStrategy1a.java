@@ -1,12 +1,8 @@
 package mapek;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
 import deltaiot.services.Link;
-import deltaiot.services.LinkSettings;
 import deltaiot.services.Mote;
 import util.IMoteWriter;
 
@@ -93,42 +89,6 @@ public class EAFeedbackLoopStrategy1a extends FeedbackLoop {
         if (steps.size() > 0) {
             execution();
         }
-    }
-
-    @Override
-    void execution() {
-        boolean addMote;
-        List<Mote> motesEffected = new LinkedList<>();
-        for (Mote mote : motes) {
-            addMote = false;
-            for (PlanningStep step : steps) {
-                if (step.getLink()
-                    .getSource() == mote.getMoteid()) {
-                    addMote = true;
-                    if (step.getStep() == Step.CHANGE_POWER) {
-                        mote.getLinkWithDest(step.getLink()
-                            .getDest())
-                            .setPower(step.getValue());
-                    } else if (step.getStep() == Step.CHANGE_DIST) {
-                        mote.getLinkWithDest(step.getLink()
-                            .getDest())
-                            .setDistribution(step.getValue());
-                    }
-                }
-            }
-            motesEffected.add(mote);
-        }
-        List<LinkSettings> newSettings;
-
-        for (Mote mote : motesEffected) {
-            newSettings = new LinkedList<>();
-            for (Link link : mote.getLinks()) {
-                newSettings.add(new LinkSettings(mote.getMoteid(), link.getDest(), link.getPower(),
-                        link.getDistribution(), link.getSF()));
-            }
-            getEffector().setMoteSettings(mote.getMoteid(), newSettings);
-        }
-        steps.clear();
     }
 
     @Override
