@@ -35,6 +35,7 @@ import simulator.QoS;
 import simulator.Simulator;
 import util.CsvFileWriter;
 import util.ICSVWriter;
+import util.IQOSWriter;
 
 public class DeltaIoTEmulatorMain extends Application {
     @FXML
@@ -72,8 +73,8 @@ public class DeltaIoTEmulatorMain extends Application {
                     }
 
                     ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(simul.getNumOfRuns());
-                    ICSVWriter csvWriter = new CsvFileWriter();
-                    csvWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
+                    IQOSWriter qosWriter = new CsvFileWriter();
+                    qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
 
                     btnDisplay.setDisable(false);
                     return null;

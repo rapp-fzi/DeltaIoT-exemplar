@@ -15,7 +15,7 @@ import deltaiot.services.Link;
 import deltaiot.services.Mote;
 import simulator.QoS;
 
-public class CsvFileWriter implements ICSVWriter {
+public class CsvFileWriter implements ICSVWriter, IQOSWriter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvFileWriter.class);
 
     public final static String CSV_DELIMITER = ";";
