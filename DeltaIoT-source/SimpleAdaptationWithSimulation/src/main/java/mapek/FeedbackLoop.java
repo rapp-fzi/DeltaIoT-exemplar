@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
 import deltaiot.services.Link;
@@ -12,6 +15,8 @@ import deltaiot.services.Mote;
 import util.CsvFileWriter;
 
 public class FeedbackLoop {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackLoop.class);
+
     private final int numOfRuns;
 
     Probe probe;
@@ -45,10 +50,21 @@ public class FeedbackLoop {
         motes = probe.getAllMotes();
 
         counter = (counter + 1) % numOfRuns;
-        CsvFileWriter.logAndSaveConfiguration(motes, counter, getId());
+        logConfiguration(motes, counter, getId());
+        CsvFileWriter.saveConfiguration(motes, counter, getId());
 
         // perform analysis
         analysis();
+    }
+
+    private void logConfiguration(List<Mote> motes, int run, String strategyId) {
+        LOGGER.info("******** Network configuration of {} *******", run);
+        for (Mote mote : motes) {
+            for (Link link : mote.getLinks()) {
+                LOGGER.info(link.toString());
+            }
+        }
+        LOGGER.info("******** END *******");
     }
 
     void analysis() {

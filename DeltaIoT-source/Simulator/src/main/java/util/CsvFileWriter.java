@@ -62,57 +62,48 @@ public class CsvFileWriter {
         }
     }
 
-    public static void logAndSaveConfiguration(List<Mote> motes, int run, String strategyId) {
+    public static void saveConfiguration(List<Mote> motes, int run, String strategyId) {
         String csvFileName = strategyId + "Configurations.csv";
         String location = Paths.get(System.getProperty("user.dir"), "results", csvFileName)
             .toString();
         File csvOutputFile = new File(location);
+        try {
+            boolean csvFileExists = csvOutputFile.exists();
 
-        boolean csvFileExists = csvOutputFile.exists();
-
-        List<String> csvRows = new ArrayList<>();
-        if (csvFileExists == false) {
-            try {
+            List<String> csvRows = new ArrayList<>();
+            if (csvFileExists == false) {
                 csvOutputFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-            String header = new StringBuilder().append("Run")
-                .append(CSV_DELIMITER)
-                .append("Link")
-                .append(CSV_DELIMITER)
-                .append("Power")
-                .append(CSV_DELIMITER)
-                .append("Distribution")
-                .toString();
-            csvRows.add(header);
-        }
-
-        LOGGER.info("******** Network configuration of {} *******", run);
-
-        for (Mote mote : motes) {
-            for (Link link : mote.getLinks()) {
-                LOGGER.info(link.toString());
-
-                String strLink = String.format("Link%1sto%2s", link.getSource(), link.getDest())
-                    .replace(" ", "");
-                String csvRow = new StringBuilder().append(run)
+                String header = new StringBuilder().append("Run")
                     .append(CSV_DELIMITER)
-                    .append(strLink)
+                    .append("Link")
                     .append(CSV_DELIMITER)
-                    .append(link.getPower())
+                    .append("Power")
                     .append(CSV_DELIMITER)
-                    .append(link.getDistribution())
+                    .append("Distribution")
                     .toString();
-                csvRows.add(csvRow);
+                csvRows.add(header);
             }
-        }
 
-        LOGGER.info("******** END *******");
+            for (Mote mote : motes) {
+                for (Link link : mote.getLinks()) {
+                    String strLink = String.format("Link%1sto%2s", link.getSource(), link.getDest())
+                        .replace(" ", "");
+                    String csvRow = new StringBuilder().append(run)
+                        .append(CSV_DELIMITER)
+                        .append(strLink)
+                        .append(CSV_DELIMITER)
+                        .append(link.getPower())
+                        .append(CSV_DELIMITER)
+                        .append(link.getDistribution())
+                        .toString();
+                    csvRows.add(csvRow);
+                }
+            }
 
-        try (PrintWriter pw = new PrintWriter(new FileWriter(location, csvFileExists))) {
-            csvRows.forEach(pw::println);
+            try (PrintWriter pw = new PrintWriter(new FileWriter(location, csvFileExists))) {
+                csvRows.forEach(pw::println);
+            }
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
