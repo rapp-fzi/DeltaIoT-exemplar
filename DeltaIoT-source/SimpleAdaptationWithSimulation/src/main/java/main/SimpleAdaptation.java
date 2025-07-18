@@ -30,17 +30,13 @@ public class SimpleAdaptation {
     }
 
     public void start() {
-        // Create Feedback loop
-        FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, csvWriter);
-        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
-
         // get probe and effectors
         Probe probe = networkMgmt.getProbe();
         Effector effector = networkMgmt.getEffector();
 
-        // Connect probe and effectors with feedback loop
-        feedbackLoop.setProbe(probe);
-        feedbackLoop.setEffector(effector);
+        // Create Feedback loop
+        FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, probe, effector, csvWriter);
+        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
 
         // StartFeedback loop
         feedbackLoop.start();

@@ -1,6 +1,5 @@
 package mapek;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,28 +17,21 @@ public class FeedbackLoop {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackLoop.class);
 
     private final int numOfRuns;
+    private final Probe probe;
+    private final Effector effector;
     private final IMoteWriter moteWriter;
 
-    Probe probe;
-    Effector effector;
-
-    int counter = -1;
+    private int counter = -1;
 
     // Knowledge
-    ArrayList<Mote> motes;
-    List<PlanningStep> steps = new LinkedList<>();
+    protected List<Mote> motes;
+    protected List<PlanningStep> steps = new LinkedList<>();
 
-    public FeedbackLoop(int numOfRuns, IMoteWriter moteWriter) {
+    public FeedbackLoop(int numOfRuns, Probe probe, Effector effector, IMoteWriter moteWriter) {
         this.numOfRuns = numOfRuns;
-        this.moteWriter = moteWriter;
-    }
-
-    public void setProbe(Probe probe) {
         this.probe = probe;
-    }
-
-    public void setEffector(Effector effector) {
         this.effector = effector;
+        this.moteWriter = moteWriter;
     }
 
     public void start() {
