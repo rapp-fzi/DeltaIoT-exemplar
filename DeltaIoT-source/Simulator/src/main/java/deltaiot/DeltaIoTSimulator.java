@@ -14,6 +14,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -27,6 +30,7 @@ import domain.SNREquation;
 import simulator.Simulator;
 
 public class DeltaIoTSimulator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeltaIoTSimulator.class);
 
     public final static int NUM_OF_RUNS = 96;
 
@@ -37,16 +41,16 @@ public class DeltaIoTSimulator {
 
     Simulator simul;
 
-    public DeltaIoTSimulator() {
-        this.simul = createSimulatorForDeltaIoT();
+    public DeltaIoTSimulator(int numOfRuns) {
+        this.simul = createSimulatorForDeltaIoT(numOfRuns);
     }
 
-    public static Simulator createSimulatorForDeltaIoT() {
-        return createExperimentSimulator();
+    public static Simulator createSimulatorForDeltaIoT(int numOfRuns) {
+        return createExperimentSimulator(numOfRuns);
     }
 
-    private static Simulator createExperimentSimulator() {
-        Simulator simul = new Simulator();
+    private static Simulator createExperimentSimulator(int numOfRuns) {
+        Simulator simul = new Simulator(numOfRuns);
 
         // Motes
         int load = 10;
@@ -276,15 +280,15 @@ public class DeltaIoTSimulator {
 
     public void run() {
         try {
-            System.out.println("--START--");
+            LOGGER.info("--START--");
 
             // Create socket
             ServerSocket serverSocket = new ServerSocket(PORT);
-            System.out.println("Waiting to connect...");
+            LOGGER.info("Waiting to connect...");
             Socket socket = serverSocket.accept();
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintStream output = new PrintStream(socket.getOutputStream());
-            System.out.println("Connected.");
+            LOGGER.info("Connected.");
 
             // Create thread that listens for messages from the client
             new Thread(new Runnable() {
@@ -302,21 +306,21 @@ public class DeltaIoTSimulator {
             }).start();
 
             // Do logic
-            System.out.println("--SIMULATION--");
+            LOGGER.info("--SIMULATION--");
             List<String> printsBackup = new ArrayList<>();
             for (int i = 0; i < 96; ++i) {
-                System.out.println("Run... " + i);
+                LOGGER.info("Run... {}", i);
 
                 // Do emulation
                 simul.doSingleRun();
                 String print = simul.getGatewayWithId(GATEWAY_ID)
                     .toString();
                 printsBackup.add(print);
-                System.out.println(print);
+                LOGGER.info(print);
 
                 // Send info to client
                 String infoToSend = createInfoToSend();
-                System.out.println("To FeedbackLoop: " + infoToSend);
+                LOGGER.info("To FeedbackLoop: {}", infoToSend);
                 output.println(infoToSend);
 
                 // Wait for client response
@@ -331,9 +335,9 @@ public class DeltaIoTSimulator {
             }
 
             // Report
-            System.out.println("--FINAL REPORT--");
+            LOGGER.info("--FINAL REPORT--");
             for (String print : printsBackup) {
-                System.out.println(print);
+                LOGGER.info(print);
             }
 
             // Cleanup
@@ -342,7 +346,7 @@ public class DeltaIoTSimulator {
             socket.close();
             serverSocket.close();
         } catch (IOException e) {
-            System.out.println(e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -399,7 +403,7 @@ public class DeltaIoTSimulator {
     }
 
     public void applyNewSettings(String msgSettings) {
-        System.out.println("Message Received from Client:" + msgSettings);
+        LOGGER.info("Message Received from Client:{}", msgSettings);
         if (msgSettings.equalsIgnoreCase("NoAdaptationRequired")
                 || msgSettings.equalsIgnoreCase("AdaptationCompleted")) {
             lock.lock();
@@ -423,11 +427,11 @@ public class DeltaIoTSimulator {
 
                 if (actualLink.getDistribution() != afLink.getDistribution()) {
                     actualLink.setDistribution(afLink.getDistribution());
-                    System.out.println("Link distribution adapted: " + actualLink);
+                    LOGGER.info("Link distribution adapted: {}", actualLink);
                 }
                 if (actualLink.getPowerNumber() != afLink.getPower()) {
                     actualLink.setPowerNumber(afLink.getPower());
-                    System.out.println("Link power adapted:        " + actualLink);
+                    LOGGER.info("Link power adapted:        {}", actualLink);
                 }
             }
         }

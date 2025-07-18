@@ -8,15 +8,20 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
 import simulator.QoS;
 
-public class CsvFileWriter {
+public class CsvFileWriter implements ICSVWriter, IQOSWriter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvFileWriter.class);
 
     public final static String CSV_DELIMITER = ";";
 
-    public static void saveQoS(ArrayList<QoS> result, String strategyId) {
+    @Override
+    public void saveQoS(ArrayList<QoS> result, String strategyId) {
         String csvFileName = strategyId + "Results.csv";
         String location = Paths.get(System.getProperty("user.dir"), "results", csvFileName)
             .toString();
@@ -58,59 +63,51 @@ public class CsvFileWriter {
         }
     }
 
-    public static void logAndSaveConfiguration(List<Mote> motes, int run, String strategyId) {
+    @Override
+    public void saveConfiguration(List<Mote> motes, int run, String strategyId) {
         String csvFileName = strategyId + "Configurations.csv";
         String location = Paths.get(System.getProperty("user.dir"), "results", csvFileName)
             .toString();
         File csvOutputFile = new File(location);
+        try {
+            boolean csvFileExists = csvOutputFile.exists();
 
-        boolean csvFileExists = csvOutputFile.exists();
-
-        List<String> csvRows = new ArrayList<>();
-        if (csvFileExists == false) {
-            try {
+            List<String> csvRows = new ArrayList<>();
+            if (csvFileExists == false) {
                 csvOutputFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-            String header = new StringBuilder().append("Run")
-                .append(CSV_DELIMITER)
-                .append("Link")
-                .append(CSV_DELIMITER)
-                .append("Power")
-                .append(CSV_DELIMITER)
-                .append("Distribution")
-                .toString();
-            csvRows.add(header);
-        }
-
-        System.out.println("******** Network configuration of " + run + " *******");
-
-        for (Mote mote : motes) {
-            for (Link link : mote.getLinks()) {
-                System.out.println(link.toString());
-
-                String strLink = String.format("Link%1sto%2s", link.getSource(), link.getDest())
-                    .replace(" ", "");
-                String csvRow = new StringBuilder().append(run)
+                String header = new StringBuilder().append("Run")
                     .append(CSV_DELIMITER)
-                    .append(strLink)
+                    .append("Link")
                     .append(CSV_DELIMITER)
-                    .append(link.getPower())
+                    .append("Power")
                     .append(CSV_DELIMITER)
-                    .append(link.getDistribution())
+                    .append("Distribution")
                     .toString();
-                csvRows.add(csvRow);
+                csvRows.add(header);
             }
-        }
 
-        System.out.println("******** END *******");
+            for (Mote mote : motes) {
+                for (Link link : mote.getLinks()) {
+                    String strLink = String.format("Link%1sto%2s", link.getSource(), link.getDest())
+                        .replace(" ", "");
+                    String csvRow = new StringBuilder().append(run)
+                        .append(CSV_DELIMITER)
+                        .append(strLink)
+                        .append(CSV_DELIMITER)
+                        .append(link.getPower())
+                        .append(CSV_DELIMITER)
+                        .append(link.getDistribution())
+                        .toString();
+                    csvRows.add(csvRow);
+                }
+            }
 
-        try (PrintWriter pw = new PrintWriter(new FileWriter(location, csvFileExists))) {
-            csvRows.forEach(pw::println);
+            try (PrintWriter pw = new PrintWriter(new FileWriter(location, csvFileExists))) {
+                csvRows.forEach(pw::println);
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

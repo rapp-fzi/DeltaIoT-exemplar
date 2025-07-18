@@ -1,16 +1,14 @@
 package mapek;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
 import deltaiot.services.Link;
 import deltaiot.services.LinkSettings;
 import deltaiot.services.Mote;
-import util.CsvFileWriter;
+import util.IMoteWriter;
 
 public class EADefaultFeedbackLoop extends FeedbackLoop {
 
@@ -19,53 +17,8 @@ public class EADefaultFeedbackLoop extends FeedbackLoop {
     private static int UNIFORM_DIST_VALUE = 50;
     private static int TOTAL_DIST_VALUE = 100;
 
-    Probe probe;
-    Effector effector;
-
-    int counter = -1;
-
-    // Knowledge
-    ArrayList<Mote> motes;
-    List<PlanningStep> steps = new LinkedList<>();
-
-    @Override
-    public void setProbe(Probe probe) {
-        this.probe = probe;
-    }
-
-    @Override
-    public void setEffector(Effector effector) {
-        this.effector = effector;
-    }
-
-    @Override
-    public void start() {
-        for (int i = 0; i < DeltaIoTSimulator.NUM_OF_RUNS; i++) {
-            monitor();
-        }
-    }
-
-    @Override
-    void monitor() {
-        motes = probe.getAllMotes();
-
-        counter = (counter + 1) % DeltaIoTSimulator.NUM_OF_RUNS;
-        CsvFileWriter.logAndSaveConfiguration(motes, counter, getId());
-
-        // perform analysis
-        analysis();
-    }
-
-    @Override
-    void analysis() {
-
-        // analyze all link settings
-        boolean adaptationRequired = analyzeLinkSettings();
-
-        // if adaptation required invoke the planner
-        if (adaptationRequired) {
-            planning();
-        }
+    public EADefaultFeedbackLoop(int numOfRuns, Probe probe, Effector effector, IMoteWriter moteWriter) {
+        super(numOfRuns, probe, effector, moteWriter);
     }
 
     @Override
@@ -145,14 +98,17 @@ public class EADefaultFeedbackLoop extends FeedbackLoop {
         for (Mote mote : motes) {
             addMote = false;
             for (PlanningStep step : steps) {
-                if (step.link.getSource() == mote.getMoteid()) {
+                if (step.getLink()
+                    .getSource() == mote.getMoteid()) {
                     addMote = true;
-                    if (step.step == Step.CHANGE_POWER) {
-                        mote.getLinkWithDest(step.link.getDest())
-                            .setPower(step.value);
-                    } else if (step.step == Step.CHANGE_DIST) {
-                        mote.getLinkWithDest(step.link.getDest())
-                            .setDistribution(step.value);
+                    if (step.getStep() == Step.CHANGE_POWER) {
+                        mote.getLinkWithDest(step.getLink()
+                            .getDest())
+                            .setPower(step.getValue());
+                    } else if (step.getStep() == Step.CHANGE_DIST) {
+                        mote.getLinkWithDest(step.getLink()
+                            .getDest())
+                            .setDistribution(step.getValue());
                     }
                 }
             }
@@ -166,19 +122,9 @@ public class EADefaultFeedbackLoop extends FeedbackLoop {
                 newSettings.add(new LinkSettings(mote.getMoteid(), link.getDest(), link.getPower(),
                         link.getDistribution(), link.getSF()));
             }
-            effector.setMoteSettings(mote.getMoteid(), newSettings);
+            getEffector().setMoteSettings(mote.getMoteid(), newSettings);
         }
         steps.clear();
-    }
-
-    @Override
-    Mote findMote(int source, int destination) {
-        for (Mote mote : motes) {
-            if (mote.getMoteid() == source) {
-                return mote;
-            }
-        }
-        return null;
     }
 
     @Override

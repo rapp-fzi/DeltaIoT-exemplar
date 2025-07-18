@@ -1,38 +1,45 @@
 package mapek;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import deltaiot.DeltaIoTSimulator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
 import deltaiot.services.Link;
 import deltaiot.services.LinkSettings;
 import deltaiot.services.Mote;
-import util.CsvFileWriter;
+import util.IMoteWriter;
 
 public class FeedbackLoop {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackLoop.class);
 
-    Probe probe;
-    Effector effector;
+    private final int numOfRuns;
+    private final Probe probe;
+    private final Effector effector;
+    private final IMoteWriter moteWriter;
 
-    int counter = -1;
+    private int counter = -1;
 
     // Knowledge
-    ArrayList<Mote> motes;
-    List<PlanningStep> steps = new LinkedList<>();
+    protected List<Mote> motes;
+    protected List<PlanningStep> steps = new LinkedList<>();
 
-    public void setProbe(Probe probe) {
+    public FeedbackLoop(int numOfRuns, Probe probe, Effector effector, IMoteWriter moteWriter) {
+        this.numOfRuns = numOfRuns;
         this.probe = probe;
+        this.effector = effector;
+        this.moteWriter = moteWriter;
     }
 
-    public void setEffector(Effector effector) {
-        this.effector = effector;
+    protected Effector getEffector() {
+        return effector;
     }
 
     public void start() {
-        for (int i = 0; i < DeltaIoTSimulator.NUM_OF_RUNS; i++) {
+        for (int i = 0; i < numOfRuns; i++) {
             monitor();
         }
     }
@@ -40,11 +47,22 @@ public class FeedbackLoop {
     void monitor() {
         motes = probe.getAllMotes();
 
-        counter = (counter + 1) % DeltaIoTSimulator.NUM_OF_RUNS;
-        CsvFileWriter.logAndSaveConfiguration(motes, counter, getId());
+        counter = (counter + 1) % numOfRuns;
+        logConfiguration(motes, counter, getId());
+        moteWriter.saveConfiguration(motes, counter, getId());
 
         // perform analysis
         analysis();
+    }
+
+    private void logConfiguration(List<Mote> motes, int run, String strategyId) {
+        LOGGER.info("******** Network configuration of {} *******", run);
+        for (Mote mote : motes) {
+            for (Link link : mote.getLinks()) {
+                LOGGER.info(link.toString());
+            }
+        }
+        LOGGER.info("******** END *******");
     }
 
     void analysis() {
@@ -130,14 +148,17 @@ public class FeedbackLoop {
         for (Mote mote : motes) {
             addMote = false;
             for (PlanningStep step : steps) {
-                if (step.link.getSource() == mote.getMoteid()) {
+                if (step.getLink()
+                    .getSource() == mote.getMoteid()) {
                     addMote = true;
-                    if (step.step == Step.CHANGE_POWER) {
-                        mote.getLinkWithDest(step.link.getDest())
-                            .setPower(step.value);
-                    } else if (step.step == Step.CHANGE_DIST) {
-                        mote.getLinkWithDest(step.link.getDest())
-                            .setDistribution(step.value);
+                    if (step.getStep() == Step.CHANGE_POWER) {
+                        mote.getLinkWithDest(step.getLink()
+                            .getDest())
+                            .setPower(step.getValue());
+                    } else if (step.getStep() == Step.CHANGE_DIST) {
+                        mote.getLinkWithDest(step.getLink()
+                            .getDest())
+                            .setDistribution(step.getValue());
                     }
                 }
             }

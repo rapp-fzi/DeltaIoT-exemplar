@@ -2,6 +2,9 @@ package main;
 
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
@@ -11,41 +14,47 @@ import mapek.FeedbackLoop;
 import simulator.QoS;
 import simulator.Simulator;
 import util.CsvFileWriter;
+import util.ICSVWriter;
 
 public class SimpleAdaptation {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAdaptation.class);
 
-    SimulationClient networkMgmt;
+    private final int numOfRuns;
+    private final ICSVWriter csvWriter;
+    private final SimulationClient networkMgmt;
+
+    public SimpleAdaptation(int numOfRuns, ICSVWriter csvWriter) {
+        this.numOfRuns = numOfRuns;
+        this.csvWriter = csvWriter;
+        // Create a simulation client object
+        this.networkMgmt = new SimulationClient(numOfRuns);
+    }
 
     public void start() {
-
-        // Create a simulation client object
-        networkMgmt = new SimulationClient();
-
-        // Create Feedback loop
-        FeedbackLoop feedbackLoop = new EAFeedbackLoopStrategy1a();
-
         // get probe and effectors
         Probe probe = networkMgmt.getProbe();
         Effector effector = networkMgmt.getEffector();
 
-        // Connect probe and effectors with feedback loop
-        feedbackLoop.setProbe(probe);
-        feedbackLoop.setEffector(effector);
+        // Create Feedback loop
+        // FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, probe, effector, csvWriter);
+        FeedbackLoop feedbackLoop = new EAFeedbackLoopStrategy1a(numOfRuns, probe, effector, csvWriter);
+        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
 
         // StartFeedback loop
         feedbackLoop.start();
 
-        ArrayList<QoS> result = networkMgmt.getNetworkQoS(DeltaIoTSimulator.NUM_OF_RUNS);
+        ArrayList<QoS> result = networkMgmt.getNetworkQoS(numOfRuns);
 
-        System.out.println("Run, PacketLoss, EnergyConsumption");
-        result.forEach(qos -> System.out.println(qos));
+        LOGGER.info("Run, PacketLoss, EnergyConsumption");
+        result.forEach(qos -> LOGGER.info("{}", qos));
 
-        CsvFileWriter.saveQoS(result, feedbackLoop.getId());
+        csvWriter.saveQoS(result, feedbackLoop.getId());
 
     }
 
     public static void main(String[] args) {
-        SimpleAdaptation client = new SimpleAdaptation();
+        ICSVWriter csvWriter = new CsvFileWriter();
+        SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS, csvWriter);
         client.start();
     }
 
