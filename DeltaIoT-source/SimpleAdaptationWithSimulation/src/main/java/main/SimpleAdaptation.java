@@ -20,19 +20,16 @@ public class SimpleAdaptation {
 
     private final int numOfRuns;
     private final ICSVWriter csvWriter;
-
-    SimulationClient networkMgmt;
+    private final SimulationClient networkMgmt;
 
     public SimpleAdaptation(int numOfRuns, ICSVWriter csvWriter) {
         this.numOfRuns = numOfRuns;
         this.csvWriter = csvWriter;
+        // Create a simulation client object
+        this.networkMgmt = new SimulationClient(numOfRuns);
     }
 
     public void start() {
-
-        // Create a simulation client object
-        networkMgmt = new SimulationClient(numOfRuns);
-
         // Create Feedback loop
         FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, csvWriter);
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
