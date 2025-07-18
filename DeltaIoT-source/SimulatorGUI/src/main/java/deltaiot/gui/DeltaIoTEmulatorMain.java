@@ -17,7 +17,6 @@ import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,6 +29,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import main.SimpleAdaptation;
 import simulator.QoS;
 import simulator.Simulator;
@@ -40,7 +40,7 @@ public class DeltaIoTEmulatorMain extends Application {
     private Button runEmulator, btnSaveResults, btnAdaptationLogic, btnClearResults, btnDisplay;
 
     @FXML
-    private LineChart<?, ?> chartPacketLoss, chartEnergyConsumption;
+    private LineChart<Integer, Double> chartPacketLoss, chartEnergyConsumption;
 
     @FXML
     private ProgressBar progressBar;
@@ -52,7 +52,7 @@ public class DeltaIoTEmulatorMain extends Application {
     List<String> data = new LinkedList<>();
     Stage primaryStage;
     Simulator simul;
-    Service serviceEmulation = new Service() {
+    Service<Void> serviceEmulation = new Service<>() {
 
         @Override
         protected void succeeded() {
@@ -60,10 +60,10 @@ public class DeltaIoTEmulatorMain extends Application {
         }
 
         @Override
-        protected Task createTask() {
-            return new Task() {
+        protected Task<Void> createTask() {
+            return new Task<>() {
                 @Override
-                protected Object call() throws Exception {
+                protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
                     simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT();
                     for (int i = 0; i < DeltaIoTSimulator.NUM_OF_RUNS; i++)
@@ -87,17 +87,17 @@ public class DeltaIoTEmulatorMain extends Application {
         }
     }
 
-    Service serviceProgress = new Service() {
+    Service<Void> serviceProgress = new Service<>() {
         @Override
         protected void succeeded() {
 
         }
 
         @Override
-        protected Task createTask() {
-            return new Task() {
+        protected Task<Void> createTask() {
+            return new Task<>() {
                 @Override
-                protected Object call() throws Exception {
+                protected Void call() throws Exception {
                     int run;
                     do {
                         run = simul.getRunInfo()
@@ -120,7 +120,7 @@ public class DeltaIoTEmulatorMain extends Application {
         }
     };
 
-    Service serviceAdaptation = new Service() {
+    Service<Void> serviceAdaptation = new Service<>() {
 
         @Override
         protected void succeeded() {
@@ -128,10 +128,10 @@ public class DeltaIoTEmulatorMain extends Application {
         }
 
         @Override
-        protected Task createTask() {
-            return new Task() {
+        protected Task<Void> createTask() {
+            return new Task<>() {
                 @Override
-                protected Object call() throws Exception {
+                protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
                     SimpleAdaptation client = new SimpleAdaptation();
                     client.start();
@@ -227,8 +227,8 @@ public class DeltaIoTEmulatorMain extends Application {
     }
 
     void displayData(String setName, int index) {
-        XYChart.Series energyConsumptionSeries = new XYChart.Series();
-        XYChart.Series packetLossSeries = new XYChart.Series();
+        XYChart.Series<Integer, Double> energyConsumptionSeries = new XYChart.Series<>();
+        XYChart.Series<Integer, Double> packetLossSeries = new XYChart.Series<>();
         energyConsumptionSeries.setName(setName);
         packetLossSeries.setName(setName);
         List<QoS> qosList = simul.getQosValues();
@@ -236,9 +236,9 @@ public class DeltaIoTEmulatorMain extends Application {
         for (QoS qos : qosList) {
             data.add(qos + ", " + setName);
             energyConsumptionSeries.getData()
-                .add(new XYChart.Data(Integer.parseInt(qos.getPeriod()), qos.getEnergyConsumption()));
+                .add(new XYChart.Data<>(Integer.parseInt(qos.getPeriod()), qos.getEnergyConsumption()));
             packetLossSeries.getData()
-                .add(new XYChart.Data(Integer.parseInt(qos.getPeriod()), qos.getPacketLoss()));
+                .add(new XYChart.Data<>(Integer.parseInt(qos.getPeriod()), qos.getPacketLoss()));
         }
         chartEnergyConsumption.getData()
             .add(energyConsumptionSeries);
@@ -258,10 +258,10 @@ public class DeltaIoTEmulatorMain extends Application {
         Scene scene = new Scene(root, 900, 600);
 
         stage.setTitle("DeltaIoT");
-        stage.setOnCloseRequest(new EventHandler() {
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 
             @Override
-            public void handle(Event arg0) {
+            public void handle(WindowEvent arg0) {
                 Platform.exit();
             }
 
