@@ -1,7 +1,6 @@
 package mapek;
 
-import deltaiot.client.Effector;
-import deltaiot.client.Probe;
+import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
 import util.IMoteWriter;
@@ -16,8 +15,8 @@ public class EAFeedbackLoopStrategy1a extends FeedbackLoop {
     private static int POWER_MIN = 0;
     private static int POWER_MAX = 15;
 
-    public EAFeedbackLoopStrategy1a(int numOfRuns, Probe probe, Effector effector, IMoteWriter moteWriter) {
-        super(numOfRuns, probe, effector, moteWriter);
+    public EAFeedbackLoopStrategy1a(SimulationClient networkMgmt, IMoteWriter moteWriter) {
+        super(networkMgmt, moteWriter);
     }
 
     @Override

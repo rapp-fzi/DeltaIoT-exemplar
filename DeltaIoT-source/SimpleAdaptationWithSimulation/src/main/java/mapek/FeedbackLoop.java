@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
+import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.LinkSettings;
 import deltaiot.services.Mote;
@@ -28,10 +29,11 @@ public class FeedbackLoop implements IAdaptionStrategy {
     protected List<Mote> motes;
     protected List<PlanningStep> steps = new LinkedList<>();
 
-    public FeedbackLoop(int numOfRuns, Probe probe, Effector effector, IMoteWriter moteWriter) {
-        this.numOfRuns = numOfRuns;
-        this.probe = probe;
-        this.effector = effector;
+    public FeedbackLoop(SimulationClient networkMgmt, IMoteWriter moteWriter) {
+        this.numOfRuns = networkMgmt.getSimulator()
+            .getNumOfRuns();
+        this.probe = networkMgmt.getProbe();
+        this.effector = networkMgmt.getEffector();
         this.moteWriter = moteWriter;
     }
 

@@ -6,10 +6,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import deltaiot.client.Effector;
 import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
-import deltaiot.client.Probe;
 import deltaiot.client.SimulationClient;
 import deltaiot.client.SimulationResult;
 import mapek.FeedbackLoop;
@@ -32,20 +30,16 @@ public class SimpleAdaptation implements ISimulationRunner {
 
     @Override
     public ISimulationResult run() throws IOException {
-        // get probe and effectors
-        Probe probe = networkMgmt.getProbe();
-        Effector effector = networkMgmt.getEffector();
-
         // Create Feedback loop
         // FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, probe, effector, csvWriter);
-        int numOfRuns = networkMgmt.getSimulator()
-            .getNumOfRuns();
-        IAdaptionStrategy feedbackLoop = new FeedbackLoop(numOfRuns, probe, effector, moteWriter);
+        IAdaptionStrategy feedbackLoop = new FeedbackLoop(networkMgmt, moteWriter);
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
 
         // StartFeedback loop
         feedbackLoop.start();
 
+        int numOfRuns = networkMgmt.getSimulator()
+            .getNumOfRuns();
         List<QoS> result = networkMgmt.getNetworkQoS(numOfRuns);
 
         LOGGER.info("Run, PacketLoss, EnergyConsumption");

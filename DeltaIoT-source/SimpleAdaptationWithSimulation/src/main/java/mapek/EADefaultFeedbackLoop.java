@@ -1,7 +1,6 @@
 package mapek;
 
-import deltaiot.client.Effector;
-import deltaiot.client.Probe;
+import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
 import util.IMoteWriter;
@@ -13,8 +12,8 @@ public class EADefaultFeedbackLoop extends FeedbackLoop {
     private static int UNIFORM_DIST_VALUE = 50;
     private static int TOTAL_DIST_VALUE = 100;
 
-    public EADefaultFeedbackLoop(int numOfRuns, Probe probe, Effector effector, IMoteWriter moteWriter) {
-        super(numOfRuns, probe, effector, moteWriter);
+    public EADefaultFeedbackLoop(SimulationClient networkMgmt, IMoteWriter moteWriter) {
+        super(networkMgmt, moteWriter);
     }
 
     @Override

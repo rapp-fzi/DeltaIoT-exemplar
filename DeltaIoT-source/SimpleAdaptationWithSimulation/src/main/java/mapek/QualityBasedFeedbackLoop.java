@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import deltaiot.client.Effector;
-import deltaiot.client.Probe;
 import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
@@ -21,9 +19,8 @@ public class QualityBasedFeedbackLoop extends FeedbackLoop {
 
     private final SimulationClient networkMgmt;
 
-    public QualityBasedFeedbackLoop(int numOfRuns, Probe probe, Effector effector, ICSVWriter csvWriter,
-            SimulationClient networkMgmt) {
-        super(numOfRuns, probe, effector, csvWriter);
+    public QualityBasedFeedbackLoop(SimulationClient networkMgmt, ICSVWriter csvWriter) {
+        super(networkMgmt, csvWriter);
         this.networkMgmt = networkMgmt;
     }
 
