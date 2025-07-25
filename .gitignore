@@ -24,3 +24,5 @@ hs_err_pid*
 replay_pid*
 
 dependency-reduced-pom.xml
+
+DeltaIoT-source/.metadata/.plugins/**
