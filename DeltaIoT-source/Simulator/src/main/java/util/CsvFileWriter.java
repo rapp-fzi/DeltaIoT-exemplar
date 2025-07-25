@@ -5,7 +5,6 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -26,7 +25,7 @@ public class CsvFileWriter implements ICSVWriter, IQOSWriter {
     }
 
     @Override
-    public void saveQoS(ArrayList<QoS> result, String strategyId) throws IOException {
+    public void saveQoS(List<QoS> result, String strategyId) throws IOException {
         Path strategyFolder = baseLocation.resolve(strategyId);
         Path location = strategyFolder.resolve("Results.csv");
         Files.createDirectories(strategyFolder);

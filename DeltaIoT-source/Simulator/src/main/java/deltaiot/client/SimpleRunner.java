@@ -1,7 +1,7 @@
 package deltaiot.client;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import simulator.QoS;
 import simulator.Simulator;
@@ -23,7 +23,7 @@ public class SimpleRunner implements ISimulationRunner {
             simulator.doSingleRun();
         }
 
-        ArrayList<QoS> result = simulationClient.getNetworkQoS(simulator.getNumOfRuns());
+        List<QoS> result = simulationClient.getNetworkQoS(simulator.getNumOfRuns());
         qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
     }
 

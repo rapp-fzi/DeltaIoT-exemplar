@@ -116,12 +116,12 @@ public class SimulationClient implements Probe, Effector {
     }
 
     @Override
-    public ArrayList<QoS> getNetworkQoS(int period) {
+    public List<QoS> getNetworkQoS(int period) {
         List<QoS> qosOrigList = simulator.getQosValues();
         int qosSize = qosOrigList.size();
 
         if (period >= qosSize)
-            return (ArrayList<QoS>) qosOrigList;
+            return qosOrigList;
 
         int startIndex = qosSize - period;
 
