@@ -28,6 +28,7 @@
   <modules>
     <module>../Simulator</module>
     <module>../SimpleAdaptationWithSimulation</module>
+    <module>../SimulatorConsole</module>
     <module>../SimulatorGUI</module>
   </modules>
   

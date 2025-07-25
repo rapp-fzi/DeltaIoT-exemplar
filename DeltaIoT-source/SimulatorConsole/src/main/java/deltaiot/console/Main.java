@@ -1,7 +1,8 @@
-package simulator;
+package deltaiot.console;
 
 import deltaiot.DeltaIoTSimulator;
 import domain.Gateway;
+import simulator.Simulator;
 
 public class Main {
 
@@ -9,7 +10,7 @@ public class Main {
         run();
     }
 
-    public static void run() {
+    private static void run() {
         Simulator simul = DeltaIoTSimulator.createSimulatorForDeltaIoT(DeltaIoTSimulator.NUM_OF_RUNS);
 
         // Do logic
@@ -25,5 +26,4 @@ public class Main {
              */
         }
     }
-
 }
