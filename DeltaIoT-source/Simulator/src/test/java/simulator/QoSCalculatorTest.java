@@ -35,4 +35,13 @@ public class QoSCalculatorTest {
 
         assertEquals(actualAverage, 1.5, EPSILON);
     }
+
+    @Test
+    public void testCalcScore() {
+        List<QoS> qos = Arrays.asList(new QoS("0", 1, 0), new QoS("0", 2, 1));
+
+        double actualScore = calculator.calcScore(qos);
+
+        assertEquals(actualScore, 1.0, EPSILON);
+    }
 }
