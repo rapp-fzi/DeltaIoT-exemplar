@@ -2,15 +2,19 @@ package deltaiot.console;
 
 import deltaiot.DeltaIoTSimulator;
 import domain.Gateway;
+import main.SimpleAdaptation;
 import simulator.Simulator;
+import util.CsvFileWriter;
+import util.ICSVWriter;
 
 public class Main {
 
     public static void main(String[] args) {
-        run();
+        // runNoAdaption();
+        runWithAdaption();
     }
 
-    private static void run() {
+    private static void runNoAdaption() {
         Simulator simul = DeltaIoTSimulator.createSimulatorForDeltaIoT(DeltaIoTSimulator.NUM_OF_RUNS);
 
         // Do logic
@@ -25,5 +29,11 @@ public class Main {
              * for(Mote mote: motes) { System.out.println(mote); }
              */
         }
+    }
+
+    private static void runWithAdaption() {
+        ICSVWriter csvWriter = new CsvFileWriter();
+        SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS, csvWriter);
+        client.start();
     }
 }
