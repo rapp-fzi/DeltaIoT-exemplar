@@ -36,6 +36,8 @@ import javafx.stage.WindowEvent;
 import main.SimpleAdaptation;
 import simulator.QoS;
 import simulator.Simulator;
+import simulator.SimulatorConfig;
+import simulator.SimulatorFactory;
 import util.CsvFileWriter;
 import util.ICSVWriter;
 import util.IQOSWriter;
@@ -73,7 +75,8 @@ public class DeltaIoTEmulatorMain extends Application {
                 protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
                     try {
-                        simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(getNumOfRuns());
+                        SimulatorConfig config = new SimulatorConfig(getNumOfRuns());
+                        simul = SimulatorFactory.createExperimentSimulator(config);
                         SimulationClient simulationClient = new SimulationClient(simul);
                         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
                         IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
@@ -151,7 +154,8 @@ public class DeltaIoTEmulatorMain extends Application {
                     try {
                         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
                         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
-                        simul = DeltaIoTSimulator.createSimulatorForDeltaIoT(getNumOfRuns());
+                        SimulatorConfig config = new SimulatorConfig(getNumOfRuns());
+                        simul = SimulatorFactory.createExperimentSimulator(config);
                         SimulationClient simulationClient = new SimulationClient(simul);
                         SimpleAdaptation client = new SimpleAdaptation(simulationClient, csvWriter);
                         client.run();

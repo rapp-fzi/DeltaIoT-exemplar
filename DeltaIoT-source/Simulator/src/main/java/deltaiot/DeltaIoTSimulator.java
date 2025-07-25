@@ -24,6 +24,7 @@ import domain.Gateway;
 import domain.Link;
 import domain.Mote;
 import domain.Node;
+import simulator.ISimulatorConfig;
 import simulator.Simulator;
 import simulator.SimulatorFactory;
 
@@ -40,11 +41,8 @@ public class DeltaIoTSimulator {
     Simulator simul;
 
     public DeltaIoTSimulator(int numOfRuns) {
-        this.simul = createSimulatorForDeltaIoT(numOfRuns);
-    }
-
-    public static Simulator createSimulatorForDeltaIoT(int numOfRuns) {
-        return SimulatorFactory.createExperimentSimulator(numOfRuns);
+        ISimulatorConfig config = null;
+        this.simul = SimulatorFactory.createExperimentSimulator(config);
     }
 
     public void run() {

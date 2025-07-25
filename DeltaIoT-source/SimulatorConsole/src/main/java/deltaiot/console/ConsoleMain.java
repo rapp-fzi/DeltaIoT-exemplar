@@ -20,6 +20,8 @@ import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import main.SimpleAdaptation;
 import simulator.Simulator;
+import simulator.SimulatorConfig;
+import simulator.SimulatorFactory;
 import util.CsvFileWriter;
 import util.ICSVWriter;
 import util.IQOSWriter;
@@ -45,8 +47,8 @@ public class ConsoleMain {
 
         try {
             CommandLine cmdLine = parser.parse(options, args);
-
-            Simulator simulator = DeltaIoTSimulator.createSimulatorForDeltaIoT(DeltaIoTSimulator.NUM_OF_RUNS);
+            SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
+            Simulator simulator = SimulatorFactory.createExperimentSimulator(config);
             final ISimulationRunner runner;
             if (cmdLine.hasOption('a')) {
                 runner = runWithAdaption(simulator);

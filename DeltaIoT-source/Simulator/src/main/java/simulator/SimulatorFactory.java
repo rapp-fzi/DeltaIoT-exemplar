@@ -9,12 +9,12 @@ import domain.SNREquation;
 public class SimulatorFactory {
     public static final int DEFAULT_GATEWAY_ID = 1;
 
-    public static Simulator createExperimentSimulator(int numOfRuns) {
-        return createExperimentSimulator(numOfRuns, DEFAULT_GATEWAY_ID);
+    public static Simulator createExperimentSimulator(ISimulatorConfig config) {
+        return createExperimentSimulator(config, DEFAULT_GATEWAY_ID);
     }
 
-    public static Simulator createExperimentSimulator(int numOfRuns, int gatewayId) {
-        Simulator simul = new Simulator(numOfRuns);
+    public static Simulator createExperimentSimulator(ISimulatorConfig config, int gatewayId) {
+        Simulator simul = new Simulator(config.getNumOfRuns());
 
         // Motes
         int load = 10;
@@ -244,8 +244,8 @@ public class SimulatorFactory {
 
     // Pre-build simulators
 
-    public static Simulator createBaseCase(int numOfRuns) {
-        Simulator simul = new Simulator(numOfRuns);
+    public static Simulator createBaseCase(ISimulatorConfig config) {
+        Simulator simul = new Simulator(config.getNumOfRuns());
 
         // Motes
         double battery = 11880;
@@ -278,8 +278,8 @@ public class SimulatorFactory {
         return simul;
     }
 
-    public static Simulator createBaseCase2(int numOfRuns) {
-        Simulator simul = new Simulator(numOfRuns);
+    public static Simulator createBaseCase2(ISimulatorConfig config) {
+        Simulator simul = new Simulator(config.getNumOfRuns());
 
         // Motes
         double battery = 11880;
