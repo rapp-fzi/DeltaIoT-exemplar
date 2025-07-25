@@ -54,7 +54,7 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>deltaiot.console.Main</mainClass>
+                  <mainClass>deltaiot.console.ConsoleMain</mainClass>
                 </transformer>
               </transformers>
             </configuration>

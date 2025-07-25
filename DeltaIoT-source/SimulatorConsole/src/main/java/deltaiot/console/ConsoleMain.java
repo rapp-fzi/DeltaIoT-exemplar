@@ -7,7 +7,7 @@ import simulator.Simulator;
 import util.CsvFileWriter;
 import util.ICSVWriter;
 
-public class Main {
+public class ConsoleMain {
 
     public static void main(String[] args) {
         // runNoAdaption();
