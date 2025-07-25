@@ -10,7 +10,7 @@ import deltaiot.services.Mote;
 import mapek.PlanningStep;
 import mapek.Step;
 import simulator.QoS;
-import util.ICSVWriter;
+import util.IMoteWriter;
 
 class QualityBasedFeedbackLoop extends FeedbackLoop {
 
@@ -21,8 +21,8 @@ class QualityBasedFeedbackLoop extends FeedbackLoop {
 
     private final SimulationClient networkMgmt;
 
-    public QualityBasedFeedbackLoop(SimulationClient networkMgmt, ICSVWriter csvWriter) {
-        super(networkMgmt, csvWriter);
+    public QualityBasedFeedbackLoop(SimulationClient networkMgmt, IMoteWriter moteWriter) {
+        super(networkMgmt, moteWriter);
         this.networkMgmt = networkMgmt;
     }
 

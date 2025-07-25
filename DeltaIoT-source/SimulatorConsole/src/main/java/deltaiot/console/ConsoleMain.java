@@ -22,6 +22,7 @@ import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import main.SimpleAdaptation;
 import mapek.strategy.AdaptionStrategyFactory;
+import mapek.strategy.AdaptionStrategyFactory.Kind;
 import mapek.strategy.IAdaptionStrategy;
 import simulator.QoS;
 import simulator.QoSCalculator;
@@ -98,7 +99,8 @@ public class ConsoleMain {
         // Create Feedback loop
         AdaptionStrategyFactory adaptionStrategyFactory = new AdaptionStrategyFactory();
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
-        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(simulationClient, moteWriter);
+        Kind kind = Kind.Default;
+        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(kind, simulationClient, moteWriter);
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
         return adaption;
     }

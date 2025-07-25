@@ -4,7 +4,15 @@ import deltaiot.client.SimulationClient;
 import util.IMoteWriter;
 
 public class AdaptionStrategyFactory {
-    public IAdaptionStrategy create(SimulationClient networkMgmt, IMoteWriter moteWriter) {
-        return new FeedbackLoop(networkMgmt, moteWriter);
+    public enum Kind {
+        Default, EADefault, Quality,
+    }
+
+    public IAdaptionStrategy create(Kind kind, SimulationClient networkMgmt, IMoteWriter moteWriter) {
+        return switch (kind) {
+        case Default -> new FeedbackLoop(networkMgmt, moteWriter);
+        case EADefault -> new EADefaultFeedbackLoop(networkMgmt, moteWriter);
+        case Quality -> new QualityBasedFeedbackLoop(networkMgmt, moteWriter);
+        };
     }
 }
