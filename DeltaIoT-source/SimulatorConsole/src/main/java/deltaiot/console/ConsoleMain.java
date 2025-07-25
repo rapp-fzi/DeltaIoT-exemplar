@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import deltaiot.DeltaIoTSimulator;
+import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import main.SimpleAdaptation;
@@ -46,11 +47,13 @@ public class ConsoleMain {
             CommandLine cmdLine = parser.parse(options, args);
 
             Simulator simulator = DeltaIoTSimulator.createSimulatorForDeltaIoT(DeltaIoTSimulator.NUM_OF_RUNS);
+            final ISimulationRunner runner;
             if (cmdLine.hasOption('a')) {
-                runWithAdaption(simulator);
+                runner = runWithAdaption(simulator);
             } else {
-                runNoAdaption(simulator);
+                runner = runNoAdaption(simulator);
             }
+            runner.run();
 
             return 0;
         } catch (ParseException e) {
@@ -62,19 +65,19 @@ public class ConsoleMain {
         return 1;
     }
 
-    private void runNoAdaption(Simulator simulator) throws IOException {
+    private ISimulationRunner runNoAdaption(Simulator simulator) throws IOException {
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
         SimulationClient simulationClient = new SimulationClient(simulator);
         SimpleRunner simpleRunner = new SimpleRunner(simulationClient, qosWriter);
-        simpleRunner.run();
+        return simpleRunner;
     }
 
-    private void runWithAdaption(Simulator simulator) throws IOException {
+    private ISimulationRunner runWithAdaption(Simulator simulator) throws IOException {
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
         SimulationClient simulationClient = new SimulationClient(simulator);
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, csvWriter);
-        adaption.run();
+        return adaption;
     }
 }
