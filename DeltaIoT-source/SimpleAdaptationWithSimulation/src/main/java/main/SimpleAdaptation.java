@@ -17,15 +17,13 @@ import util.ICSVWriter;
 public class SimpleAdaptation {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAdaptation.class);
 
-    private final int numOfRuns;
     private final ICSVWriter csvWriter;
     private final SimulationClient networkMgmt;
 
-    public SimpleAdaptation(int numOfRuns, ICSVWriter csvWriter) {
-        this.numOfRuns = numOfRuns;
+    public SimpleAdaptation(Simulator simulator, ICSVWriter csvWriter) {
         this.csvWriter = csvWriter;
         // Create a simulation client object
-        this.networkMgmt = new SimulationClient(numOfRuns);
+        this.networkMgmt = new SimulationClient(simulator);
     }
 
     public void start() throws IOException {
@@ -34,6 +32,8 @@ public class SimpleAdaptation {
         Effector effector = networkMgmt.getEffector();
 
         // Create Feedback loop
+        int numOfRuns = networkMgmt.getSimulator()
+            .getNumOfRuns();
         FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, probe, effector, csvWriter);
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
 

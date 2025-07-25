@@ -154,7 +154,8 @@ public class DeltaIoTEmulatorMain extends Application {
                     try {
                         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
                         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
-                        SimpleAdaptation client = new SimpleAdaptation(getNumOfRuns(), csvWriter);
+                        Simulator simulator = DeltaIoTSimulator.createSimulatorForDeltaIoT(getNumOfRuns());
+                        SimpleAdaptation client = new SimpleAdaptation(simulator, csvWriter);
                         client.start();
                         simul = client.getSimulator();
                     } catch (IOException e) {

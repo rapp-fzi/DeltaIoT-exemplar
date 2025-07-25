@@ -46,10 +46,11 @@ public class ConsoleMain {
         try {
             CommandLine cmdLine = parser.parse(options, args);
 
+            Simulator simulator = DeltaIoTSimulator.createSimulatorForDeltaIoT(DeltaIoTSimulator.NUM_OF_RUNS);
             if (cmdLine.hasOption('a')) {
-                runWithAdaption();
+                runWithAdaption(simulator);
             } else {
-                runNoAdaption();
+                runNoAdaption(simulator);
             }
 
             return 0;
@@ -62,31 +63,21 @@ public class ConsoleMain {
         return 1;
     }
 
-    private void runNoAdaption() throws IOException {
-        Simulator simul = DeltaIoTSimulator.createSimulatorForDeltaIoT(DeltaIoTSimulator.NUM_OF_RUNS);
-
+    private void runNoAdaption(Simulator simulator) throws IOException {
         // Do logic
-        for (int i = 0; i < 96; ++i) {
-            simul.doSingleRun();
-            // simul.doMultipleRuns(96);
-
-            /*
-             * for (Gateway gateway : simul.getGateways()) { LOGGER.info("{}", gateway); }
-             */
-            /*
-             * for(Mote mote: motes) { System.out.println(mote); }
-             */
+        for (int i = 0; i < simulator.getNumOfRuns(); ++i) {
+            simulator.doSingleRun();
         }
-        ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(DeltaIoTSimulator.NUM_OF_RUNS);
+        ArrayList<QoS> result = new SimulationClient(simulator).getNetworkQoS(DeltaIoTSimulator.NUM_OF_RUNS);
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
         qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
     }
 
-    private void runWithAdaption() throws IOException {
+    private void runWithAdaption(Simulator simulator) throws IOException {
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
-        SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS, csvWriter);
+        SimpleAdaptation client = new SimpleAdaptation(simulator, csvWriter);
         client.start();
     }
 }

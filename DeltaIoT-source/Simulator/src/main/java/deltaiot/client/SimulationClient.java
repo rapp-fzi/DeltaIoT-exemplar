@@ -15,10 +15,6 @@ public class SimulationClient implements Probe, Effector {
 
     private final Simulator simulator;
 
-    public SimulationClient(int numOfRuns) {
-        this(deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(numOfRuns));
-    }
-
     public SimulationClient(Simulator simulator) {
         this.simulator = simulator;
     }
