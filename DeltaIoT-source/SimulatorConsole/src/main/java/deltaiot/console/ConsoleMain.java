@@ -1,5 +1,12 @@
 package deltaiot.console;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,12 +25,32 @@ public class ConsoleMain {
 
     public static void main(String[] args) {
         ConsoleMain main = new ConsoleMain();
-        main.run(args);
+        int returnCode = main.run(args);
+        System.exit(returnCode);
     }
 
-    private void run(String[] args) {
-        // runNoAdaption();
-        runWithAdaption();
+    private int run(String[] args) {
+        Options options = new Options().addOption(Option.builder("a")
+            .longOpt("adaption")
+            .desc("Run with adaption")
+            .build());
+        CommandLineParser parser = new DefaultParser();
+
+        try {
+            CommandLine cmdLine = parser.parse(options, args);
+
+            if (cmdLine.hasOption('a')) {
+                runWithAdaption();
+            } else {
+                runNoAdaption();
+            }
+
+            return 0;
+        } catch (ParseException e) {
+            HelpFormatter helpFormatter = new HelpFormatter();
+            helpFormatter.printHelp("ConsoleMain", options);
+        }
+        return 1;
     }
 
     private void runNoAdaption() {
