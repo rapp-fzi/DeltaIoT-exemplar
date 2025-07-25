@@ -7,6 +7,12 @@ import domain.Position;
 import domain.SNREquation;
 
 public class SimulatorFactory {
+    public static final int DEFAULT_GATEWAY_ID = 1;
+
+    public static Simulator createExperimentSimulator(int numOfRuns) {
+        return createExperimentSimulator(numOfRuns, DEFAULT_GATEWAY_ID);
+    }
+
     public static Simulator createExperimentSimulator(int numOfRuns, int gatewayId) {
         Simulator simul = new Simulator(numOfRuns);
 

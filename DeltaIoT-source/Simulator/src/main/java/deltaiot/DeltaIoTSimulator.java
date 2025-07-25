@@ -34,8 +34,8 @@ public class DeltaIoTSimulator {
 
     final Lock lock = new ReentrantLock();
     final Condition adaptationCompleted = lock.newCondition();
-    final static int GATEWAY_ID = 1;
-    final static int PORT = 9888;
+    private final static int GATEWAY_ID = 1;
+    private final static int PORT = 9888;
 
     Simulator simul;
 
@@ -44,7 +44,7 @@ public class DeltaIoTSimulator {
     }
 
     public static Simulator createSimulatorForDeltaIoT(int numOfRuns) {
-        return SimulatorFactory.createExperimentSimulator(numOfRuns, GATEWAY_ID);
+        return SimulatorFactory.createExperimentSimulator(numOfRuns);
     }
 
     public void run() {
