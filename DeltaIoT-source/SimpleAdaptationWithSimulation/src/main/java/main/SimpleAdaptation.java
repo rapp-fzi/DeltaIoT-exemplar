@@ -20,10 +20,10 @@ public class SimpleAdaptation {
     private final ICSVWriter csvWriter;
     private final SimulationClient networkMgmt;
 
-    public SimpleAdaptation(Simulator simulator, ICSVWriter csvWriter) {
+    public SimpleAdaptation(SimulationClient networkMgmt, ICSVWriter csvWriter) {
         this.csvWriter = csvWriter;
         // Create a simulation client object
-        this.networkMgmt = new SimulationClient(simulator);
+        this.networkMgmt = networkMgmt;
     }
 
     public void start() throws IOException {

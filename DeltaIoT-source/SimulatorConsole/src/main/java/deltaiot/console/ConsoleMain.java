@@ -64,11 +64,12 @@ public class ConsoleMain {
     }
 
     private void runNoAdaption(Simulator simulator) throws IOException {
+        SimulationClient simulationClient = new SimulationClient(simulator);
         // Do logic
         for (int i = 0; i < simulator.getNumOfRuns(); ++i) {
             simulator.doSingleRun();
         }
-        ArrayList<QoS> result = new SimulationClient(simulator).getNetworkQoS(DeltaIoTSimulator.NUM_OF_RUNS);
+        ArrayList<QoS> result = simulationClient.getNetworkQoS(DeltaIoTSimulator.NUM_OF_RUNS);
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
         qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
@@ -77,7 +78,8 @@ public class ConsoleMain {
     private void runWithAdaption(Simulator simulator) throws IOException {
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
-        SimpleAdaptation client = new SimpleAdaptation(simulator, csvWriter);
-        client.start();
+        SimulationClient simulationClient = new SimulationClient(simulator);
+        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, csvWriter);
+        adaption.start();
     }
 }
