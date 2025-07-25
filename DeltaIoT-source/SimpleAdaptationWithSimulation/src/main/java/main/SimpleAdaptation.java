@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import deltaiot.client.Effector;
+import deltaiot.client.ISimulationRunner;
 import deltaiot.client.Probe;
 import deltaiot.client.SimulationClient;
 import mapek.FeedbackLoop;
@@ -14,7 +15,7 @@ import simulator.QoS;
 import simulator.Simulator;
 import util.ICSVWriter;
 
-public class SimpleAdaptation {
+public class SimpleAdaptation implements ISimulationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAdaptation.class);
 
     private final ICSVWriter csvWriter;
@@ -26,7 +27,8 @@ public class SimpleAdaptation {
         this.networkMgmt = networkMgmt;
     }
 
-    public void start() throws IOException {
+    @Override
+    public void run() throws IOException {
         // get probe and effectors
         Probe probe = networkMgmt.getProbe();
         Effector effector = networkMgmt.getEffector();

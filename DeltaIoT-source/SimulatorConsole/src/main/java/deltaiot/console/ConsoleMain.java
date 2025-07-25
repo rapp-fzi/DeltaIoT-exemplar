@@ -3,7 +3,6 @@ package deltaiot.console;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -16,9 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import deltaiot.DeltaIoTSimulator;
+import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import main.SimpleAdaptation;
-import simulator.QoS;
 import simulator.Simulator;
 import util.CsvFileWriter;
 import util.ICSVWriter;
@@ -64,15 +63,11 @@ public class ConsoleMain {
     }
 
     private void runNoAdaption(Simulator simulator) throws IOException {
-        SimulationClient simulationClient = new SimulationClient(simulator);
-        // Do logic
-        for (int i = 0; i < simulator.getNumOfRuns(); ++i) {
-            simulator.doSingleRun();
-        }
-        ArrayList<QoS> result = simulationClient.getNetworkQoS(DeltaIoTSimulator.NUM_OF_RUNS);
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
-        qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
+        SimulationClient simulationClient = new SimulationClient(simulator);
+        SimpleRunner simpleRunner = new SimpleRunner(simulationClient, qosWriter);
+        simpleRunner.run();
     }
 
     private void runWithAdaption(Simulator simulator) throws IOException {
@@ -80,6 +75,6 @@ public class ConsoleMain {
         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
         SimulationClient simulationClient = new SimulationClient(simulator);
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, csvWriter);
-        adaption.start();
+        adaption.run();
     }
 }

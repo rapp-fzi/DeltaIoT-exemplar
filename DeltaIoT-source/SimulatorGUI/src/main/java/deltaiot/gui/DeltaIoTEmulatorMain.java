@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import deltaiot.DeltaIoTSimulator;
+import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -74,14 +74,11 @@ public class DeltaIoTEmulatorMain extends Application {
                     btnDisplay.setDisable(true);
                     try {
                         simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(getNumOfRuns());
-                        for (int i = 0; i < simul.getNumOfRuns(); i++) {
-                            simul.doSingleRun();
-                        }
-
-                        ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(simul.getNumOfRuns());
+                        SimulationClient simulationClient = new SimulationClient(simul);
                         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
                         IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
-                        qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
+                        SimpleRunner simpleRunner = new SimpleRunner(simulationClient, qosWriter);
+                        simpleRunner.run();
                     } catch (IOException e) {
                         LOGGER.error(e.getMessage(), e);
                     }
@@ -157,7 +154,7 @@ public class DeltaIoTEmulatorMain extends Application {
                         Simulator simulator = DeltaIoTSimulator.createSimulatorForDeltaIoT(getNumOfRuns());
                         SimulationClient simulationClient = new SimulationClient(simulator);
                         SimpleAdaptation client = new SimpleAdaptation(simulationClient, csvWriter);
-                        client.start();
+                        client.run();
                         simul = client.getSimulator();
                     } catch (IOException e) {
                         LOGGER.error(e.getMessage(), e);
