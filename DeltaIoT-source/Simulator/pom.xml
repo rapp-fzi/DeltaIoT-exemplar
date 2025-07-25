@@ -18,12 +18,6 @@
         <artifactId>gson</artifactId>
         <version>${gson-version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.sun.xml.ws</groupId>
-      <artifactId>jaxws-rt</artifactId>
-      <version>${jaxws-rt-version}</version>
-      <type>pom</type>
-    </dependency>
 
 	<dependency>
 	  <groupId>org.slf4j</groupId>
