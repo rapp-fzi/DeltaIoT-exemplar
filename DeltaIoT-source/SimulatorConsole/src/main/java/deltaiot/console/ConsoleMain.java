@@ -1,5 +1,8 @@
 package deltaiot.console;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.DeltaIoTSimulator;
 import domain.Gateway;
 import main.SimpleAdaptation;
@@ -8,13 +11,22 @@ import util.CsvFileWriter;
 import util.ICSVWriter;
 
 public class ConsoleMain {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleMain.class);
+
+    public ConsoleMain() {
+    }
 
     public static void main(String[] args) {
+        ConsoleMain main = new ConsoleMain();
+        main.run(args);
+    }
+
+    private void run(String[] args) {
         // runNoAdaption();
         runWithAdaption();
     }
 
-    private static void runNoAdaption() {
+    private void runNoAdaption() {
         Simulator simul = DeltaIoTSimulator.createSimulatorForDeltaIoT(DeltaIoTSimulator.NUM_OF_RUNS);
 
         // Do logic
@@ -23,7 +35,7 @@ public class ConsoleMain {
             // simul.doMultipleRuns(96);
 
             for (Gateway gateway : simul.getGateways()) {
-                System.out.println(gateway);
+                LOGGER.info("{}", gateway);
             }
             /*
              * for(Mote mote: motes) { System.out.println(mote); }
@@ -31,7 +43,7 @@ public class ConsoleMain {
         }
     }
 
-    private static void runWithAdaption() {
+    private void runWithAdaption() {
         ICSVWriter csvWriter = new CsvFileWriter();
         SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS, csvWriter);
         client.start();
