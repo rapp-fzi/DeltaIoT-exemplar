@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +18,16 @@ import simulator.QoS;
 public class CsvFileWriter implements ICSVWriter, IQOSWriter {
     private final static String CSV_DELIMITER = ";";
 
+    private final Path baseLocation;
+
+    public CsvFileWriter(Path baseLocation) {
+        this.baseLocation = baseLocation;
+    }
+
     @Override
     public void saveQoS(ArrayList<QoS> result, String strategyId) throws IOException {
         String csvFileName = strategyId + "Results.csv";
-        Path location = Paths.get(System.getProperty("user.dir"), "results", csvFileName);
+        Path location = baseLocation.resolve(csvFileName);
 
         CSVFormat.Builder builder = CSVFormat.Builder.create()
             .setDelimiter(CSV_DELIMITER)
@@ -46,7 +51,7 @@ public class CsvFileWriter implements ICSVWriter, IQOSWriter {
     @Override
     public void saveConfiguration(List<Mote> motes, int run, String strategyId) throws IOException {
         String csvFileName = strategyId + "Configurations.csv";
-        Path location = Paths.get(System.getProperty("user.dir"), "results", csvFileName);
+        Path location = baseLocation.resolve(csvFileName);
 
         CSVFormat.Builder builder = CSVFormat.Builder.create()
             .setDelimiter(CSV_DELIMITER)

@@ -1,6 +1,8 @@
 package deltaiot.console;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -75,7 +77,8 @@ public class ConsoleMain {
     }
 
     private void runWithAdaption() throws IOException {
-        ICSVWriter csvWriter = new CsvFileWriter();
+        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
         SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS, csvWriter);
         client.start();
     }
