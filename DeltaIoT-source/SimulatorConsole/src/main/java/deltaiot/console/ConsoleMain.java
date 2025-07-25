@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import deltaiot.DeltaIoTSimulator;
+import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
@@ -24,7 +25,6 @@ import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
 import util.CsvFileWriter;
 import util.ICSVWriter;
-import util.IQOSWriter;
 
 public class ConsoleMain {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleMain.class);
@@ -49,13 +49,17 @@ public class ConsoleMain {
             CommandLine cmdLine = parser.parse(options, args);
             SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
             Simulator simulator = SimulatorFactory.createExperimentSimulator(config);
+            Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+            ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+
             final ISimulationRunner runner;
             if (cmdLine.hasOption('a')) {
-                runner = runWithAdaption(simulator);
+                runner = runWithAdaption(simulator, csvWriter);
             } else {
                 runner = runNoAdaption(simulator);
             }
-            runner.run();
+            ISimulationResult result = runner.run();
+            csvWriter.saveQoS(result.getQoS(), result.getStrategyId());
 
             return 0;
         } catch (ParseException e) {
@@ -68,16 +72,12 @@ public class ConsoleMain {
     }
 
     private ISimulationRunner runNoAdaption(Simulator simulator) throws IOException {
-        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-        IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
         SimulationClient simulationClient = new SimulationClient(simulator);
-        SimpleRunner simpleRunner = new SimpleRunner(simulationClient, qosWriter);
+        SimpleRunner simpleRunner = new SimpleRunner(simulationClient);
         return simpleRunner;
     }
 
-    private ISimulationRunner runWithAdaption(Simulator simulator) throws IOException {
-        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+    private ISimulationRunner runWithAdaption(Simulator simulator, ICSVWriter csvWriter) throws IOException {
         SimulationClient simulationClient = new SimulationClient(simulator);
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, csvWriter);
         return adaption;

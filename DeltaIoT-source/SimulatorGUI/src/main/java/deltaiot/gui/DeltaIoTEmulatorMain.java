@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import deltaiot.DeltaIoTSimulator;
+import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
@@ -41,6 +42,7 @@ import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
 import util.CsvFileWriter;
 import util.ICSVWriter;
+import util.IMoteWriter;
 import util.IQOSWriter;
 
 public class DeltaIoTEmulatorMain extends Application {
@@ -78,8 +80,10 @@ public class DeltaIoTEmulatorMain extends Application {
                     try {
                         SimulatorConfig config = createConfig();
                         simul = SimulatorFactory.createExperimentSimulator(config);
+                        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+                        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
                         ISimulationRunner runner = runNoAdaption(simul);
-                        runner.run();
+                        executeRunner(runner, csvWriter);
                     } catch (IOException e) {
                         LOGGER.error(e.getMessage(), e);
                     }
@@ -148,8 +152,10 @@ public class DeltaIoTEmulatorMain extends Application {
                     try {
                         SimulatorConfig config = createConfig();
                         simul = SimulatorFactory.createExperimentSimulator(config);
-                        ISimulationRunner runner = runWithAdaption(simul);
-                        runner.run();
+                        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+                        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+                        ISimulationRunner runner = runWithAdaption(simul, csvWriter);
+                        executeRunner(runner, csvWriter);
                     } catch (IOException e) {
                         LOGGER.error(e.getMessage(), e);
                     }
@@ -166,19 +172,20 @@ public class DeltaIoTEmulatorMain extends Application {
     }
 
     private ISimulationRunner runNoAdaption(Simulator simulator) throws IOException {
-        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-        IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
         SimulationClient simulationClient = new SimulationClient(simulator);
-        SimpleRunner simpleRunner = new SimpleRunner(simulationClient, qosWriter);
+        SimpleRunner simpleRunner = new SimpleRunner(simulationClient);
         return simpleRunner;
     }
 
-    private ISimulationRunner runWithAdaption(Simulator simulator) throws IOException {
-        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+    private ISimulationRunner runWithAdaption(Simulator simulator, IMoteWriter moteWriter) throws IOException {
         SimulationClient simulationClient = new SimulationClient(simulator);
-        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, csvWriter);
+        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, moteWriter);
         return adaption;
+    }
+
+    private void executeRunner(ISimulationRunner runner, IQOSWriter qosWriter) throws IOException {
+        ISimulationResult result = runner.run();
+        qosWriter.saveQoS(result.getQoS(), result.getStrategyId());
     }
 
     // ActivFORMSDeploy client;
