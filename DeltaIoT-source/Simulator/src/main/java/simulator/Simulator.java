@@ -70,12 +70,8 @@ public class Simulator {
         }
 
         // QoS
-        QoS qos = new QoS();
-        qos.setEnergyConsumption(gateways.get(0)
-            .getPowerConsumed());
-        qos.setPacketLoss(gateways.get(0)
-            .calculatePacketLoss());
-        qos.setPeriod("" + runInfo.getRunNumber());
+        Gateway gateway = gateways.get(0);
+        QoS qos = new QoS("" + runInfo.getRunNumber(), gateway.calculatePacketLoss(), gateway.getPowerConsumed());
         qosValues.add(qos);
 
         // Increase run number
