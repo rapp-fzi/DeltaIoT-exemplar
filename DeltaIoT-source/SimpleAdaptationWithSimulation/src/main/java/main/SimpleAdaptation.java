@@ -49,7 +49,7 @@ public class SimpleAdaptation implements ISimulationRunner {
         result.forEach(qos -> LOGGER.info("{}", qos));
 
         csvWriter.saveQoS(result, feedbackLoop.getId());
-        return new SimulationResult(result);
+        return new SimulationResult(feedbackLoop.getId(), result);
 
     }
 

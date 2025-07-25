@@ -25,7 +25,7 @@ public class SimpleRunner implements ISimulationRunner {
 
         List<QoS> result = simulationClient.getNetworkQoS(simulator.getNumOfRuns());
         qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
-        return new SimulationResult(result);
+        return new SimulationResult("NonAdaptiveDeltaIoTStrategy", result);
     }
 
 }
