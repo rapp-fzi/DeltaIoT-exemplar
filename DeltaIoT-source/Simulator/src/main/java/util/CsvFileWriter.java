@@ -26,8 +26,9 @@ public class CsvFileWriter implements ICSVWriter, IQOSWriter {
 
     @Override
     public void saveQoS(ArrayList<QoS> result, String strategyId) throws IOException {
-        String csvFileName = strategyId + "Results.csv";
-        Path location = baseLocation.resolve(csvFileName);
+        Path strategyFolder = baseLocation.resolve(strategyId);
+        Path location = strategyFolder.resolve("Results.csv");
+        Files.createDirectories(strategyFolder);
 
         CSVFormat.Builder builder = CSVFormat.Builder.create()
             .setDelimiter(CSV_DELIMITER)
@@ -50,8 +51,9 @@ public class CsvFileWriter implements ICSVWriter, IQOSWriter {
 
     @Override
     public void saveConfiguration(List<Mote> motes, int run, String strategyId) throws IOException {
-        String csvFileName = strategyId + "Configurations.csv";
-        Path location = baseLocation.resolve(csvFileName);
+        Path strategyFolder = baseLocation.resolve(strategyId);
+        Path location = strategyFolder.resolve("Configurations.csv");
+        Files.createDirectories(strategyFolder);
 
         CSVFormat.Builder builder = CSVFormat.Builder.create()
             .setDelimiter(CSV_DELIMITER)

@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.SimulationClient;
 import javafx.application.Application;
@@ -38,6 +41,8 @@ import util.ICSVWriter;
 import util.IQOSWriter;
 
 public class DeltaIoTEmulatorMain extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeltaIoTEmulatorMain.class);
+
     @FXML
     private Button runEmulator, btnSaveResults, btnAdaptationLogic, btnClearResults, btnDisplay;
 
@@ -67,15 +72,19 @@ public class DeltaIoTEmulatorMain extends Application {
                 @Override
                 protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
-                    simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(getNumOfRuns());
-                    for (int i = 0; i < simul.getNumOfRuns(); i++) {
-                        simul.doSingleRun();
-                    }
+                    try {
+                        simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(getNumOfRuns());
+                        for (int i = 0; i < simul.getNumOfRuns(); i++) {
+                            simul.doSingleRun();
+                        }
 
-                    ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(simul.getNumOfRuns());
-                    Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-                    IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
-                    qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
+                        ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(simul.getNumOfRuns());
+                        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+                        IQOSWriter qosWriter = new CsvFileWriter(baseLocation);
+                        qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
+                    } catch (IOException e) {
+                        LOGGER.error(e.getMessage(), e);
+                    }
 
                     btnDisplay.setDisable(false);
                     return null;
@@ -142,11 +151,15 @@ public class DeltaIoTEmulatorMain extends Application {
                 @Override
                 protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
-                    Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-                    ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
-                    SimpleAdaptation client = new SimpleAdaptation(getNumOfRuns(), csvWriter);
-                    client.start();
-                    simul = client.getSimulator();
+                    try {
+                        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+                        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+                        SimpleAdaptation client = new SimpleAdaptation(getNumOfRuns(), csvWriter);
+                        client.start();
+                        simul = client.getSimulator();
+                    } catch (IOException e) {
+                        LOGGER.error(e.getMessage(), e);
+                    }
                     btnDisplay.setDisable(false);
                     return null;
                 }
