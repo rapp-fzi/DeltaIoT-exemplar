@@ -1,5 +1,7 @@
 package deltaiot.console;
 
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -49,6 +51,8 @@ public class ConsoleMain {
         } catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();
             helpFormatter.printHelp("ConsoleMain", options);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
         }
         return 1;
     }
@@ -70,7 +74,7 @@ public class ConsoleMain {
         }
     }
 
-    private void runWithAdaption() {
+    private void runWithAdaption() throws IOException {
         ICSVWriter csvWriter = new CsvFileWriter();
         SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS, csvWriter);
         client.start();

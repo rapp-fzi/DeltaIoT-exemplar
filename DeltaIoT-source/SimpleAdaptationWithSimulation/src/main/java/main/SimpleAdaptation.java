@@ -1,18 +1,17 @@
 package main;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.Effector;
 import deltaiot.client.Probe;
 import deltaiot.client.SimulationClient;
 import mapek.FeedbackLoop;
 import simulator.QoS;
 import simulator.Simulator;
-import util.CsvFileWriter;
 import util.ICSVWriter;
 
 public class SimpleAdaptation {
@@ -29,7 +28,7 @@ public class SimpleAdaptation {
         this.networkMgmt = new SimulationClient(numOfRuns);
     }
 
-    public void start() {
+    public void start() throws IOException {
         // get probe and effectors
         Probe probe = networkMgmt.getProbe();
         Effector effector = networkMgmt.getEffector();
@@ -48,12 +47,6 @@ public class SimpleAdaptation {
 
         csvWriter.saveQoS(result, feedbackLoop.getId());
 
-    }
-
-    public static void main(String[] args) {
-        ICSVWriter csvWriter = new CsvFileWriter();
-        SimpleAdaptation client = new SimpleAdaptation(DeltaIoTSimulator.NUM_OF_RUNS, csvWriter);
-        client.start();
     }
 
     public Simulator getSimulator() {
