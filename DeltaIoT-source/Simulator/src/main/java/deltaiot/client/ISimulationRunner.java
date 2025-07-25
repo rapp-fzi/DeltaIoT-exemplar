@@ -1,7 +1,10 @@
 package deltaiot.client;
 
 import java.io.IOException;
+import java.util.List;
+
+import simulator.QoS;
 
 public interface ISimulationRunner {
-    void run() throws IOException;
+    List<QoS> run() throws IOException;
 }

@@ -17,7 +17,7 @@ public class SimpleRunner implements ISimulationRunner {
     }
 
     @Override
-    public void run() throws IOException {
+    public List<QoS> run() throws IOException {
         Simulator simulator = simulationClient.getSimulator();
         for (int i = 0; i < simulator.getNumOfRuns(); ++i) {
             simulator.doSingleRun();
@@ -25,6 +25,7 @@ public class SimpleRunner implements ISimulationRunner {
 
         List<QoS> result = simulationClient.getNetworkQoS(simulator.getNumOfRuns());
         qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
+        return result;
     }
 
 }

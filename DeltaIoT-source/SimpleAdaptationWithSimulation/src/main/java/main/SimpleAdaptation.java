@@ -28,7 +28,7 @@ public class SimpleAdaptation implements ISimulationRunner {
     }
 
     @Override
-    public void run() throws IOException {
+    public List<QoS> run() throws IOException {
         // get probe and effectors
         Probe probe = networkMgmt.getProbe();
         Effector effector = networkMgmt.getEffector();
@@ -48,6 +48,7 @@ public class SimpleAdaptation implements ISimulationRunner {
         result.forEach(qos -> LOGGER.info("{}", qos));
 
         csvWriter.saveQoS(result, feedbackLoop.getId());
+        return result;
 
     }
 
