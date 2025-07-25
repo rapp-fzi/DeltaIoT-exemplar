@@ -50,27 +50,7 @@ public class ConsoleMain {
 
         try {
             CommandLine cmdLine = parser.parse(options, args);
-            SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
-            Simulator simulator = SimulatorFactory.createExperimentSimulator(config);
-            Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-            ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
-
-            final ISimulationRunner runner;
-            if (cmdLine.hasOption('a')) {
-                runner = runWithAdaption(simulator, csvWriter);
-            } else {
-                runner = runNoAdaption(simulator);
-            }
-            ISimulationResult result = runner.run();
-            List<QoS> qos = result.getQoS();
-            csvWriter.saveQoS(qos, result.getStrategyId());
-            QoSCalculator qoSCalculator = new QoSCalculator();
-            double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
-            double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
-            double score = qoSCalculator.calcScore(qos);
-            LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
-            LOGGER.info("result score: {}", score);
-
+            runSimulation(cmdLine);
             return 0;
         } catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();
@@ -79,6 +59,29 @@ public class ConsoleMain {
             LOGGER.error(e.getMessage(), e);
         }
         return 1;
+    }
+
+    private void runSimulation(CommandLine cmdLine) throws IOException {
+        SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
+        Simulator simulator = SimulatorFactory.createExperimentSimulator(config);
+        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+
+        final ISimulationRunner runner;
+        if (cmdLine.hasOption('a')) {
+            runner = runWithAdaption(simulator, csvWriter);
+        } else {
+            runner = runNoAdaption(simulator);
+        }
+        ISimulationResult result = runner.run();
+        List<QoS> qos = result.getQoS();
+        csvWriter.saveQoS(qos, result.getStrategyId());
+        QoSCalculator qoSCalculator = new QoSCalculator();
+        double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
+        double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
+        double score = qoSCalculator.calcScore(qos);
+        LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
+        LOGGER.info("result score: {}", score);
     }
 
     private ISimulationRunner runNoAdaption(Simulator simulator) throws IOException {
