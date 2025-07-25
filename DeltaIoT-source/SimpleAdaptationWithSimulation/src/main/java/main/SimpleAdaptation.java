@@ -13,6 +13,7 @@ import deltaiot.client.Probe;
 import deltaiot.client.SimulationClient;
 import deltaiot.client.SimulationResult;
 import mapek.FeedbackLoop;
+import mapek.IAdaptionStrategy;
 import simulator.QoS;
 import simulator.Simulator;
 import util.IMoteWriter;
@@ -39,7 +40,7 @@ public class SimpleAdaptation implements ISimulationRunner {
         // FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, probe, effector, csvWriter);
         int numOfRuns = networkMgmt.getSimulator()
             .getNumOfRuns();
-        FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, probe, effector, moteWriter);
+        IAdaptionStrategy feedbackLoop = new FeedbackLoop(numOfRuns, probe, effector, moteWriter);
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
 
         // StartFeedback loop

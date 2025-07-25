@@ -14,7 +14,7 @@ import deltaiot.services.LinkSettings;
 import deltaiot.services.Mote;
 import util.IMoteWriter;
 
-public class FeedbackLoop {
+public class FeedbackLoop implements IAdaptionStrategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackLoop.class);
 
     private final int numOfRuns;
@@ -35,6 +35,7 @@ public class FeedbackLoop {
         this.moteWriter = moteWriter;
     }
 
+    @Override
     public void start() throws IOException {
         for (int i = 0; i < numOfRuns; i++) {
             initRun();
@@ -187,6 +188,7 @@ public class FeedbackLoop {
         return null;
     }
 
+    @Override
     public String getId() {
         return "DefaultDeltaIoTStrategy";
     }
