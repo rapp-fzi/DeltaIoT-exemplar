@@ -18,6 +18,12 @@
         <artifactId>gson</artifactId>
         <version>${gson-version}</version>
     </dependency>
+    
+	<dependency>
+	    <groupId>org.apache.commons</groupId>
+	    <artifactId>commons-csv</artifactId>
+	    <version>${commons-csv-version}</version>
+	</dependency>    
 
 	<dependency>
 	  <groupId>org.slf4j</groupId>
