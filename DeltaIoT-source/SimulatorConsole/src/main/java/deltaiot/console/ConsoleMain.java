@@ -3,6 +3,7 @@ package deltaiot.console;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -20,6 +21,8 @@ import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import main.SimpleAdaptation;
+import simulator.QoS;
+import simulator.QoSCalculator;
 import simulator.Simulator;
 import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
@@ -59,7 +62,14 @@ public class ConsoleMain {
                 runner = runNoAdaption(simulator);
             }
             ISimulationResult result = runner.run();
-            csvWriter.saveQoS(result.getQoS(), result.getStrategyId());
+            List<QoS> qos = result.getQoS();
+            csvWriter.saveQoS(qos, result.getStrategyId());
+            QoSCalculator qoSCalculator = new QoSCalculator();
+            double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
+            double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
+            double score = qoSCalculator.calcScore(qos);
+            LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
+            LOGGER.info("result score: {}", score);
 
             return 0;
         } catch (ParseException e) {

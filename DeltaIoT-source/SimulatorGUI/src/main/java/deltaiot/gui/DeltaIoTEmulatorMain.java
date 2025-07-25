@@ -37,6 +37,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import main.SimpleAdaptation;
 import simulator.QoS;
+import simulator.QoSCalculator;
 import simulator.Simulator;
 import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
@@ -185,7 +186,15 @@ public class DeltaIoTEmulatorMain extends Application {
 
     private void executeRunner(ISimulationRunner runner, IQOSWriter qosWriter) throws IOException {
         ISimulationResult result = runner.run();
-        qosWriter.saveQoS(result.getQoS(), result.getStrategyId());
+        List<QoS> qos = result.getQoS();
+        qosWriter.saveQoS(qos, result.getStrategyId());
+
+        QoSCalculator qoSCalculator = new QoSCalculator();
+        double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
+        double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
+        double score = qoSCalculator.calcScore(qos);
+        LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
+        LOGGER.info("result score: {}", score);
     }
 
     // ActivFORMSDeploy client;
