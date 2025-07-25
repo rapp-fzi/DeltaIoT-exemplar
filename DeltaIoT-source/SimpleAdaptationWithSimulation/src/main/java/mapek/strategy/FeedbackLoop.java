@@ -17,7 +17,7 @@ import mapek.PlanningStep;
 import mapek.Step;
 import util.IMoteWriter;
 
-public class FeedbackLoop implements IAdaptionStrategy {
+class FeedbackLoop implements IAdaptionStrategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackLoop.class);
 
     private final int numOfRuns;

@@ -7,7 +7,7 @@ import mapek.PlanningStep;
 import mapek.Step;
 import util.IMoteWriter;
 
-public class EAFeedbackLoopStrategy1a extends FeedbackLoop {
+class EAFeedbackLoopStrategy1a extends FeedbackLoop {
 
     private static int CHANGE_POWER_VALUE = 1;
     private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0

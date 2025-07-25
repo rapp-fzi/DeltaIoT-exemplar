@@ -12,7 +12,7 @@ import mapek.Step;
 import simulator.QoS;
 import util.ICSVWriter;
 
-public class QualityBasedFeedbackLoop extends FeedbackLoop {
+class QualityBasedFeedbackLoop extends FeedbackLoop {
 
     private final static double LOWER_PACKET_LOSS = 0.1;
     // private final static double LOWER_ENERGY_CONSUMPTION = 26;
