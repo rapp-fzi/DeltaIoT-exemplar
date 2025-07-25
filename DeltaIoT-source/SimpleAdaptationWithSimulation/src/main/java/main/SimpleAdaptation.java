@@ -10,6 +10,7 @@ import deltaiot.client.Effector;
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.Probe;
 import deltaiot.client.SimulationClient;
+import deltaiot.client.SimulationResult;
 import mapek.FeedbackLoop;
 import simulator.QoS;
 import simulator.Simulator;
@@ -28,7 +29,7 @@ public class SimpleAdaptation implements ISimulationRunner {
     }
 
     @Override
-    public List<QoS> run() throws IOException {
+    public SimulationResult run() throws IOException {
         // get probe and effectors
         Probe probe = networkMgmt.getProbe();
         Effector effector = networkMgmt.getEffector();
@@ -48,7 +49,7 @@ public class SimpleAdaptation implements ISimulationRunner {
         result.forEach(qos -> LOGGER.info("{}", qos));
 
         csvWriter.saveQoS(result, feedbackLoop.getId());
-        return result;
+        return new SimulationResult(result);
 
     }
 
