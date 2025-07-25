@@ -10,7 +10,7 @@ import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimulationClient;
 import deltaiot.client.SimulationResult;
-import mapek.IAdaptionStrategy;
+import mapek.strategy.IAdaptionStrategy;
 import simulator.QoS;
 import simulator.Simulator;
 

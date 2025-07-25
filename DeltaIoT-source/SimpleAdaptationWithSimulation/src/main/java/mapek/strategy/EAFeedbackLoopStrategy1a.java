@@ -1,18 +1,23 @@
-package mapek;
+package mapek.strategy;
 
 import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
+import mapek.PlanningStep;
+import mapek.Step;
 import util.IMoteWriter;
 
-public class EADefaultFeedbackLoop extends FeedbackLoop {
+public class EAFeedbackLoopStrategy1a extends FeedbackLoop {
 
     private static int CHANGE_POWER_VALUE = 1;
     private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
     private static int UNIFORM_DIST_VALUE = 50;
     private static int TOTAL_DIST_VALUE = 100;
 
-    public EADefaultFeedbackLoop(SimulationClient networkMgmt, IMoteWriter moteWriter) {
+    private static int POWER_MIN = 0;
+    private static int POWER_MAX = 15;
+
+    public EAFeedbackLoopStrategy1a(SimulationClient networkMgmt, IMoteWriter moteWriter) {
         super(networkMgmt, moteWriter);
     }
 
@@ -21,7 +26,8 @@ public class EADefaultFeedbackLoop extends FeedbackLoop {
         // analyze all links for possible adaptation options
         for (Mote mote : motes) {
             for (Link link : mote.getLinks()) {
-                if (link.getSNR() > 0 && link.getPower() > 0 || link.getSNR() < 0 && link.getPower() < 15) {
+                if (link.getSNR() > 0 && link.getPower() > POWER_MIN
+                        || link.getSNR() < 0 && link.getPower() < POWER_MAX) {
                     return true;
                 }
             }
@@ -47,10 +53,10 @@ public class EADefaultFeedbackLoop extends FeedbackLoop {
         for (Mote mote : motes) {
             for (Link link : mote.getLinks()) {
                 powerChanging = false;
-                if (link.getSNR() > 0 && link.getPower() > 0) {
+                if (link.getSNR() > 0 && link.getPower() > POWER_MIN) {
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - CHANGE_POWER_VALUE));
                     powerChanging = true;
-                } else if (link.getSNR() < 0 && link.getPower() < 15) {
+                } else if (link.getSNR() < 0 && link.getPower() < POWER_MAX) {
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + CHANGE_POWER_VALUE));
                     powerChanging = true;
                 }
@@ -88,6 +94,6 @@ public class EADefaultFeedbackLoop extends FeedbackLoop {
 
     @Override
     public String getId() {
-        return "DeltaIoTDefaultReconfigurationStrategy";
+        return "DeltaIoTEAStrategy1aReconfigurationStrategy";
     }
 }

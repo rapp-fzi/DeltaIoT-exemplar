@@ -1,4 +1,4 @@
-package mapek;
+package mapek.strategy;
 
 import java.io.IOException;
 

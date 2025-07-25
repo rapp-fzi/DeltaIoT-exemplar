@@ -1,4 +1,4 @@
-package mapek;
+package mapek.strategy;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
+import mapek.PlanningStep;
+import mapek.Step;
 import simulator.QoS;
 import util.ICSVWriter;
 

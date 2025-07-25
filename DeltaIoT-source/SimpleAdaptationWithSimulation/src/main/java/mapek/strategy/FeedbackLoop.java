@@ -1,4 +1,4 @@
-package mapek;
+package mapek.strategy;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -13,6 +13,8 @@ import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.LinkSettings;
 import deltaiot.services.Mote;
+import mapek.PlanningStep;
+import mapek.Step;
 import util.IMoteWriter;
 
 public class FeedbackLoop implements IAdaptionStrategy {
