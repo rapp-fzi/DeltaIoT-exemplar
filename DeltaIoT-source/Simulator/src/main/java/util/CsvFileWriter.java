@@ -17,6 +17,7 @@ import simulator.QoS;
 
 public class CsvFileWriter implements ICSVWriter, IQOSWriter {
     private final static String CSV_DELIMITER = ";";
+    private static final String RECORD_SEPARATOR = "\r\n";
 
     private final Path baseLocation;
 
@@ -32,7 +33,7 @@ public class CsvFileWriter implements ICSVWriter, IQOSWriter {
 
         CSVFormat.Builder builder = CSVFormat.Builder.create()
             .setDelimiter(CSV_DELIMITER)
-            .setRecordSeparator("\r\n");
+            .setRecordSeparator(RECORD_SEPARATOR);
         if (!Files.exists(location)) {
             String[] HEADERS = { "Time", "Packet loss", "Energy consumption" };
             builder = builder.setHeader(HEADERS);
@@ -57,7 +58,7 @@ public class CsvFileWriter implements ICSVWriter, IQOSWriter {
 
         CSVFormat.Builder builder = CSVFormat.Builder.create()
             .setDelimiter(CSV_DELIMITER)
-            .setRecordSeparator("\r\n");
+            .setRecordSeparator(RECORD_SEPARATOR);
         if (!Files.exists(location)) {
             String[] HEADERS = { "Link", "Power", "Distribution" };
             builder = builder.setHeader(HEADERS);
