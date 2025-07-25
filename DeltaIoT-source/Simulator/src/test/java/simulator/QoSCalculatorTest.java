@@ -2,6 +2,7 @@ package simulator;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -19,11 +20,19 @@ public class QoSCalculatorTest {
 
     @Test
     public void testCalcPowerAverage() {
-        List<QoS> qos = null;
+        List<QoS> qos = Arrays.asList(new QoS("0", 0, 0), new QoS("0", 0, 1));
 
-        double actualAverage = calculator.calcPowerAverage(qos);
+        double actualAverage = calculator.calcEnergyConsumptionAverage(qos);
 
-        assertEquals(actualAverage, 0.0, EPSILON);
+        assertEquals(actualAverage, 0.5, EPSILON);
     }
 
+    @Test
+    public void testCalcPacketLossAverage() {
+        List<QoS> qos = Arrays.asList(new QoS("0", 1, 0), new QoS("0", 2, 0));
+
+        double actualAverage = calculator.calcPacketLossAverage(qos);
+
+        assertEquals(actualAverage, 1.5, EPSILON);
+    }
 }

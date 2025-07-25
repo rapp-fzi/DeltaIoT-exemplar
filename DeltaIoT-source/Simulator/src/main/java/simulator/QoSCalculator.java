@@ -4,9 +4,20 @@ import java.util.List;
 
 public class QoSCalculator {
 
-    public double calcPowerAverage(List<QoS> qos) {
-        // TODO Auto-generated method stub
-        return 0;
+    public double calcEnergyConsumptionAverage(List<QoS> qos) {
+        double average = qos.stream()
+            .mapToDouble(QoS::getEnergyConsumption)
+            .average()
+            .orElse(Double.NaN);
+        return average;
+    }
+
+    public double calcPacketLossAverage(List<QoS> qos) {
+        double average = qos.stream()
+            .mapToDouble(QoS::getPacketLoss)
+            .average()
+            .orElse(Double.NaN);
+        return average;
     }
 
 }
