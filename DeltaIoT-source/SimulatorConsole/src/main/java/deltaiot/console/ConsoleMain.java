@@ -21,6 +21,8 @@ import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import main.SimpleAdaptation;
+import mapek.FeedbackLoop;
+import mapek.IAdaptionStrategy;
 import simulator.QoS;
 import simulator.QoSCalculator;
 import simulator.Simulator;
@@ -28,6 +30,7 @@ import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
 import util.CsvFileWriter;
 import util.ICSVWriter;
+import util.IMoteWriter;
 
 public class ConsoleMain {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleMain.class);
@@ -90,9 +93,12 @@ public class ConsoleMain {
         return simpleRunner;
     }
 
-    private ISimulationRunner runWithAdaption(Simulator simulator, ICSVWriter csvWriter) throws IOException {
+    private ISimulationRunner runWithAdaption(Simulator simulator, IMoteWriter moteWriter) throws IOException {
         SimulationClient simulationClient = new SimulationClient(simulator);
-        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, csvWriter);
+        // Create Feedback loop
+        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
+        IAdaptionStrategy feedbackLoop = new FeedbackLoop(simulationClient, moteWriter);
+        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
         return adaption;
     }
 }

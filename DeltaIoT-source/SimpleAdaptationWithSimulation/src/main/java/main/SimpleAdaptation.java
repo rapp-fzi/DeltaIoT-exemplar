@@ -10,31 +10,23 @@ import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimulationClient;
 import deltaiot.client.SimulationResult;
-import mapek.FeedbackLoop;
 import mapek.IAdaptionStrategy;
 import simulator.QoS;
 import simulator.Simulator;
-import util.IMoteWriter;
 
 public class SimpleAdaptation implements ISimulationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAdaptation.class);
 
-    private final IMoteWriter moteWriter;
     private final SimulationClient networkMgmt;
+    private final IAdaptionStrategy feedbackLoop;
 
-    public SimpleAdaptation(SimulationClient networkMgmt, IMoteWriter moteWriter) {
-        this.moteWriter = moteWriter;
-        // Create a simulation client object
+    public SimpleAdaptation(SimulationClient networkMgmt, IAdaptionStrategy feedbackLoop) {
         this.networkMgmt = networkMgmt;
+        this.feedbackLoop = feedbackLoop;
     }
 
     @Override
     public ISimulationResult run() throws IOException {
-        // Create Feedback loop
-        // FeedbackLoop feedbackLoop = new FeedbackLoop(numOfRuns, probe, effector, csvWriter);
-        IAdaptionStrategy feedbackLoop = new FeedbackLoop(networkMgmt, moteWriter);
-        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
-
         // StartFeedback loop
         feedbackLoop.start();
 

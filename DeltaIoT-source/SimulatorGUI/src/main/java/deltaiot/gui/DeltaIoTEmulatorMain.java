@@ -36,6 +36,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import main.SimpleAdaptation;
+import mapek.FeedbackLoop;
+import mapek.IAdaptionStrategy;
 import simulator.QoS;
 import simulator.QoSCalculator;
 import simulator.Simulator;
@@ -180,7 +182,10 @@ public class DeltaIoTEmulatorMain extends Application {
 
     private ISimulationRunner runWithAdaption(Simulator simulator, IMoteWriter moteWriter) throws IOException {
         SimulationClient simulationClient = new SimulationClient(simulator);
-        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, moteWriter);
+        // Create Feedback loop
+        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
+        IAdaptionStrategy feedbackLoop = new FeedbackLoop(simulationClient, moteWriter);
+        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
         return adaption;
     }
 
