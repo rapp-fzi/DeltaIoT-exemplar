@@ -6,11 +6,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.DeltaIoTSimulator;
+import deltaiot.client.ISimulationResult;
+import deltaiot.client.ISimulationRunner;
+import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -32,12 +37,18 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import main.SimpleAdaptation;
 import simulator.QoS;
+import simulator.QoSCalculator;
 import simulator.Simulator;
+import simulator.SimulatorConfig;
+import simulator.SimulatorFactory;
 import util.CsvFileWriter;
 import util.ICSVWriter;
+import util.IMoteWriter;
 import util.IQOSWriter;
 
 public class DeltaIoTEmulatorMain extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeltaIoTEmulatorMain.class);
+
     @FXML
     private Button runEmulator, btnSaveResults, btnAdaptationLogic, btnClearResults, btnDisplay;
 
@@ -67,14 +78,16 @@ public class DeltaIoTEmulatorMain extends Application {
                 @Override
                 protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
-                    simul = deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(getNumOfRuns());
-                    for (int i = 0; i < simul.getNumOfRuns(); i++) {
-                        simul.doSingleRun();
+                    try {
+                        SimulatorConfig config = createConfig();
+                        simul = SimulatorFactory.createExperimentSimulator(config);
+                        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+                        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+                        ISimulationRunner runner = runNoAdaption(simul);
+                        executeRunner(runner, csvWriter);
+                    } catch (IOException e) {
+                        LOGGER.error(e.getMessage(), e);
                     }
-
-                    ArrayList<QoS> result = new SimulationClient(simul).getNetworkQoS(simul.getNumOfRuns());
-                    IQOSWriter qosWriter = new CsvFileWriter();
-                    qosWriter.saveQoS(result, "NonAdaptiveDeltaIoTStrategy");
 
                     btnDisplay.setDisable(false);
                     return null;
@@ -124,10 +137,6 @@ public class DeltaIoTEmulatorMain extends Application {
         }
     };
 
-    private int getNumOfRuns() {
-        return DeltaIoTSimulator.NUM_OF_RUNS;
-    }
-
     Service<Void> serviceAdaptation = new Service<>() {
 
         @Override
@@ -141,16 +150,52 @@ public class DeltaIoTEmulatorMain extends Application {
                 @Override
                 protected Void call() throws Exception {
                     btnDisplay.setDisable(true);
-                    ICSVWriter csvWriter = new CsvFileWriter();
-                    SimpleAdaptation client = new SimpleAdaptation(getNumOfRuns(), csvWriter);
-                    client.start();
-                    simul = client.getSimulator();
+                    try {
+                        SimulatorConfig config = createConfig();
+                        simul = SimulatorFactory.createExperimentSimulator(config);
+                        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+                        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+                        ISimulationRunner runner = runWithAdaption(simul, csvWriter);
+                        executeRunner(runner, csvWriter);
+                    } catch (IOException e) {
+                        LOGGER.error(e.getMessage(), e);
+                    }
                     btnDisplay.setDisable(false);
                     return null;
                 }
             };
         }
     };
+
+    private SimulatorConfig createConfig() {
+        SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
+        return config;
+    }
+
+    private ISimulationRunner runNoAdaption(Simulator simulator) throws IOException {
+        SimulationClient simulationClient = new SimulationClient(simulator);
+        SimpleRunner simpleRunner = new SimpleRunner(simulationClient);
+        return simpleRunner;
+    }
+
+    private ISimulationRunner runWithAdaption(Simulator simulator, IMoteWriter moteWriter) throws IOException {
+        SimulationClient simulationClient = new SimulationClient(simulator);
+        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, moteWriter);
+        return adaption;
+    }
+
+    private void executeRunner(ISimulationRunner runner, IQOSWriter qosWriter) throws IOException {
+        ISimulationResult result = runner.run();
+        List<QoS> qos = result.getQoS();
+        qosWriter.saveQoS(qos, result.getStrategyId());
+
+        QoSCalculator qoSCalculator = new QoSCalculator();
+        double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
+        double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
+        double score = qoSCalculator.calcScore(qos);
+        LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
+        LOGGER.info("result score: {}", score);
+    }
 
     // ActivFORMSDeploy client;
 

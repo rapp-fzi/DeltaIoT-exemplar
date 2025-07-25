@@ -1,5 +1,6 @@
 package mapek;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,11 +35,7 @@ public class FeedbackLoop {
         this.moteWriter = moteWriter;
     }
 
-    protected Effector getEffector() {
-        return effector;
-    }
-
-    public void start() {
+    public void start() throws IOException {
         for (int i = 0; i < numOfRuns; i++) {
             initRun();
             monitor();
@@ -48,7 +45,7 @@ public class FeedbackLoop {
     protected void initRun() {
     }
 
-    void monitor() {
+    void monitor() throws IOException {
         motes = probe.getAllMotes();
 
         counter = (counter + 1) % numOfRuns;

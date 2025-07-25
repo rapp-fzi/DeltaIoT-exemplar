@@ -25,84 +25,6 @@ public class Simulator {
         this.numOfRuns = numOfRuns;
     }
 
-    // Pre-build simulators
-
-    public static Simulator createBaseCase(int numOfRuns) {
-        Simulator simul = new Simulator(numOfRuns);
-
-        // Motes
-        double battery = 11880;
-        int load = 10;
-        Mote mote1 = new Mote(1, battery, load);
-        Mote mote12 = new Mote(12, battery, load);
-        Mote mote2 = new Mote(2, battery, load);
-        simul.addMotes(mote1, mote12, mote2);
-
-        // Gateways
-        // I use the convention to give gateways negative ids
-        // Nothing enforces this, but all ids have to be unique between all nodes (= motes &
-        // gateways)
-        Gateway gateway1 = new Gateway(-1);
-        gateway1.setView(mote1, mote12);
-        Gateway gateway2 = new Gateway(-2);
-        gateway2.setView(mote2, mote12);
-        simul.addGateways(gateway1, gateway2);
-
-        // Links
-        int power = 15;
-        int distribution = 100;
-        mote1.addLinkTo(gateway1, gateway1, power, distribution);
-        mote2.addLinkTo(gateway2, gateway2, power, distribution);
-        mote12.addLinkTo(mote1, gateway1, power, distribution);
-        mote12.addLinkTo(mote2, gateway2, power, distribution);
-
-        simul.setTurnOrder(mote12, mote1, mote2);
-
-        return simul;
-    }
-
-    public static Simulator createBaseCase2(int numOfRuns) {
-        Simulator simul = new Simulator(numOfRuns);
-
-        // Motes
-        double battery = 11880;
-        int load = 10;
-        Mote mote0 = new Mote(0, battery, load);
-        Mote mote11 = new Mote(11, battery, load);
-        Mote mote12 = new Mote(12, battery, load);
-        Mote mote21 = new Mote(21, battery, load);
-        Mote mote22 = new Mote(22, battery, load);
-        simul.addMotes(mote0, mote11, mote12, mote21, mote22);
-
-        // Gateways
-        // I use the convention to give gateways negative ids
-        // Nothing enforces this, but all ids have to be unique between all nodes (= motes &
-        // gateways)
-        Gateway gateway1 = new Gateway(-1);
-        gateway1.setView(mote11, mote12, mote0);
-        Gateway gateway2 = new Gateway(-2);
-        gateway2.setView(mote21, mote22, mote0);
-        simul.addGateways(gateway1, gateway2);
-
-        // Links
-        int power = 15;
-        int distribution = 100;
-        mote0.addLinkTo(mote11, gateway1, power, distribution);
-        mote0.addLinkTo(mote12, gateway1, power, distribution);
-        mote0.addLinkTo(mote21, gateway2, power, distribution);
-        mote0.addLinkTo(mote22, gateway2, power, distribution);
-
-        mote11.addLinkTo(gateway1, gateway1, power, distribution);
-        mote12.addLinkTo(gateway1, gateway1, power, distribution);
-
-        mote21.addLinkTo(gateway2, gateway2, power, distribution);
-        mote22.addLinkTo(gateway2, gateway2, power, distribution);
-
-        simul.setTurnOrder(mote0, mote11, mote12, mote21, mote22);
-
-        return simul;
-    }
-
     // Creation API
 
     public void addMotes(Mote... motes) {
@@ -148,12 +70,8 @@ public class Simulator {
         }
 
         // QoS
-        QoS qos = new QoS();
-        qos.setEnergyConsumption(gateways.get(0)
-            .getPowerConsumed());
-        qos.setPacketLoss(gateways.get(0)
-            .calculatePacketLoss());
-        qos.setPeriod("" + runInfo.getRunNumber());
+        Gateway gateway = gateways.get(0);
+        QoS qos = new QoS("" + runInfo.getRunNumber(), gateway.calculatePacketLoss(), gateway.getPowerConsumed());
         qosValues.add(qos);
 
         // Increase run number

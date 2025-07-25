@@ -15,10 +15,6 @@ public class SimulationClient implements Probe, Effector {
 
     private final Simulator simulator;
 
-    public SimulationClient(int numOfRuns) {
-        this(deltaiot.DeltaIoTSimulator.createSimulatorForDeltaIoT(numOfRuns));
-    }
-
     public SimulationClient(Simulator simulator) {
         this.simulator = simulator;
     }
@@ -120,12 +116,12 @@ public class SimulationClient implements Probe, Effector {
     }
 
     @Override
-    public ArrayList<QoS> getNetworkQoS(int period) {
+    public List<QoS> getNetworkQoS(int period) {
         List<QoS> qosOrigList = simulator.getQosValues();
         int qosSize = qosOrigList.size();
 
         if (period >= qosSize)
-            return (ArrayList<QoS>) qosOrigList;
+            return qosOrigList;
 
         int startIndex = qosSize - period;
 
