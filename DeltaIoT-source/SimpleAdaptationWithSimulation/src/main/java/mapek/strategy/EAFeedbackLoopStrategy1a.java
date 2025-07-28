@@ -17,7 +17,8 @@ class EAFeedbackLoopStrategy1a extends FeedbackLoop {
     private static int POWER_MIN = 0;
     private static int POWER_MAX = 15;
 
-    public EAFeedbackLoopStrategy1a(SimulationClient networkMgmt, IMoteWriter moteWriter) {
+    public EAFeedbackLoopStrategy1a(SimulationClient networkMgmt, IMoteWriter moteWriter,
+            DefaultStrategyConfiguration configuration) {
         super(networkMgmt, moteWriter);
     }
 
