@@ -4,6 +4,8 @@ bin
 # Log file
 *.log
 
+*.json
+
 # BlueJ files
 *.ctxt
 

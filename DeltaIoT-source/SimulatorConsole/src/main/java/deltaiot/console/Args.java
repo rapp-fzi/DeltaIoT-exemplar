@@ -17,6 +17,9 @@ public class Args {
     @Parameter(names = { "-h", "--help" }, help = true)
     public boolean help;
 
+    @Parameter(names = { "-r", "--result" }, description = "json result file", converter = PathConverter.class)
+    public Path resultPath;
+
     @Parameters
     public static class CommandStrategy {
 

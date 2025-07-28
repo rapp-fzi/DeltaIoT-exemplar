@@ -1,6 +1,9 @@
 package deltaiot.console;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -11,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.IUsageFormatter;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.ISimulationResult;
@@ -83,23 +88,41 @@ public class ConsoleMain {
         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
 
         final ISimulationRunner runner;
+        final String strategyName;
         String command = parser.getParsedCommand();
         if ("strategy".equals(command)) {
+            strategyName = strategy.strategyKind.name();
             LOGGER.info("running with strategy: {}", strategy.strategyKind);
             runner = runWithAdaption(simulator, strategy.strategyKind, csvWriter);
         } else {
+            strategyName = "none";
             LOGGER.info("running without strategy");
             runner = runNoAdaption(simulator);
         }
-        ISimulationResult result = runner.run();
-        List<QoS> qos = result.getQoS();
-        csvWriter.saveQoS(qos, result.getStrategyId());
+        ISimulationResult simulationResult = runner.run();
+        List<QoS> qos = simulationResult.getQoS();
+        csvWriter.saveQoS(qos, simulationResult.getStrategyId());
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
         double score = qoSCalculator.calcScore(qos);
         LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
         LOGGER.info("result score: {}", score);
+
+        if (args.resultPath != null) {
+            LOGGER.info("write result to: {}", args.resultPath);
+            Result result = new Result(strategyName, energyConsumptionAverage, packetLossAverage, score);
+            writeResult(result, args.resultPath);
+        }
+    }
+
+    private void writeResult(Result result, Path resultFile) throws IOException {
+        Gson gson = new GsonBuilder().serializeNulls()
+            .setPrettyPrinting()
+            .create();
+        try (Writer writer = Files.newBufferedWriter(resultFile, StandardCharsets.UTF_8)) {
+            gson.toJson(result, writer);
+        }
     }
 
     private ISimulationRunner runNoAdaption(Simulator simulator) throws IOException {
