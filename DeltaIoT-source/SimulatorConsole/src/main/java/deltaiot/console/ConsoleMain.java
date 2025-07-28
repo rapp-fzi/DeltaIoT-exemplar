@@ -1,6 +1,7 @@
 package deltaiot.console;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -23,10 +24,9 @@ import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import deltaiot.console.Args.CommandStrategy;
+import deltaiot.console.json.StrictFieldsTypeAdapterFactory;
 import main.SimpleAdaptation;
 import mapek.strategy.AdaptionStrategyFactory;
-import mapek.strategy.AdaptionStrategyFactory.Kind;
-import mapek.strategy.DefaultStrategyConfiguration;
 import mapek.strategy.IAdaptionStrategy;
 import mapek.strategy.IStrategyConfiguration;
 import simulator.QoS;
@@ -93,7 +93,7 @@ public class ConsoleMain {
         if (CommandStrategy.ID.equals(command)) {
             strategyName = strategy.strategyKind.name();
             LOGGER.info("running with strategy: {}", strategy.strategyKind);
-            runner = runWithAdaption(simulator, strategy.strategyKind, csvWriter);
+            runner = runWithAdaption(simulator, strategy, csvWriter);
         } else {
             strategyName = "none";
             LOGGER.info("running without strategy");
@@ -110,13 +110,13 @@ public class ConsoleMain {
         LOGGER.info("result score: {}", score);
 
         if (args.resultPath != null) {
-            LOGGER.info("write result to: {}", args.resultPath);
             Result result = new Result(strategyName, energyConsumptionAverage, packetLossAverage, score);
             writeResult(result, args.resultPath);
         }
     }
 
     private void writeResult(Result result, Path resultFile) throws IOException {
+        LOGGER.info("write result to: {}", resultFile);
         Gson gson = new GsonBuilder().serializeNulls()
             .setPrettyPrinting()
             .create();
@@ -131,15 +131,27 @@ public class ConsoleMain {
         return simpleRunner;
     }
 
-    private ISimulationRunner runWithAdaption(Simulator simulator, Kind kind, IMoteWriter moteWriter)
+    private ISimulationRunner runWithAdaption(Simulator simulator, CommandStrategy strategy, IMoteWriter moteWriter)
             throws IOException {
         SimulationClient simulationClient = new SimulationClient(simulator);
         // Create Feedback loop
         AdaptionStrategyFactory adaptionStrategyFactory = new AdaptionStrategyFactory();
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
-        IStrategyConfiguration config = new DefaultStrategyConfiguration();
-        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(kind, simulationClient, moteWriter, config);
+        IStrategyConfiguration config = readStrategyParameter(strategy.parameterFile,
+                strategy.strategyKind.getStrategyConfiguration());
+        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(strategy.strategyKind, simulationClient,
+                moteWriter, config);
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
         return adaption;
+    }
+
+    private <T extends IStrategyConfiguration> T readStrategyParameter(Path parameterFile, Class<T> paramClass)
+            throws IOException {
+        LOGGER.info("read strategy parameters from: {}", parameterFile);
+        Gson gson = new GsonBuilder().registerTypeAdapterFactory(new StrictFieldsTypeAdapterFactory())
+            .create();
+        try (Reader reader = Files.newBufferedReader(parameterFile, StandardCharsets.UTF_8)) {
+            return gson.fromJson(reader, paramClass);
+        }
     }
 }

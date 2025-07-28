@@ -5,7 +5,19 @@ import util.IMoteWriter;
 
 public class AdaptionStrategyFactory {
     public enum Kind {
-        Default, EADefault, Quality,
+        Default(DefaultStrategyConfiguration.class), //
+        EADefault(DefaultStrategyConfiguration.class), //
+        Quality(DefaultStrategyConfiguration.class);
+
+        private final Class<? extends IStrategyConfiguration> strategyConfiguration;
+
+        private Kind(Class<? extends IStrategyConfiguration> strategyConfiguration) {
+            this.strategyConfiguration = strategyConfiguration;
+        }
+
+        public Class<? extends IStrategyConfiguration> getStrategyConfiguration() {
+            return strategyConfiguration;
+        }
     }
 
     public IAdaptionStrategy create(Kind kind, SimulationClient networkMgmt, IMoteWriter moteWriter,
