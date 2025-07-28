@@ -5,10 +5,10 @@ import util.IMoteWriter;
 
 public class AdaptionStrategyFactory {
     public enum Kind {
-        Default(DefaultStrategyConfiguration.class), //
-        Quality(DefaultStrategyConfiguration.class), //
-        EADefault(DefaultStrategyConfiguration.class), //
-        EAStrategy1a(DefaultStrategyConfiguration.class), //
+        Default(StrategyConfigurationDefault.class), //
+        Quality(StrategyConfigurationDefault.class), //
+        EADefault(StrategyConfigurationDefault.class), //
+        EAStrategy1a(StrategyConfigurationEAStrategy1a.class), //
         ;
 
         private final Class<? extends IStrategyConfiguration> strategyConfiguration;
@@ -28,7 +28,8 @@ public class AdaptionStrategyFactory {
         case Default -> new FeedbackLoop(networkMgmt, moteWriter);
         case Quality -> new QualityBasedFeedbackLoop(networkMgmt, moteWriter);
         case EADefault -> new EADefaultFeedbackLoop(networkMgmt, moteWriter);
-        case EAStrategy1a -> new EAFeedbackLoopStrategy1a(networkMgmt, moteWriter, (DefaultStrategyConfiguration) config);
+        case EAStrategy1a -> new EAFeedbackLoopStrategy1a(networkMgmt, moteWriter,
+                (StrategyConfigurationEAStrategy1a) config);
         };
     }
 }
