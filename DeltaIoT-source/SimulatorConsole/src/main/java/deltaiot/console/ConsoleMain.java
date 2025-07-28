@@ -17,6 +17,7 @@ import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
+import deltaiot.console.Args.CommandStrategy;
 import main.SimpleAdaptation;
 import mapek.strategy.AdaptionStrategyFactory;
 import mapek.strategy.AdaptionStrategyFactory.Kind;
@@ -46,8 +47,10 @@ public class ConsoleMain {
 
     private int run(String[] argv) {
         Args args = new Args();
+        CommandStrategy strategy = new CommandStrategy();
         JCommander parser = JCommander.newBuilder()
             .addObject(args)
+            .addCommand("strategy", strategy)
             .build();
 
         try {
@@ -60,7 +63,7 @@ public class ConsoleMain {
                 return 1;
             }
 
-            runSimulation(args);
+            runSimulation(args, strategy, parser);
             return 0;
         } catch (ParameterException e) {
             StringBuilder sb = new StringBuilder();
@@ -73,16 +76,17 @@ public class ConsoleMain {
         return 2;
     }
 
-    private void runSimulation(Args args) throws IOException {
+    private void runSimulation(Args args, CommandStrategy strategy, JCommander parser) throws IOException {
         SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
         Simulator simulator = SimulatorFactory.createExperimentSimulator(config);
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
 
         final ISimulationRunner runner;
-        if (args.strategyKind != null) {
-            LOGGER.info("running with strategy: {}", args.strategyKind);
-            runner = runWithAdaption(simulator, args.strategyKind, csvWriter);
+        String command = parser.getParsedCommand();
+        if ("strategy".equals(command)) {
+            LOGGER.info("running with strategy: {}", strategy.strategyKind);
+            runner = runWithAdaption(simulator, strategy.strategyKind, csvWriter);
         } else {
             LOGGER.info("running without strategy");
             runner = runNoAdaption(simulator);
