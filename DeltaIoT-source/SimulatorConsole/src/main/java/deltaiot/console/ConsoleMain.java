@@ -5,15 +5,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.beust.jcommander.IUsageFormatter;
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 
 import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.ISimulationResult;
@@ -47,36 +44,47 @@ public class ConsoleMain {
         System.exit(returnCode);
     }
 
-    private int run(String[] args) {
-        Options options = new Options().addOption(Option.builder("a")
-            .longOpt("adaption")
-            .desc("Run with adaption")
-            .build());
-        CommandLineParser parser = new DefaultParser();
+    private int run(String[] argv) {
+        Args args = new Args();
+        JCommander parser = JCommander.newBuilder()
+            .addObject(args)
+            .build();
 
         try {
-            CommandLine cmdLine = parser.parse(options, args);
-            runSimulation(cmdLine);
+            parser.parse(argv);
+            if (args.help) {
+                StringBuilder sb = new StringBuilder();
+                IUsageFormatter usageFormatter = parser.getUsageFormatter();
+                usageFormatter.usage(sb);
+                LOGGER.info("{}", sb);
+                return 1;
+            }
+
+            runSimulation(args);
             return 0;
-        } catch (ParseException e) {
-            HelpFormatter helpFormatter = new HelpFormatter();
-            helpFormatter.printHelp("ConsoleMain", options);
+        } catch (ParameterException e) {
+            StringBuilder sb = new StringBuilder();
+            IUsageFormatter usageFormatter = parser.getUsageFormatter();
+            usageFormatter.usage(sb);
+            LOGGER.error("{}\n{}", e.getMessage(), e);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
-        return 1;
+        return 2;
     }
 
-    private void runSimulation(CommandLine cmdLine) throws IOException {
+    private void runSimulation(Args args) throws IOException {
         SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
         Simulator simulator = SimulatorFactory.createExperimentSimulator(config);
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
 
         final ISimulationRunner runner;
-        if (cmdLine.hasOption('a')) {
-            runner = runWithAdaption(simulator, csvWriter);
+        if (args.strategyKind != null) {
+            LOGGER.info("running with strategy: {}", args.strategyKind);
+            runner = runWithAdaption(simulator, args.strategyKind, csvWriter);
         } else {
+            LOGGER.info("running without strategy");
             runner = runNoAdaption(simulator);
         }
         ISimulationResult result = runner.run();
@@ -96,12 +104,12 @@ public class ConsoleMain {
         return simpleRunner;
     }
 
-    private ISimulationRunner runWithAdaption(Simulator simulator, IMoteWriter moteWriter) throws IOException {
+    private ISimulationRunner runWithAdaption(Simulator simulator, Kind kind, IMoteWriter moteWriter)
+            throws IOException {
         SimulationClient simulationClient = new SimulationClient(simulator);
         // Create Feedback loop
         AdaptionStrategyFactory adaptionStrategyFactory = new AdaptionStrategyFactory();
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
-        Kind kind = Kind.Default;
         IStrategyConfiguration config = new DefaultStrategyConfiguration();
         IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(kind, simulationClient, moteWriter, config);
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
