@@ -8,7 +8,8 @@ public class AdaptionStrategyFactory {
         Default, EADefault, Quality,
     }
 
-    public IAdaptionStrategy create(Kind kind, SimulationClient networkMgmt, IMoteWriter moteWriter) {
+    public IAdaptionStrategy create(Kind kind, SimulationClient networkMgmt, IMoteWriter moteWriter,
+            IStrategyConfiguration config) {
         return switch (kind) {
         case Default -> new FeedbackLoop(networkMgmt, moteWriter);
         case EADefault -> new EADefaultFeedbackLoop(networkMgmt, moteWriter);

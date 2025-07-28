@@ -38,7 +38,9 @@ import javafx.stage.WindowEvent;
 import main.SimpleAdaptation;
 import mapek.strategy.AdaptionStrategyFactory;
 import mapek.strategy.AdaptionStrategyFactory.Kind;
+import mapek.strategy.DefaultStrategyConfiguration;
 import mapek.strategy.IAdaptionStrategy;
+import mapek.strategy.IStrategyConfiguration;
 import simulator.QoS;
 import simulator.QoSCalculator;
 import simulator.Simulator;
@@ -187,7 +189,8 @@ public class DeltaIoTEmulatorMain extends Application {
         AdaptionStrategyFactory adaptionStrategyFactory = new AdaptionStrategyFactory();
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
         Kind kind = Kind.Default;
-        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(kind, simulationClient, moteWriter);
+        IStrategyConfiguration config = new DefaultStrategyConfiguration();
+        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(kind, simulationClient, moteWriter, config);
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
         return adaption;
     }
