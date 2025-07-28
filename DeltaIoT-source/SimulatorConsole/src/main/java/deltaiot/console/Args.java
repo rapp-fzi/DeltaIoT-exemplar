@@ -22,6 +22,7 @@ public class Args {
 
     @Parameters
     public static class CommandStrategy {
+        public static final String ID = "strategy";
 
         public static class KindConverter extends EnumConverter<Kind> {
 

@@ -55,7 +55,7 @@ public class ConsoleMain {
         CommandStrategy strategy = new CommandStrategy();
         JCommander parser = JCommander.newBuilder()
             .addObject(args)
-            .addCommand("strategy", strategy)
+            .addCommand(CommandStrategy.ID, strategy)
             .build();
 
         try {
@@ -90,7 +90,7 @@ public class ConsoleMain {
         final ISimulationRunner runner;
         final String strategyName;
         String command = parser.getParsedCommand();
-        if ("strategy".equals(command)) {
+        if (CommandStrategy.ID.equals(command)) {
             strategyName = strategy.strategyKind.name();
             LOGGER.info("running with strategy: {}", strategy.strategyKind);
             runner = runWithAdaption(simulator, strategy.strategyKind, csvWriter);
