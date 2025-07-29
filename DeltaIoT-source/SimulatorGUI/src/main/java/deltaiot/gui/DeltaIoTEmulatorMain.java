@@ -17,6 +17,8 @@ import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
+import deltaiot.gui.service.ISimulatorProvider;
+import deltaiot.gui.service.ServiceProgress;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
@@ -38,9 +40,9 @@ import javafx.stage.WindowEvent;
 import main.SimpleAdaptation;
 import mapek.strategy.AdaptionStrategyFactory;
 import mapek.strategy.AdaptionStrategyFactory.Kind;
-import mapek.strategy.StrategyConfigurationDefault;
 import mapek.strategy.IAdaptionStrategy;
 import mapek.strategy.IStrategyConfiguration;
+import mapek.strategy.StrategyConfigurationDefault;
 import simulator.QoS;
 import simulator.QoSCalculator;
 import simulator.Simulator;
@@ -51,7 +53,7 @@ import util.ICSVWriter;
 import util.IMoteWriter;
 import util.IQOSWriter;
 
-public class DeltaIoTEmulatorMain extends Application {
+public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeltaIoTEmulatorMain.class);
 
     @FXML
@@ -70,6 +72,12 @@ public class DeltaIoTEmulatorMain extends Application {
     List<String> data = new LinkedList<>();
     Stage primaryStage;
     Simulator simul;
+
+    @Override
+    public Simulator getSimulator() {
+        return simul;
+    }
+
     Service<Void> serviceEmulation = new Service<>() {
 
         @Override
@@ -109,38 +117,7 @@ public class DeltaIoTEmulatorMain extends Application {
         }
     }
 
-    Service<Void> serviceProgress = new Service<>() {
-        @Override
-        protected void succeeded() {
-
-        }
-
-        @Override
-        protected Task<Void> createTask() {
-            return new Task<>() {
-                @Override
-                protected Void call() throws Exception {
-                    int run;
-                    do {
-                        run = simul.getRunInfo()
-                            .getRunNumber();
-
-                        updateProgress(run, simul.getNumOfRuns());
-                        updateMessage("(" + run + "/" + simul.getNumOfRuns() + ")");
-
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                    } while (run < simul.getNumOfRuns());
-
-                    return null;
-                }
-            };
-        }
-    };
+    Service<Void> serviceProgress = new ServiceProgress(this);
 
     Service<Void> serviceAdaptation = new Service<>() {
 
