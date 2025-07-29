@@ -82,7 +82,7 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
 
         @Override
         protected void succeeded() {
-            displayData("Without Adaptation", 0);
+            displayData(simul, "Without Adaptation", 0);
         }
 
         @Override
@@ -123,7 +123,7 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
 
         @Override
         protected void succeeded() {
-            displayData("With Adaptation", 1);
+            displayData(simul, "With Adaptation", 1);
         }
 
         @Override
@@ -268,7 +268,7 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
         data.clear();
     }
 
-    void displayData(String setName, int index) {
+    void displayData(Simulator simul, String setName, int index) {
         XYChart.Series<Integer, Double> energyConsumptionSeries = new XYChart.Series<>();
         XYChart.Series<Integer, Double> packetLossSeries = new XYChart.Series<>();
         energyConsumptionSeries.setName(setName);
