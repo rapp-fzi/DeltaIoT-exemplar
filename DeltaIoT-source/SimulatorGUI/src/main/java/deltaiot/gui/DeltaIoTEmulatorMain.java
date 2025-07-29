@@ -214,7 +214,7 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
             stage.setAlwaysOnTop(true);
             stage.showAndWait();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -253,10 +253,9 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
             for (String line : data)
                 fileWriter.write(line + "\n");
             fileWriter.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
         }
-
     }
 
     @FXML
