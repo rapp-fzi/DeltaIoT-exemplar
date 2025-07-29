@@ -12,19 +12,15 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import deltaiot.DeltaIoTSimulator;
-import deltaiot.client.ISimulationResult;
-import deltaiot.client.ISimulationRunner;
-import deltaiot.client.SimulationClient;
 import deltaiot.gui.service.IDataDisplay;
 import deltaiot.gui.service.ISimulatorProvider;
+import deltaiot.gui.service.ServiceAdaption;
 import deltaiot.gui.service.ServiceDisplayTopology;
 import deltaiot.gui.service.ServiceEmulation;
 import deltaiot.gui.service.ServiceProgress;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -39,21 +35,8 @@ import javafx.scene.control.ProgressBar;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import main.SimpleAdaptation;
-import mapek.strategy.AdaptionStrategyFactory;
-import mapek.strategy.AdaptionStrategyFactory.Kind;
-import mapek.strategy.IAdaptionStrategy;
-import mapek.strategy.IStrategyConfiguration;
-import mapek.strategy.StrategyConfigurationDefault;
 import simulator.QoS;
-import simulator.QoSCalculator;
 import simulator.Simulator;
-import simulator.SimulatorConfig;
-import simulator.SimulatorFactory;
-import util.CsvFileWriter;
-import util.ICSVWriter;
-import util.IMoteWriter;
-import util.IQOSWriter;
 
 public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvider, IDataDisplay {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeltaIoTEmulatorMain.class);
@@ -70,17 +53,17 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
     @FXML
     private Label lblProgress;
 
-    public static final Path filePath = Paths.get(System.getProperty("user.dir") + "/data/data.csv");
     List<String> data = new LinkedList<>();
     Stage primaryStage;
-    Simulator simul;
+
+    ServiceEmulation serviceEmulation;
+    ServiceAdaption serviceAdaptation;
+    Service<Void> serviceProgress = new ServiceProgress(this);
 
     @Override
     public Simulator getSimulator() {
-        return simul;
+        return null;
     }
-
-    Service<Void> serviceEmulation;
 
     @FXML
     void runEmulatorClicked(ActionEvent event) {
@@ -88,68 +71,6 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
             serviceEmulation.restart();
             serviceProgress.restart();
         }
-    }
-
-    Service<Void> serviceProgress = new ServiceProgress(this);
-
-    Service<Void> serviceAdaptation = new Service<>() {
-
-        @Override
-        protected void succeeded() {
-            displayData(simul, "With Adaptation", 1);
-        }
-
-        @Override
-        protected Task<Void> createTask() {
-            return new Task<>() {
-                @Override
-                protected Void call() throws Exception {
-                    btnDisplay.setDisable(true);
-                    try {
-                        SimulatorConfig config = createConfig();
-                        simul = SimulatorFactory.createExperimentSimulator(config);
-                        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-                        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
-                        ISimulationRunner runner = runWithAdaption(simul, csvWriter);
-                        executeRunner(runner, csvWriter);
-                    } catch (IOException e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-                    btnDisplay.setDisable(false);
-                    return null;
-                }
-            };
-        }
-    };
-
-    private SimulatorConfig createConfig() {
-        SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
-        return config;
-    }
-
-    private ISimulationRunner runWithAdaption(Simulator simulator, IMoteWriter moteWriter) throws IOException {
-        SimulationClient simulationClient = new SimulationClient(simulator);
-        // Create Feedback loop
-        AdaptionStrategyFactory adaptionStrategyFactory = new AdaptionStrategyFactory();
-        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
-        Kind kind = Kind.Default;
-        IStrategyConfiguration config = new StrategyConfigurationDefault();
-        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(kind, simulationClient, moteWriter, config);
-        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
-        return adaption;
-    }
-
-    private void executeRunner(ISimulationRunner runner, IQOSWriter qosWriter) throws IOException {
-        ISimulationResult result = runner.run();
-        List<QoS> qos = result.getQoS();
-        qosWriter.saveQoS(qos, result.getStrategyId());
-
-        QoSCalculator qoSCalculator = new QoSCalculator();
-        double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
-        double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
-        double score = qoSCalculator.calcScore(qos);
-        LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
-        LOGGER.info("result score: {}", score);
     }
 
     // ActivFORMSDeploy client;
@@ -177,6 +98,7 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
             .bind(serviceProgress.progressProperty());
 
         serviceEmulation = new ServiceEmulation(this, btnDisplay);
+        serviceAdaptation = new ServiceAdaption(this, btnDisplay);
     }
 
     @FXML

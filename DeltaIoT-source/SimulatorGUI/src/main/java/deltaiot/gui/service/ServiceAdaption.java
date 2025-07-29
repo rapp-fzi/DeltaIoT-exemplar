@@ -11,11 +11,16 @@ import org.slf4j.LoggerFactory;
 import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
-import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
+import main.SimpleAdaptation;
+import mapek.strategy.AdaptionStrategyFactory;
+import mapek.strategy.AdaptionStrategyFactory.Kind;
+import mapek.strategy.IAdaptionStrategy;
+import mapek.strategy.IStrategyConfiguration;
+import mapek.strategy.StrategyConfigurationDefault;
 import simulator.QoS;
 import simulator.QoSCalculator;
 import simulator.Simulator;
@@ -23,17 +28,18 @@ import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
 import util.CsvFileWriter;
 import util.ICSVWriter;
+import util.IMoteWriter;
 import util.IQOSWriter;
 
-public class ServiceEmulation extends Service<Void> implements ISimulatorProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceEmulation.class);
+public class ServiceAdaption extends Service<Void> implements ISimulatorProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAdaption.class);
 
     private final IDataDisplay dataDisplay;
     private final Button btnDisplay;
 
     private Simulator simul;
 
-    public ServiceEmulation(IDataDisplay dataDisplay, Button btnDisplay) {
+    public ServiceAdaption(IDataDisplay dataDisplay, Button btnDisplay) {
         this.dataDisplay = dataDisplay;
         this.btnDisplay = btnDisplay;
     }
@@ -45,7 +51,7 @@ public class ServiceEmulation extends Service<Void> implements ISimulatorProvide
 
     @Override
     protected void succeeded() {
-        dataDisplay.displayData(simul, "Without Adaptation", 0);
+        dataDisplay.displayData(simul, "With Adaptation", 1);
     }
 
     @Override
@@ -59,7 +65,7 @@ public class ServiceEmulation extends Service<Void> implements ISimulatorProvide
                     simul = SimulatorFactory.createExperimentSimulator(config);
                     Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
                     ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
-                    ISimulationRunner runner = runNoAdaption(simul);
+                    ISimulationRunner runner = runWithAdaption(simul, csvWriter);
                     executeRunner(runner, csvWriter);
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage(), e);
@@ -76,10 +82,16 @@ public class ServiceEmulation extends Service<Void> implements ISimulatorProvide
         return config;
     }
 
-    private ISimulationRunner runNoAdaption(Simulator simulator) throws IOException {
+    private ISimulationRunner runWithAdaption(Simulator simulator, IMoteWriter moteWriter) throws IOException {
         SimulationClient simulationClient = new SimulationClient(simulator);
-        SimpleRunner simpleRunner = new SimpleRunner(simulationClient);
-        return simpleRunner;
+        // Create Feedback loop
+        AdaptionStrategyFactory adaptionStrategyFactory = new AdaptionStrategyFactory();
+        // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
+        Kind kind = Kind.Default;
+        IStrategyConfiguration config = new StrategyConfigurationDefault();
+        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(kind, simulationClient, moteWriter, config);
+        SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
+        return adaption;
     }
 
     private void executeRunner(ISimulationRunner runner, IQOSWriter qosWriter) throws IOException {
