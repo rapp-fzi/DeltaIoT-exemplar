@@ -15,10 +15,11 @@ import org.slf4j.LoggerFactory;
 import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
-import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
+import deltaiot.gui.service.IDataDisplay;
 import deltaiot.gui.service.ISimulatorProvider;
 import deltaiot.gui.service.ServiceDisplayTopology;
+import deltaiot.gui.service.ServiceEmulation;
 import deltaiot.gui.service.ServiceProgress;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -54,7 +55,7 @@ import util.ICSVWriter;
 import util.IMoteWriter;
 import util.IQOSWriter;
 
-public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvider {
+public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvider, IDataDisplay {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeltaIoTEmulatorMain.class);
 
     @FXML
@@ -79,36 +80,7 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
         return simul;
     }
 
-    Service<Void> serviceEmulation = new Service<>() {
-
-        @Override
-        protected void succeeded() {
-            displayData(simul, "Without Adaptation", 0);
-        }
-
-        @Override
-        protected Task<Void> createTask() {
-            return new Task<>() {
-                @Override
-                protected Void call() throws Exception {
-                    btnDisplay.setDisable(true);
-                    try {
-                        SimulatorConfig config = createConfig();
-                        simul = SimulatorFactory.createExperimentSimulator(config);
-                        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-                        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
-                        ISimulationRunner runner = runNoAdaption(simul);
-                        executeRunner(runner, csvWriter);
-                    } catch (IOException e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-
-                    btnDisplay.setDisable(false);
-                    return null;
-                }
-            };
-        }
-    };
+    Service<Void> serviceEmulation;
 
     @FXML
     void runEmulatorClicked(ActionEvent event) {
@@ -153,12 +125,6 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
     private SimulatorConfig createConfig() {
         SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
         return config;
-    }
-
-    private ISimulationRunner runNoAdaption(Simulator simulator) throws IOException {
-        SimulationClient simulationClient = new SimulationClient(simulator);
-        SimpleRunner simpleRunner = new SimpleRunner(simulationClient);
-        return simpleRunner;
     }
 
     private ISimulationRunner runWithAdaption(Simulator simulator, IMoteWriter moteWriter) throws IOException {
@@ -209,6 +175,8 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
             .bind(serviceProgress.messageProperty());
         progressBar.progressProperty()
             .bind(serviceProgress.progressProperty());
+
+        serviceEmulation = new ServiceEmulation(this, btnDisplay);
     }
 
     @FXML
@@ -251,7 +219,8 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
         data.clear();
     }
 
-    void displayData(Simulator simul, String setName, int index) {
+    @Override
+    public void displayData(Simulator simul, String setName, int index) {
         XYChart.Series<Integer, Double> energyConsumptionSeries = new XYChart.Series<>();
         XYChart.Series<Integer, Double> packetLossSeries = new XYChart.Series<>();
         energyConsumptionSeries.setName(setName);
