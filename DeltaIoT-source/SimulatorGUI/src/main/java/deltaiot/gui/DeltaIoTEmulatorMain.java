@@ -18,6 +18,7 @@ import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
 import deltaiot.gui.service.ISimulatorProvider;
+import deltaiot.gui.service.ServiceDisplayTopology;
 import deltaiot.gui.service.ServiceProgress;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -197,25 +198,8 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
 
     @FXML
     void btnDisplay(ActionEvent event) {
-        try {
-            Path userPath = Paths.get(System.getProperty("user.dir"));
-            Path guifxml = userPath.resolve("resources")
-                .resolve("DeltaIoTModel.fxml");
-            URL url = guifxml.toUri()
-                .toURL();
-            FXMLLoader fxmlLoader = new FXMLLoader(url);
-            Parent root1 = (Parent) fxmlLoader.load();
-            DeltaIoTClientMain main = fxmlLoader.getController();
-            main.setSimulationClient(simul);
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root1));
-            stage.setResizable(false);
-            stage.setTitle("DeltaIoT Topology");
-            stage.setAlwaysOnTop(true);
-            stage.showAndWait();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        Service<Void> serviceDisplay = new ServiceDisplayTopology(this);
+        serviceDisplay.start();
     }
 
     @FXML
