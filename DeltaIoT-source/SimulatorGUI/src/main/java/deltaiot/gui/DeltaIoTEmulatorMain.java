@@ -17,7 +17,6 @@ import deltaiot.gui.service.ISimulatorProvider;
 import deltaiot.gui.service.ServiceAdaption;
 import deltaiot.gui.service.ServiceDisplayTopology;
 import deltaiot.gui.service.ServiceEmulation;
-import deltaiot.gui.service.ServiceProgress;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
@@ -35,6 +34,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import simulator.IRunMonitor;
 import simulator.QoS;
 import simulator.Simulator;
 
@@ -54,11 +54,10 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
     private Label lblProgress;
 
     List<String> data = new LinkedList<>();
-    Stage primaryStage;
+    private Stage primaryStage;
 
     ServiceEmulation serviceEmulation;
     ServiceAdaption serviceAdaptation;
-    Service<Void> serviceProgress = new ServiceProgress(this);
 
     @Override
     public Simulator getSimulator() {
@@ -69,7 +68,6 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
     void runEmulatorClicked(ActionEvent event) {
         if (!serviceEmulation.isRunning()) {
             serviceEmulation.restart();
-            serviceProgress.restart();
         }
     }
 
@@ -79,7 +77,6 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
     void btnAdaptationLogic(ActionEvent event) {
         if (!serviceAdaptation.isRunning()) {
             serviceAdaptation.restart();
-            serviceProgress.restart();
         }
     }
 
@@ -92,13 +89,30 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
     @FXML
     void initialize() {
         assert progressBar != null : "fx:id=\"progressBar\" was not injected: check your FXML file 'Progress.fxml'.";
-        lblProgress.textProperty()
-            .bind(serviceProgress.messageProperty());
-        progressBar.progressProperty()
-            .bind(serviceProgress.progressProperty());
 
-        serviceEmulation = new ServiceEmulation(this, btnDisplay);
-        serviceAdaptation = new ServiceAdaption(this, btnDisplay);
+        IRunMonitor runMonitor = new IRunMonitor() {
+
+            @Override
+            public void onRun(int current, int max) {
+                final double progress;
+                if (max > 0) {
+                    progress = (double) current / max;
+                } else {
+                    progress = 0.0;
+                }
+                Platform.runLater(() -> {
+                    try {
+                        progressBar.setProgress(progress);
+                        lblProgress.setText("(" + current + "/" + max + ")");
+                    } catch (Exception e) {
+                        LOGGER.error(e.getMessage(), e);
+                    }
+                });
+            }
+        };
+
+        serviceEmulation = new ServiceEmulation(this, runMonitor, btnDisplay);
+        serviceAdaptation = new ServiceAdaption(this, runMonitor, btnDisplay);
     }
 
     @FXML

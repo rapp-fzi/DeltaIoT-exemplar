@@ -21,6 +21,7 @@ import mapek.strategy.AdaptionStrategyFactory.Kind;
 import mapek.strategy.IAdaptionStrategy;
 import mapek.strategy.IStrategyConfiguration;
 import mapek.strategy.StrategyConfigurationDefault;
+import simulator.IRunMonitor;
 import simulator.QoS;
 import simulator.QoSCalculator;
 import simulator.Simulator;
@@ -35,12 +36,14 @@ public class ServiceAdaption extends Service<Void> implements ISimulatorProvider
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAdaption.class);
 
     private final IDataDisplay dataDisplay;
+    private final IRunMonitor runMonitor;
     private final Button btnDisplay;
 
     private Simulator simul;
 
-    public ServiceAdaption(IDataDisplay dataDisplay, Button btnDisplay) {
+    public ServiceAdaption(IDataDisplay dataDisplay, IRunMonitor runMonitor, Button btnDisplay) {
         this.dataDisplay = dataDisplay;
+        this.runMonitor = runMonitor;
         this.btnDisplay = btnDisplay;
     }
 
@@ -62,7 +65,7 @@ public class ServiceAdaption extends Service<Void> implements ISimulatorProvider
                 btnDisplay.setDisable(true);
                 try {
                     SimulatorConfig config = createConfig();
-                    simul = SimulatorFactory.createExperimentSimulator(config);
+                    simul = SimulatorFactory.createExperimentSimulator(config, runMonitor);
                     Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
                     ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
                     ISimulationRunner runner = runWithAdaption(simul, csvWriter);

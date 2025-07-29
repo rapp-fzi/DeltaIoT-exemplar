@@ -16,6 +16,7 @@ import deltaiot.client.SimulationClient;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
+import simulator.IRunMonitor;
 import simulator.QoS;
 import simulator.QoSCalculator;
 import simulator.Simulator;
@@ -29,12 +30,14 @@ public class ServiceEmulation extends Service<Void> implements ISimulatorProvide
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceEmulation.class);
 
     private final IDataDisplay dataDisplay;
+    private final IRunMonitor runMonitor;
     private final Button btnDisplay;
 
     private Simulator simul;
 
-    public ServiceEmulation(IDataDisplay dataDisplay, Button btnDisplay) {
+    public ServiceEmulation(IDataDisplay dataDisplay, IRunMonitor runMonitor, Button btnDisplay) {
         this.dataDisplay = dataDisplay;
+        this.runMonitor = runMonitor;
         this.btnDisplay = btnDisplay;
     }
 
@@ -56,7 +59,7 @@ public class ServiceEmulation extends Service<Void> implements ISimulatorProvide
                 btnDisplay.setDisable(true);
                 try {
                     SimulatorConfig config = createConfig();
-                    simul = SimulatorFactory.createExperimentSimulator(config);
+                    simul = SimulatorFactory.createExperimentSimulator(config, runMonitor);
                     Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
                     ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
                     ISimulationRunner runner = runNoAdaption(simul);

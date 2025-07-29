@@ -83,7 +83,7 @@ public class ConsoleMain {
 
     private void runSimulation(Args args, CommandStrategy strategy, JCommander parser) throws IOException {
         SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
-        Simulator simulator = SimulatorFactory.createExperimentSimulator(config);
+        Simulator simulator = SimulatorFactory.createExperimentSimulator(config, new NullRunMonitor());
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
 

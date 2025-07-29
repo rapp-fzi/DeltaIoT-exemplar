@@ -13,6 +13,7 @@ import domain.RunInfo;
 public class Simulator {
 
     private final int numOfRuns;
+    private final IRunMonitor runMonitor;
 
     private List<Mote> motes = new ArrayList<>();
     private List<Gateway> gateways = new ArrayList<>();
@@ -21,8 +22,9 @@ public class Simulator {
     private List<QoS> qosValues = new ArrayList<>();
 
     // Constructor
-    public Simulator(int numOfRuns) {
+    public Simulator(int numOfRuns, IRunMonitor runMonitor) {
         this.numOfRuns = numOfRuns;
+        this.runMonitor = runMonitor;
     }
 
     // Creation API
@@ -76,6 +78,7 @@ public class Simulator {
 
         // Increase run number
         runInfo.incrementRunNumber();
+        runMonitor.onRun(runInfo.getRunNumber(), getNumOfRuns());
     }
 
     private void resetGatewaysAggregatedValues() {
