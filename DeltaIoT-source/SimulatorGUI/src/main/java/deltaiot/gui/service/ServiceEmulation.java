@@ -18,7 +18,7 @@ public class ServiceEmulation extends BaseServiceSimulation {
 
     @Override
     protected String getName() {
-        return "Without Adaptation";
+        return "NonAdaptiveDeltaIoTStrategy";
     }
 
     @Override

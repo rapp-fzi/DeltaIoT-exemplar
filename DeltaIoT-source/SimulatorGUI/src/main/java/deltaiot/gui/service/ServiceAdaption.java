@@ -17,13 +17,15 @@ import simulator.Simulator;
 import util.IMoteWriter;
 
 public class ServiceAdaption extends BaseServiceSimulation {
+    private String adaptionId;
+
     public ServiceAdaption(IDataDisplay dataDisplay, IRunMonitor runMonitor, Path resultLocation, Button btnDisplay) {
         super(dataDisplay, runMonitor, resultLocation, btnDisplay);
     }
 
     @Override
     protected String getName() {
-        return "With Adaptation";
+        return String.format("%s", adaptionId);
     }
 
     @Override
@@ -35,6 +37,7 @@ public class ServiceAdaption extends BaseServiceSimulation {
         Kind kind = Kind.Default;
         IStrategyConfiguration config = new StrategyConfigurationDefault();
         IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(kind, simulationClient, moteWriter, config);
+        adaptionId = feedbackLoop.getId();
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
         return adaption;
     }
