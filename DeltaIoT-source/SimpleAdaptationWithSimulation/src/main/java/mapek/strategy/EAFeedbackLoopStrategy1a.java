@@ -9,25 +9,34 @@ import util.IMoteWriter;
 
 class EAFeedbackLoopStrategy1a extends FeedbackLoop {
 
-    private static int CHANGE_POWER_VALUE = 1;
-    private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
-    private static int UNIFORM_DIST_VALUE = 50;
-    private static int TOTAL_DIST_VALUE = 100;
+    private static final int CHANGE_DIST_VALUE = 1; // original value from Paper: 10.0
+    private static final int UNIFORM_DIST_VALUE = 5;
+    private static final int DIST_MIN = 0;
+    private static final int DIST_MIN_MAX_DELTA = 10;
+    private static final int DIST_UPPER = DIST_MIN + DIST_MIN_MAX_DELTA;
+    private static final int DIST_MAX = DIST_UPPER - CHANGE_DIST_VALUE + 1;
 
-    private static int POWER_MIN = 0;
-    private static int POWER_MAX = 15;
+    private int POWER_UPPER = -1;
+    private int POWER_MAX = -1; // will be assigned later down
 
-    private final StrategyConfigurationEAStrategy1a configuration;
+    private final StrategyConfigurationEAStrategy1a config;
 
     public EAFeedbackLoopStrategy1a(SimulationClient networkMgmt, IMoteWriter moteWriter,
             StrategyConfigurationEAStrategy1a configuration) {
         super(networkMgmt, moteWriter);
-        this.configuration = configuration;
+        this.config = configuration;
+    }
+
+    @Override
+    protected void initRun() {
+        POWER_UPPER = config.POWER_MIN + config.POWER_MIN_MAX_DELTA;
+        POWER_MAX = POWER_UPPER - config.CHANGE_POWER_VALUE + 1;
     }
 
     @Override
     protected boolean adaptationRequiredPower(Link link) {
-        if (link.getSNR() > 0 && link.getPower() > POWER_MIN || link.getSNR() < 0 && link.getPower() < POWER_MAX) {
+        if (link.getSNR() > 0 && link.getPower() > config.POWER_MIN
+                || link.getSNR() < 0 && link.getPower() < POWER_MAX) {
             return true;
         }
         return false;
@@ -42,11 +51,11 @@ class EAFeedbackLoopStrategy1a extends FeedbackLoop {
         for (Mote mote : motes) {
             for (Link link : mote.getLinks()) {
                 powerChanging = false;
-                if (link.getSNR() > 0 && link.getPower() > POWER_MIN) {
-                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - CHANGE_POWER_VALUE));
+                if (link.getSNR() > 0 && link.getPower() > config.POWER_MIN) {
+                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - config.CHANGE_POWER_VALUE));
                     powerChanging = true;
                 } else if (link.getSNR() < 0 && link.getPower() < POWER_MAX) {
-                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + CHANGE_POWER_VALUE));
+                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + config.CHANGE_POWER_VALUE));
                     powerChanging = true;
                 }
             }
@@ -59,15 +68,15 @@ class EAFeedbackLoopStrategy1a extends FeedbackLoop {
                 if (left.getPower() != right.getPower()) {
                     // If distribution of all links is 100 then change it to 50
                     // 50
-                    if (left.getDistribution() == TOTAL_DIST_VALUE && right.getDistribution() == TOTAL_DIST_VALUE) {
+                    if (left.getDistribution() == DIST_UPPER && right.getDistribution() == DIST_UPPER) {
                         left.setDistribution(UNIFORM_DIST_VALUE);
                         right.setDistribution(UNIFORM_DIST_VALUE);
                     }
-                    if (left.getPower() > right.getPower() && left.getDistribution() < TOTAL_DIST_VALUE) {
+                    if (left.getPower() > right.getPower() && left.getDistribution() < DIST_MAX) {
                         steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() + CHANGE_DIST_VALUE));
                         steps.add(
                                 new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() - CHANGE_DIST_VALUE));
-                    } else if (right.getDistribution() < TOTAL_DIST_VALUE) {
+                    } else if (right.getDistribution() < DIST_MAX) {
                         steps.add(
                                 new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() + CHANGE_DIST_VALUE));
                         steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() - CHANGE_DIST_VALUE));
