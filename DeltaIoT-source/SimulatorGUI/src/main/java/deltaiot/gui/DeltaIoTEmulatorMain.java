@@ -53,16 +53,18 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
     @FXML
     private Label lblProgress;
 
-    List<String> data = new LinkedList<>();
+    private List<String> data = new LinkedList<>();
     private Stage primaryStage;
 
-    ServiceEmulation serviceEmulation;
-    ServiceAdaption serviceAdaptation;
+    private ServiceEmulation serviceEmulation;
+    private ServiceAdaption serviceAdaptation;
 
     @Override
     public Simulator getSimulator() {
         return null;
     }
+
+    // ActivFORMSDeploy client;
 
     @FXML
     void runEmulatorClicked(ActionEvent event) {
@@ -70,8 +72,6 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
             serviceEmulation.restart();
         }
     }
-
-    // ActivFORMSDeploy client;
 
     @FXML
     void btnAdaptationLogic(ActionEvent event) {
@@ -156,12 +156,11 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
     }
 
     @Override
-    public void displayData(Simulator simul, String setName, int index) {
+    public void displayData(List<QoS> qosList, String setName) {
         XYChart.Series<Integer, Double> energyConsumptionSeries = new XYChart.Series<>();
         XYChart.Series<Integer, Double> packetLossSeries = new XYChart.Series<>();
         energyConsumptionSeries.setName(setName);
         packetLossSeries.setName(setName);
-        List<QoS> qosList = simul.getQosValues();
 
         for (QoS qos : qosList) {
             data.add(qos + ", " + setName);

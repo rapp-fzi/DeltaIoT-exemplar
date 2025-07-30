@@ -1,7 +1,9 @@
 package deltaiot.gui.service;
 
-import simulator.Simulator;
+import java.util.List;
+
+import simulator.QoS;
 
 public interface IDataDisplay {
-    void displayData(Simulator simul, String setName, int index);
+    void displayData(List<QoS> qosList, String setName);
 }

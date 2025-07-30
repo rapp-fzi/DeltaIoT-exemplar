@@ -47,7 +47,8 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
 
     @Override
     protected void succeeded() {
-        dataDisplay.displayData(simul, getName(), 1);
+        List<QoS> qosList = simul.getQosValues();
+        dataDisplay.displayData(qosList, getName());
     }
 
     protected abstract String getName();
