@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,7 +26,7 @@ public class JsonQOSWriter implements IQOSWriter {
         Gson gson = new GsonBuilder().serializeNulls()
             .setPrettyPrinting()
             .create();
-        try (Writer writer = Files.newBufferedWriter(location, StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
+        try (Writer writer = Files.newBufferedWriter(location)) {
             gson.toJson(qosResult, writer);
         }
     }
