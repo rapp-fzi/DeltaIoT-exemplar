@@ -1,16 +1,20 @@
 package deltaiot.gui;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import deltaiot.gui.service.IDataDisplay;
 import deltaiot.gui.service.ISimulatorProvider;
@@ -37,11 +41,13 @@ import javafx.stage.WindowEvent;
 import simulator.IRunMonitor;
 import simulator.QoS;
 import simulator.Simulator;
+import util.QoSResult;
 
 public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvider, IDataDisplay {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeltaIoTEmulatorMain.class);
     private static Path USER_PATH = Paths.get(System.getProperty("user.dir"));
     private static Path RESOURCE_PATH = USER_PATH.resolve("resources");
+    private static Path RESULT_LOCATION = USER_PATH.resolve("results");
 
     @FXML
     private Button runEmulator, btnSaveResults, btnAdaptationLogic, btnClearResults, btnDisplay;
@@ -55,7 +61,6 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
     @FXML
     private Label lblProgress;
 
-    private List<String> data = new LinkedList<>();
     private Stage primaryStage;
 
     private ServiceEmulation serviceEmulation;
@@ -113,39 +118,41 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
             }
         };
 
-        Path resultLocation = USER_PATH.resolve("results");
-        serviceEmulation = new ServiceEmulation(this, runMonitor, resultLocation, btnDisplay);
-        serviceAdaptation = new ServiceAdaption(this, runMonitor, resultLocation, btnDisplay);
+        serviceEmulation = new ServiceEmulation(this, runMonitor, RESULT_LOCATION, btnDisplay);
+        serviceAdaptation = new ServiceAdaption(this, runMonitor, RESULT_LOCATION, btnDisplay);
     }
 
     @FXML
-    void btnSaveResults(ActionEvent event) {
+    void btnLoadResults(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(RESULT_LOCATION.toFile());
 
         // Set extension filter
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSon files (*.json)", "*.json");
         fileChooser.getExtensionFilters()
             .add(extFilter);
 
-        // Show save file dialog
-        File file = fileChooser.showSaveDialog(primaryStage);
-
+        File file = fileChooser.showOpenDialog(primaryStage);
         if (file != null) {
-            saveFile(file);
+            try {
+                QoSResult qosResult = readQoSResult(file.toPath());
+                LOGGER.info("loaded result file: {}", file);
+                LOGGER.info("strategy: {}", qosResult.getStrategyName());
+                LOGGER.info("result average energy {}, packet loss {}", qosResult.getEnergyConsumptionAverage(),
+                        qosResult.getPacketLossAverage());
+                LOGGER.info("result score: {}", qosResult.getScore());
+                displayData(qosResult.getQosEntries(), qosResult.getStrategyName());
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
     }
 
-    private void saveFile(File file) {
-        try {
-            FileWriter fileWriter = null;
-
-            fileWriter = new FileWriter(file, true);
-
-            for (String line : data)
-                fileWriter.write(line + "\n");
-            fileWriter.close();
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
+    private QoSResult readQoSResult(Path resultFile) throws IOException {
+        LOGGER.debug("read QoS results from: {}", resultFile);
+        Gson gson = new GsonBuilder().create();
+        try (Reader reader = Files.newBufferedReader(resultFile, StandardCharsets.UTF_8)) {
+            return gson.fromJson(reader, QoSResult.class);
         }
     }
 
@@ -155,7 +162,6 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
             .clear();
         chartPacketLoss.getData()
             .clear();
-        data.clear();
     }
 
     @Override
@@ -166,7 +172,6 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
         packetLossSeries.setName(setName);
 
         for (QoS qos : qosList) {
-            data.add(qos + ", " + setName);
             energyConsumptionSeries.getData()
                 .add(new XYChart.Data<>(qos.getPeriod(), qos.getEnergyConsumption()));
             packetLossSeries.getData()

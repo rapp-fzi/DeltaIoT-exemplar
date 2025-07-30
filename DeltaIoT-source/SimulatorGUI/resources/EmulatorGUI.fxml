@@ -62,7 +62,7 @@
 						<Insets left="5.0" right="5.0" />
 					</FlowPane.margin>
 				</Button>
-				<Button fx:id="btnSaveResults" mnemonicParsing="false" onAction="#btnSaveResults" text="Save Results" textAlignment="CENTER">
+				<Button fx:id="btnSaveResults" mnemonicParsing="false" onAction="#btnLoadResults" text="Load Results" textAlignment="CENTER">
 					<FlowPane.margin>
 						<Insets left="5.0" right="5.0" />
 					</FlowPane.margin>
