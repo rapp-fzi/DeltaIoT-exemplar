@@ -2,7 +2,6 @@ package deltaiot.gui.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -30,13 +29,16 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
 
     private final IDataDisplay dataDisplay;
     private final IRunMonitor runMonitor;
+    private final Path resultLocation;
     private final Button btnDisplay;
 
     private Simulator simul;
 
-    public BaseServiceSimulation(IDataDisplay dataDisplay, IRunMonitor runMonitor, Button btnDisplay) {
+    public BaseServiceSimulation(IDataDisplay dataDisplay, IRunMonitor runMonitor, Path resultLocation,
+            Button btnDisplay) {
         this.dataDisplay = dataDisplay;
         this.runMonitor = runMonitor;
+        this.resultLocation = resultLocation;
         this.btnDisplay = btnDisplay;
     }
 
@@ -62,8 +64,7 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
                 try {
                     SimulatorConfig config = createConfig();
                     simul = SimulatorFactory.createExperimentSimulator(config, runMonitor);
-                    Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-                    ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+                    ICSVWriter csvWriter = new CsvFileWriter(resultLocation);
                     ISimulationRunner runner = createRunner(simul, csvWriter);
                     executeRunner(runner, csvWriter);
                 } catch (IOException e) {

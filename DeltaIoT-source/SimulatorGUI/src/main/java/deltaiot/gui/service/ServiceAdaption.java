@@ -1,6 +1,7 @@
 package deltaiot.gui.service;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimulationClient;
@@ -16,8 +17,8 @@ import simulator.Simulator;
 import util.IMoteWriter;
 
 public class ServiceAdaption extends BaseServiceSimulation {
-    public ServiceAdaption(IDataDisplay dataDisplay, IRunMonitor runMonitor, Button btnDisplay) {
-        super(dataDisplay, runMonitor, btnDisplay);
+    public ServiceAdaption(IDataDisplay dataDisplay, IRunMonitor runMonitor, Path resultLocation, Button btnDisplay) {
+        super(dataDisplay, runMonitor, resultLocation, btnDisplay);
     }
 
     @Override

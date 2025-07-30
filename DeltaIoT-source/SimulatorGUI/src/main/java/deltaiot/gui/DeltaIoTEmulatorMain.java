@@ -40,6 +40,8 @@ import simulator.Simulator;
 
 public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvider, IDataDisplay {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeltaIoTEmulatorMain.class);
+    private static Path USER_PATH = Paths.get(System.getProperty("user.dir"));
+    private static Path RESOURCE_PATH = USER_PATH.resolve("resources");
 
     @FXML
     private Button runEmulator, btnSaveResults, btnAdaptationLogic, btnClearResults, btnDisplay;
@@ -82,7 +84,7 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
 
     @FXML
     void btnDisplay(ActionEvent event) {
-        Service<Void> serviceDisplay = new ServiceDisplayTopology(this);
+        Service<Void> serviceDisplay = new ServiceDisplayTopology(this, RESOURCE_PATH);
         serviceDisplay.start();
     }
 
@@ -111,8 +113,9 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
             }
         };
 
-        serviceEmulation = new ServiceEmulation(this, runMonitor, btnDisplay);
-        serviceAdaptation = new ServiceAdaption(this, runMonitor, btnDisplay);
+        Path resultLocation = USER_PATH.resolve("results");
+        serviceEmulation = new ServiceEmulation(this, runMonitor, resultLocation, btnDisplay);
+        serviceAdaptation = new ServiceAdaption(this, runMonitor, resultLocation, btnDisplay);
     }
 
     @FXML
@@ -177,9 +180,7 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
 
     @Override
     public void start(Stage stage) throws Exception {
-        Path userPath = Paths.get(System.getProperty("user.dir"));
-        Path guifxml = userPath.resolve("resources")
-            .resolve("EmulatorGUI.fxml");
+        Path guifxml = RESOURCE_PATH.resolve("EmulatorGUI.fxml");
         URL url = guifxml.toUri()
             .toURL();
         Parent root = FXMLLoader.load(url);

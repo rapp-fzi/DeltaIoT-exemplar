@@ -2,7 +2,6 @@ package deltaiot.gui.service;
 
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +20,11 @@ public class ServiceDisplayTopology extends Service<Void> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDisplayTopology.class);
 
     private final ISimulatorProvider simulatorProvider;
+    private final Path resourcePath;
 
-    public ServiceDisplayTopology(ISimulatorProvider simulatorProvider) {
+    public ServiceDisplayTopology(ISimulatorProvider simulatorProvider, Path resourcePath) {
         this.simulatorProvider = simulatorProvider;
+        this.resourcePath = resourcePath;
     }
 
     @Override
@@ -45,9 +46,7 @@ public class ServiceDisplayTopology extends Service<Void> {
 
             private void displayStage(Simulator simul) {
                 try {
-                    Path userPath = Paths.get(System.getProperty("user.dir"));
-                    Path guifxml = userPath.resolve("resources")
-                        .resolve("DeltaIoTModel.fxml");
+                    Path guifxml = resourcePath.resolve("DeltaIoTModel.fxml");
                     URL url = guifxml.toUri()
                         .toURL();
                     FXMLLoader fxmlLoader = new FXMLLoader(url);
