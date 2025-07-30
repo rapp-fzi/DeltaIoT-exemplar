@@ -35,8 +35,9 @@ import simulator.Simulator;
 import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
 import util.CsvFileWriter;
-import util.IResultWriter;
 import util.IMoteWriter;
+import util.IResultWriter;
+import util.QoSResult;
 
 public class ConsoleMain {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleMain.class);
@@ -101,7 +102,8 @@ public class ConsoleMain {
         }
         ISimulationResult simulationResult = runner.run();
         List<QoS> qos = simulationResult.getQoS();
-        resultWriter.saveQoS(qos, simulationResult.getStrategyId());
+        QoSResult qosResult = new QoSResult(qos);
+        resultWriter.saveQoS(qosResult, simulationResult.getStrategyId());
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);

@@ -25,7 +25,7 @@ public class CsvFileWriter implements IResultWriter, IQOSWriter {
     }
 
     @Override
-    public void saveQoS(List<QoS> result, String strategyId) throws IOException {
+    public void saveQoS(QoSResult qosResult, String strategyId) throws IOException {
         Path strategyFolder = baseLocation.resolve(strategyId);
         Path location = strategyFolder.resolve("Results.csv");
         Files.createDirectories(strategyFolder);
@@ -41,7 +41,7 @@ public class CsvFileWriter implements IResultWriter, IQOSWriter {
 
         try (Writer writer = Files.newBufferedWriter(location, StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
             try (CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
-                for (QoS each : result) {
+                for (QoS each : qosResult.getQosEntries()) {
                     printer.printRecord(each.getPeriod(), Double.toString(each.getPacketLoss()),
                             Double.toString(each.getEnergyConsumption()));
                 }
