@@ -9,10 +9,10 @@ import util.IMoteWriter;
 
 class EAFeedbackLoopStrategy1a extends FeedbackLoop {
 
-    private static final int CHANGE_DIST_VALUE = 1; // original value from Paper: 10.0
-    private static final int UNIFORM_DIST_VALUE = 5;
+    private static final int CHANGE_DIST_VALUE = 10;
+    private static final int UNIFORM_DIST_VALUE = 50;
     private static final int DIST_MIN = 0;
-    private static final int DIST_MIN_MAX_DELTA = 10;
+    private static final int DIST_MIN_MAX_DELTA = 100;
     private static final int DIST_UPPER = DIST_MIN + DIST_MIN_MAX_DELTA;
     private static final int DIST_MAX = DIST_UPPER - CHANGE_DIST_VALUE + 1;
 
