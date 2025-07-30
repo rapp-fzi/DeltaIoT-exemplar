@@ -88,8 +88,8 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
     protected void executeRunner(ISimulationRunner runner, IQOSWriter qosWriter) throws IOException {
         ISimulationResult result = runner.run();
         List<QoS> qos = result.getQoS();
-        QoSResult qosResult = new QoSResult(qos);
-        qosWriter.saveQoS(qosResult, result.getStrategyId());
+        QoSResult qosResult = new QoSResult(result.getStrategyId(), qos);
+        qosWriter.saveQoS(qosResult);
 
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);

@@ -25,7 +25,8 @@ public class CsvFileWriter implements IResultWriter, IQOSWriter {
     }
 
     @Override
-    public void saveQoS(QoSResult qosResult, String strategyId) throws IOException {
+    public void saveQoS(QoSResult qosResult) throws IOException {
+        String strategyId = qosResult.getStrategyName();
         Path strategyFolder = baseLocation.resolve(strategyId);
         Path location = strategyFolder.resolve("Results.csv");
         Files.createDirectories(strategyFolder);

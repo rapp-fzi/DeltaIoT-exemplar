@@ -102,8 +102,8 @@ public class ConsoleMain {
         }
         ISimulationResult simulationResult = runner.run();
         List<QoS> qos = simulationResult.getQoS();
-        QoSResult qosResult = new QoSResult(qos);
-        resultWriter.saveQoS(qosResult, simulationResult.getStrategyId());
+        QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos);
+        resultWriter.saveQoS(qosResult);
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
