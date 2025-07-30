@@ -14,11 +14,21 @@ import com.beust.jcommander.converters.PathConverter;
 import mapek.strategy.AdaptionStrategyFactory.Kind;
 
 public class Args {
+    public static class OutputFormatConverter extends EnumConverter<OutputFormat> {
+
+        public OutputFormatConverter(String optionName) {
+            super(optionName, OutputFormat.class);
+        }
+    }
+
     @Parameter(names = { "-h", "--help" }, help = true)
     public boolean help;
 
     @Parameter(names = { "-r", "--result" }, description = "json result file", converter = PathConverter.class)
     public Path resultPath;
+
+    @Parameter(names = { "-t", "--output type" }, converter = OutputFormatConverter.class)
+    public OutputFormat outputFormat = OutputFormat.JSON;
 
     @Parameters
     public static class CommandStrategy {

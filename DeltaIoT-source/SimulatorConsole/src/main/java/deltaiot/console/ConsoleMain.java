@@ -36,7 +36,9 @@ import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
 import util.CsvFileWriter;
 import util.IMoteWriter;
+import util.IQOSWriter;
 import util.IResultWriter;
+import util.JsonQOSWriter;
 import util.QoSResult;
 
 public class ConsoleMain {
@@ -111,7 +113,13 @@ public class ConsoleMain {
 
         QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos, energyConsumptionAverage,
                 packetLossAverage, score);
-        resultWriter.saveQoS(qosResult);
+        final IQOSWriter qosWriter;
+        if (args.outputFormat == OutputFormat.CSV) {
+            qosWriter = resultWriter;
+        } else {
+            qosWriter = new JsonQOSWriter(baseLocation);
+        }
+        qosWriter.saveQoS(qosResult);
 
         if (args.resultPath != null) {
             Result result = new Result(strategyName, energyConsumptionAverage, packetLossAverage, score);
