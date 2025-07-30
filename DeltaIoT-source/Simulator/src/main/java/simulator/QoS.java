@@ -3,9 +3,9 @@ package simulator;
 public class QoS {
     private final double packetLoss;
     private final double powerConsumption;
-    private final String period;
+    private final int period;
 
-    public QoS(String period, double packetLoss, double powerConsumption) {
+    public QoS(int period, double packetLoss, double powerConsumption) {
         this.period = period;
         this.packetLoss = packetLoss;
         this.powerConsumption = powerConsumption;
@@ -19,7 +19,7 @@ public class QoS {
         return powerConsumption;
     }
 
-    public String getPeriod() {
+    public int getPeriod() {
         return period;
     }
 

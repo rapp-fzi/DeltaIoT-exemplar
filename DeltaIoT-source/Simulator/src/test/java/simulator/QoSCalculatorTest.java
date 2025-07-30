@@ -20,7 +20,7 @@ public class QoSCalculatorTest {
 
     @Test
     public void testCalcPowerAverage() {
-        List<QoS> qos = Arrays.asList(new QoS("0", 0, 0), new QoS("0", 0, 1));
+        List<QoS> qos = Arrays.asList(new QoS(0, 0, 0), new QoS(0, 0, 1));
 
         double actualAverage = calculator.calcEnergyConsumptionAverage(qos);
 
@@ -29,7 +29,7 @@ public class QoSCalculatorTest {
 
     @Test
     public void testCalcPacketLossAverage() {
-        List<QoS> qos = Arrays.asList(new QoS("0", 1, 0), new QoS("0", 2, 0));
+        List<QoS> qos = Arrays.asList(new QoS(0, 1, 0), new QoS(0, 2, 0));
 
         double actualAverage = calculator.calcPacketLossAverage(qos);
 
@@ -38,7 +38,7 @@ public class QoSCalculatorTest {
 
     @Test
     public void testCalcScore() {
-        List<QoS> qos = Arrays.asList(new QoS("0", 1, 0), new QoS("0", 2, 1));
+        List<QoS> qos = Arrays.asList(new QoS(0, 1, 0), new QoS(0, 2, 1));
 
         double actualScore = calculator.calcScore(qos);
 

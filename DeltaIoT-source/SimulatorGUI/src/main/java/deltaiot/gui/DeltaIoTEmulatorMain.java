@@ -165,9 +165,9 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
         for (QoS qos : qosList) {
             data.add(qos + ", " + setName);
             energyConsumptionSeries.getData()
-                .add(new XYChart.Data<>(Integer.parseInt(qos.getPeriod()), qos.getEnergyConsumption()));
+                .add(new XYChart.Data<>(qos.getPeriod(), qos.getEnergyConsumption()));
             packetLossSeries.getData()
-                .add(new XYChart.Data<>(Integer.parseInt(qos.getPeriod()), qos.getPacketLoss()));
+                .add(new XYChart.Data<>(qos.getPeriod(), qos.getPacketLoss()));
         }
         chartEnergyConsumption.getData()
             .add(energyConsumptionSeries);
