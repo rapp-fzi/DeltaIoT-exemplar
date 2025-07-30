@@ -88,14 +88,15 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
     protected void executeRunner(ISimulationRunner runner, IQOSWriter qosWriter) throws IOException {
         ISimulationResult result = runner.run();
         List<QoS> qos = result.getQoS();
-        QoSResult qosResult = new QoSResult(result.getStrategyId(), qos);
-        qosWriter.saveQoS(qosResult);
-
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
         double score = qoSCalculator.calcScore(qos);
         LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
         LOGGER.info("result score: {}", score);
+
+        QoSResult qosResult = new QoSResult(result.getStrategyId(), qos, energyConsumptionAverage, packetLossAverage,
+                score);
+        qosWriter.saveQoS(qosResult);
     }
 }

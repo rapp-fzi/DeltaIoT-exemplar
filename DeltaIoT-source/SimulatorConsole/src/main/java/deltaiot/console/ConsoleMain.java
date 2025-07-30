@@ -102,14 +102,16 @@ public class ConsoleMain {
         }
         ISimulationResult simulationResult = runner.run();
         List<QoS> qos = simulationResult.getQoS();
-        QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos);
-        resultWriter.saveQoS(qosResult);
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
         double score = qoSCalculator.calcScore(qos);
         LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
         LOGGER.info("result score: {}", score);
+
+        QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos, energyConsumptionAverage,
+                packetLossAverage, score);
+        resultWriter.saveQoS(qosResult);
 
         if (args.resultPath != null) {
             Result result = new Result(strategyName, energyConsumptionAverage, packetLossAverage, score);
