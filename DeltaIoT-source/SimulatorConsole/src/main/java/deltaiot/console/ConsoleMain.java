@@ -35,7 +35,7 @@ import simulator.Simulator;
 import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
 import util.CsvFileWriter;
-import util.ICSVWriter;
+import util.IResultWriter;
 import util.IMoteWriter;
 
 public class ConsoleMain {
@@ -85,7 +85,7 @@ public class ConsoleMain {
         SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
         Simulator simulator = SimulatorFactory.createExperimentSimulator(config, new NullRunMonitor());
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-        ICSVWriter csvWriter = new CsvFileWriter(baseLocation);
+        IResultWriter resultWriter = new CsvFileWriter(baseLocation);
 
         final ISimulationRunner runner;
         final String strategyName;
@@ -93,7 +93,7 @@ public class ConsoleMain {
         if (CommandStrategy.ID.equals(command)) {
             strategyName = strategy.strategyKind.name();
             LOGGER.info("running with strategy: {}", strategy.strategyKind);
-            runner = runWithAdaption(simulator, strategy, csvWriter);
+            runner = runWithAdaption(simulator, strategy, resultWriter);
         } else {
             strategyName = "none";
             LOGGER.info("running without strategy");
@@ -101,7 +101,7 @@ public class ConsoleMain {
         }
         ISimulationResult simulationResult = runner.run();
         List<QoS> qos = simulationResult.getQoS();
-        csvWriter.saveQoS(qos, simulationResult.getStrategyId());
+        resultWriter.saveQoS(qos, simulationResult.getStrategyId());
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);

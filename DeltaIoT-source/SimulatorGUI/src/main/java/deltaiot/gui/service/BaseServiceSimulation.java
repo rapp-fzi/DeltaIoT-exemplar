@@ -20,7 +20,7 @@ import simulator.Simulator;
 import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
 import util.CsvFileWriter;
-import util.ICSVWriter;
+import util.IResultWriter;
 import util.IMoteWriter;
 import util.IQOSWriter;
 
@@ -64,9 +64,9 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
                 try {
                     SimulatorConfig config = createConfig();
                     simul = SimulatorFactory.createExperimentSimulator(config, runMonitor);
-                    ICSVWriter csvWriter = new CsvFileWriter(resultLocation);
-                    ISimulationRunner runner = createRunner(simul, csvWriter);
-                    executeRunner(runner, csvWriter);
+                    IResultWriter resultWriter = new CsvFileWriter(resultLocation);
+                    ISimulationRunner runner = createRunner(simul, resultWriter);
+                    executeRunner(runner, resultWriter);
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage(), e);
                 }

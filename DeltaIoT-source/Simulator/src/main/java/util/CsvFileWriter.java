@@ -14,7 +14,7 @@ import deltaiot.services.Link;
 import deltaiot.services.Mote;
 import simulator.QoS;
 
-public class CsvFileWriter implements ICSVWriter, IQOSWriter {
+public class CsvFileWriter implements IResultWriter, IQOSWriter {
     private final static String CSV_DELIMITER = ";";
     private static final String RECORD_SEPARATOR = "\r\n";
 
