@@ -19,23 +19,9 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
     }
 
     @Override
-    boolean analyzeLinkSettings() {
-        // analyze all links for possible adaptation options
-        for (Mote mote : motes) {
-            for (Link link : mote.getLinks()) {
-                if (link.getSNR() > 0 && link.getPower() > 0 || link.getSNR() < 0 && link.getPower() < 15) {
-                    return true;
-                }
-            }
-            if (mote.getLinks()
-                .size() == 2) {
-                if (mote.getLinks()
-                    .get(0)
-                    .getPower() != mote.getLinks()
-                        .get(1)
-                        .getPower())
-                    return true;
-            }
+    protected boolean adaptationRequiredPower(Link link) {
+        if (link.getSNR() > 0 && link.getPower() > 0 || link.getSNR() < 0 && link.getPower() < 15) {
+            return true;
         }
         return false;
     }

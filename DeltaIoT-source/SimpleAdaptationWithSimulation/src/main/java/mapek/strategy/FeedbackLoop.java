@@ -71,7 +71,7 @@ class FeedbackLoop implements IAdaptionStrategy {
         LOGGER.info("******** END *******");
     }
 
-    void analysis() {
+    private void analysis() {
 
         // analyze all link settings
         boolean adaptationRequired = analyzeLinkSettings();
@@ -82,23 +82,42 @@ class FeedbackLoop implements IAdaptionStrategy {
         }
     }
 
-    boolean analyzeLinkSettings() {
+    protected boolean isAdaptationRequired() {
+        return analyzeLinkSettings();
+    }
+
+    private boolean analyzeLinkSettings() {
         // analyze all links for possible adaptation options
         for (Mote mote : motes) {
             for (Link link : mote.getLinks()) {
-                if (link.getSNR() > 0 && link.getPower() > 0 || link.getSNR() < 0 && link.getPower() < 15) {
+                if (adaptationRequiredPower(link)) {
                     return true;
                 }
             }
             if (mote.getLinks()
                 .size() == 2) {
-                if (mote.getLinks()
-                    .get(0)
-                    .getPower() != mote.getLinks()
-                        .get(1)
-                        .getPower())
+                if (adaptationRequiredPowerDistribution(mote)) {
                     return true;
+                }
             }
+        }
+        return false;
+    }
+
+    protected boolean adaptationRequiredPower(Link link) {
+        if (link.getSNR() > 0 && link.getPower() > 0 || link.getSNR() < 0 && link.getPower() < 15) {
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean adaptationRequiredPowerDistribution(Mote mote) {
+        if (mote.getLinks()
+            .get(0)
+            .getPower() != mote.getLinks()
+                .get(1)
+                .getPower()) {
+            return true;
         }
         return false;
     }

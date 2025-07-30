@@ -32,13 +32,6 @@ class QualityBasedFeedbackLoop extends FeedbackLoop {
     }
 
     @Override
-    public void analysis() {
-        if (isAdaptationRequired()) {
-            planning();
-        }
-    }
-
-    @Override
     public void planning() {
         if (isEnergyConsumptionViolated()) {
             planEnergyConsumption();
@@ -134,7 +127,8 @@ class QualityBasedFeedbackLoop extends FeedbackLoop {
             .collect(Collectors.toList());
     }
 
-    private boolean isAdaptationRequired() {
+    @Override
+    protected boolean isAdaptationRequired() {
         return isPacketLossViolated() || isEnergyConsumptionViolated();
     }
 
