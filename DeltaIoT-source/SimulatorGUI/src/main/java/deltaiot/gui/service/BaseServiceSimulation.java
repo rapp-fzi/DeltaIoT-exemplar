@@ -23,6 +23,7 @@ import util.CsvFileWriter;
 import util.IMoteWriter;
 import util.IQOSWriter;
 import util.IResultWriter;
+import util.JsonQOSWriter;
 import util.QoSResult;
 
 public abstract class BaseServiceSimulation extends Service<Void> implements ISimulatorProvider {
@@ -67,7 +68,8 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
                     simul = SimulatorFactory.createExperimentSimulator(config, runMonitor);
                     IResultWriter resultWriter = new CsvFileWriter(resultLocation);
                     ISimulationRunner runner = createRunner(simul, resultWriter);
-                    executeRunner(runner, resultWriter);
+                    IQOSWriter qosWriter = new JsonQOSWriter(resultLocation);
+                    executeRunner(runner, qosWriter);
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage(), e);
                 }
