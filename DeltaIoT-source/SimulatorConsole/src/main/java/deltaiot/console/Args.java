@@ -27,9 +27,6 @@ public class Args {
     @Parameter(names = { "-r", "--result" }, description = "result file", converter = PathConverter.class)
     public Path resultPath;
 
-    @Parameter(names = { "-t", "--output type" }, converter = OutputFormatConverter.class)
-    public OutputFormat outputFormat = OutputFormat.JSON;
-
     @Parameters
     public static class CommandStrategy {
         public static final String ID = "strategy";

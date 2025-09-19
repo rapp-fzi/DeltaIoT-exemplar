@@ -117,12 +117,7 @@ public class ConsoleMain {
 
         QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos, energyConsumptionAverage,
                 packetLossAverage, score);
-        final IQOSWriter qosWriter;
-        if (args.outputFormat == OutputFormat.CSV) {
-            qosWriter = resultWriter;
-        } else {
-            qosWriter = new JsonQOSWriter(baseLocation);
-        }
+        IQOSWriter qosWriter = new JsonQOSWriter(baseLocation);
         qosWriter.saveQoS(qosResult);
 
         if (args.resultPath != null) {
