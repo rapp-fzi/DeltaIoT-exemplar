@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +85,11 @@ public class ConsoleMain {
     }
 
     private void runSimulation(Args args, CommandStrategy strategy, JCommander parser) throws IOException {
-        SimulatorConfig config = new SimulatorConfig(args.num_runs);
+        Random randomGenerator = new Random();
+        if (args.seed != null) {
+            randomGenerator.setSeed(args.seed);
+        }
+        SimulatorConfig config = new SimulatorConfig(args.num_runs, randomGenerator);
         Simulator simulator = SimulatorFactory.createExperimentSimulator(config, new NullRunMonitor());
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         IResultWriter resultWriter = new CsvFileWriter(baseLocation);

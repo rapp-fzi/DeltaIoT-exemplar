@@ -3,6 +3,8 @@ package deltaiot.gui.service;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Random;
+import java.util.random.RandomGenerator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +85,8 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
     protected abstract ISimulationRunner createRunner(Simulator simulator, IMoteWriter moteWriter) throws IOException;
 
     protected SimulatorConfig createConfig() {
-        SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
+        RandomGenerator randomGenerator = new Random();
+        SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS, randomGenerator);
         return config;
     }
 

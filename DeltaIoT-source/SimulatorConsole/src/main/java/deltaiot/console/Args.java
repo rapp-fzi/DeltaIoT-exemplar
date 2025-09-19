@@ -31,6 +31,9 @@ public class Args {
     @Parameter(names = { "-n", "--num_runs" }, description = "number of runs")
     public int num_runs = DeltaIoTSimulator.NUM_OF_RUNS;
 
+    @Parameter(names = { "-s", "--seed" }, description = "PRNG seed")
+    public Long seed;
+
     @Parameters
     public static class CommandStrategy {
         public static final String ID = "strategy";

@@ -20,20 +20,34 @@ public class SimulatorFactory {
         int load = 10;
         double battery = 11880.0;
         double posScale = 2;
-        Mote mote2 = new Mote(2, battery, load, new Position(378 * posScale, 193 * posScale));
-        Mote mote3 = new Mote(3, battery, load, new Position(365 * posScale, 343 * posScale));
-        Mote mote4 = new Mote(4, battery, load, new Position(508 * posScale, 296 * posScale));
-        Mote mote5 = new Mote(5, battery, load, new Position(603 * posScale, 440 * posScale));
-        Mote mote6 = new Mote(6, battery, load, new Position(628 * posScale, 309 * posScale));
-        Mote mote7 = new Mote(7, battery, load, new Position(324 * posScale, 273 * posScale));
-        Mote mote8 = new Mote(8, battery, load, new Position(392 * posScale, 478 * posScale));
-        Mote mote9 = new Mote(9, battery, load, new Position(540 * posScale, 479 * posScale));
-        Mote mote10 = new Mote(10, battery, load, new Position(694 * posScale, 356 * posScale));
-        Mote mote11 = new Mote(11, battery, load, new Position(234 * posScale, 232 * posScale));
-        Mote mote12 = new Mote(12, battery, load, new Position(221 * posScale, 322 * posScale));
-        Mote mote13 = new Mote(13, battery, load, new Position(142 * posScale, 170 * posScale));
-        Mote mote14 = new Mote(14, battery, load, new Position(139 * posScale, 293 * posScale));
-        Mote mote15 = new Mote(15, battery, load, new Position(128 * posScale, 344 * posScale));
+        Mote mote2 = new Mote(config.getRandomGenerator(), 2, battery, load,
+                new Position(378 * posScale, 193 * posScale));
+        Mote mote3 = new Mote(config.getRandomGenerator(), 3, battery, load,
+                new Position(365 * posScale, 343 * posScale));
+        Mote mote4 = new Mote(config.getRandomGenerator(), 4, battery, load,
+                new Position(508 * posScale, 296 * posScale));
+        Mote mote5 = new Mote(config.getRandomGenerator(), 5, battery, load,
+                new Position(603 * posScale, 440 * posScale));
+        Mote mote6 = new Mote(config.getRandomGenerator(), 6, battery, load,
+                new Position(628 * posScale, 309 * posScale));
+        Mote mote7 = new Mote(config.getRandomGenerator(), 7, battery, load,
+                new Position(324 * posScale, 273 * posScale));
+        Mote mote8 = new Mote(config.getRandomGenerator(), 8, battery, load,
+                new Position(392 * posScale, 478 * posScale));
+        Mote mote9 = new Mote(config.getRandomGenerator(), 9, battery, load,
+                new Position(540 * posScale, 479 * posScale));
+        Mote mote10 = new Mote(config.getRandomGenerator(), 10, battery, load,
+                new Position(694 * posScale, 356 * posScale));
+        Mote mote11 = new Mote(config.getRandomGenerator(), 11, battery, load,
+                new Position(234 * posScale, 232 * posScale));
+        Mote mote12 = new Mote(config.getRandomGenerator(), 12, battery, load,
+                new Position(221 * posScale, 322 * posScale));
+        Mote mote13 = new Mote(config.getRandomGenerator(), 13, battery, load,
+                new Position(142 * posScale, 170 * posScale));
+        Mote mote14 = new Mote(config.getRandomGenerator(), 14, battery, load,
+                new Position(139 * posScale, 293 * posScale));
+        Mote mote15 = new Mote(config.getRandomGenerator(), 15, battery, load,
+                new Position(128 * posScale, 344 * posScale));
 
         Mote[] allMotes = new Mote[] { mote2, mote3, mote4, mote5, mote6, mote7, mote8, mote9, mote10, mote11, mote12,
                 mote13, mote14, mote15 };
@@ -69,17 +83,17 @@ public class SimulatorFactory {
         simul.setTurnOrder(8, 10, 13, 14, 15, 5, 6, 11, 12, 9, 7, 2, 3, 4);
 
         // Mote activations
-        mote5.setActivationProbability(new DoubleRange(0.7, 0.9));
-        mote7.setActivationProbability(new DoubleRange(0.6, 1.0));
-        mote11.setActivationProbability(new DoubleRange(0.7, 0.9));
-        mote12.setActivationProbability(new DoubleRange(0.85, 0.95));
+        mote5.setActivationProbability(new DoubleRange(config.getRandomGenerator(), 0.7, 0.9));
+        mote7.setActivationProbability(new DoubleRange(config.getRandomGenerator(), 0.6, 1.0));
+        mote11.setActivationProbability(new DoubleRange(config.getRandomGenerator(), 0.7, 0.9));
+        mote12.setActivationProbability(new DoubleRange(config.getRandomGenerator(), 0.85, 0.95));
 
         // Global random interference (mimicking Usman's random interference)
         simul.getRunInfo()
-            .setGlobalInterference(new DoubleRange(0.0, 0.0));
+            .setGlobalInterference(new DoubleRange(config.getRandomGenerator(), 0.0, 0.0));
 
-        DoubleRange highWirelessInterference = new DoubleRange(-5.0, 5.0);
-        DoubleRange smallWirelessInterference = new DoubleRange(-2.0, 2.0);
+        DoubleRange highWirelessInterference = new DoubleRange(config.getRandomGenerator(), -5.0, 5.0);
+        DoubleRange smallWirelessInterference = new DoubleRange(config.getRandomGenerator(), -2.0, 2.0);
         mote2.getLinkTo(mote4)
             .setInterference(highWirelessInterference);
         mote3.getLinkTo(gateway)
@@ -250,9 +264,9 @@ public class SimulatorFactory {
         // Motes
         double battery = 11880;
         int load = 10;
-        Mote mote1 = new Mote(1, battery, load);
-        Mote mote12 = new Mote(12, battery, load);
-        Mote mote2 = new Mote(2, battery, load);
+        Mote mote1 = new Mote(config.getRandomGenerator(), 1, battery, load);
+        Mote mote12 = new Mote(config.getRandomGenerator(), 12, battery, load);
+        Mote mote2 = new Mote(config.getRandomGenerator(), 2, battery, load);
         simul.addMotes(mote1, mote12, mote2);
 
         // Gateways
@@ -284,11 +298,11 @@ public class SimulatorFactory {
         // Motes
         double battery = 11880;
         int load = 10;
-        Mote mote0 = new Mote(0, battery, load);
-        Mote mote11 = new Mote(11, battery, load);
-        Mote mote12 = new Mote(12, battery, load);
-        Mote mote21 = new Mote(21, battery, load);
-        Mote mote22 = new Mote(22, battery, load);
+        Mote mote0 = new Mote(config.getRandomGenerator(), 0, battery, load);
+        Mote mote11 = new Mote(config.getRandomGenerator(), 11, battery, load);
+        Mote mote12 = new Mote(config.getRandomGenerator(), 12, battery, load);
+        Mote mote21 = new Mote(config.getRandomGenerator(), 21, battery, load);
+        Mote mote22 = new Mote(config.getRandomGenerator(), 22, battery, load);
         simul.addMotes(mote0, mote11, mote12, mote21, mote22);
 
         // Gateways
