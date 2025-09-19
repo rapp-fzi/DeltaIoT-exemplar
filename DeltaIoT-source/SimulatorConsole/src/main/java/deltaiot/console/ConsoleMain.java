@@ -92,13 +92,17 @@ public class ConsoleMain {
 
         final ISimulationRunner runner;
         final String strategyName;
+        final IStrategyConfiguration strategyConfig;
         String command = parser.getParsedCommand();
         if (CommandStrategy.ID.equals(command)) {
             strategyName = strategy.strategyKind.name();
             LOGGER.info("running with strategy: {}", strategy.strategyKind);
-            runner = runWithAdaption(simulator, strategy, resultWriter);
+            strategyConfig = readStrategyParameter(strategy.parameterFile,
+                    strategy.strategyKind.getStrategyConfiguration());
+            runner = runWithAdaption(simulator, strategy, strategyConfig, resultWriter);
         } else {
             strategyName = "none";
+            strategyConfig = null;
             LOGGER.info("running without strategy");
             runner = runNoAdaption(simulator);
         }
@@ -122,7 +126,8 @@ public class ConsoleMain {
         qosWriter.saveQoS(qosResult);
 
         if (args.resultPath != null) {
-            Result result = new Result(strategyName, energyConsumptionAverage, packetLossAverage, score);
+            Result result = new Result(strategyName, strategyConfig, energyConsumptionAverage, packetLossAverage,
+                    score);
             writeResult(result, args.resultPath);
         }
     }
@@ -143,16 +148,14 @@ public class ConsoleMain {
         return simpleRunner;
     }
 
-    private ISimulationRunner runWithAdaption(Simulator simulator, CommandStrategy strategy, IMoteWriter moteWriter)
-            throws IOException {
+    private ISimulationRunner runWithAdaption(Simulator simulator, CommandStrategy strategy,
+            IStrategyConfiguration strategyConfig, IMoteWriter moteWriter) throws IOException {
         SimulationClient simulationClient = new SimulationClient(simulator);
         // Create Feedback loop
         AdaptionStrategyFactory adaptionStrategyFactory = new AdaptionStrategyFactory();
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
-        IStrategyConfiguration config = readStrategyParameter(strategy.parameterFile,
-                strategy.strategyKind.getStrategyConfiguration());
         IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(strategy.strategyKind, simulationClient,
-                moteWriter, config);
+                moteWriter, strategyConfig);
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
         return adaption;
     }
