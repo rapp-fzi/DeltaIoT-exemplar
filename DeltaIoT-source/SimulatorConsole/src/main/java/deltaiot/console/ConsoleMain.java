@@ -126,8 +126,8 @@ public class ConsoleMain {
         qosWriter.saveQoS(qosResult);
 
         if (args.resultPath != null) {
-            Result result = new Result(strategyName, strategyConfig, energyConsumptionAverage, packetLossAverage,
-                    score);
+            Result result = new Result(strategyName, strategyConfig, energyConsumptionAverage, packetLossAverage, score,
+                    qos);
             writeResult(result, args.resultPath);
         }
     }
