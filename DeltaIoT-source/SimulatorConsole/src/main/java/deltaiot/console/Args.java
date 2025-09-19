@@ -11,6 +11,7 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.converters.EnumConverter;
 import com.beust.jcommander.converters.PathConverter;
 
+import deltaiot.DeltaIoTSimulator;
 import mapek.strategy.AdaptionStrategyFactory.Kind;
 
 public class Args {
@@ -26,6 +27,9 @@ public class Args {
 
     @Parameter(names = { "-r", "--result" }, description = "result file", converter = PathConverter.class)
     public Path resultPath;
+
+    @Parameter(names = { "-n", "--num_runs" }, description = "number of runs")
+    public int num_runs = DeltaIoTSimulator.NUM_OF_RUNS;
 
     @Parameters
     public static class CommandStrategy {

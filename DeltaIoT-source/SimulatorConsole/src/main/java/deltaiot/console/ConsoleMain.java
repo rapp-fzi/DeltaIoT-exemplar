@@ -18,7 +18,6 @@ import com.beust.jcommander.ParameterException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
@@ -85,7 +84,7 @@ public class ConsoleMain {
     }
 
     private void runSimulation(Args args, CommandStrategy strategy, JCommander parser) throws IOException {
-        SimulatorConfig config = new SimulatorConfig(DeltaIoTSimulator.NUM_OF_RUNS);
+        SimulatorConfig config = new SimulatorConfig(args.num_runs);
         Simulator simulator = SimulatorFactory.createExperimentSimulator(config, new NullRunMonitor());
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         IResultWriter resultWriter = new CsvFileWriter(baseLocation);
@@ -121,8 +120,8 @@ public class ConsoleMain {
         qosWriter.saveQoS(qosResult);
 
         if (args.resultPath != null) {
-            Result result = new Result(strategyName, strategyConfig, energyConsumptionAverage, packetLossAverage, score,
-                    qos);
+            Result result = new Result(strategyName, strategyConfig, args.num_runs, energyConsumptionAverage,
+                    packetLossAverage, score, qos);
             writeResult(result, args.resultPath);
         }
     }
