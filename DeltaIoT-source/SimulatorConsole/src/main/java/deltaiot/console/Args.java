@@ -24,7 +24,7 @@ public class Args {
     @Parameter(names = { "-h", "--help" }, help = true)
     public boolean help;
 
-    @Parameter(names = { "-r", "--result" }, description = "json result file", converter = PathConverter.class)
+    @Parameter(names = { "-r", "--result" }, description = "result file", converter = PathConverter.class)
     public Path resultPath;
 
     @Parameter(names = { "-t", "--output type" }, converter = OutputFormatConverter.class)
