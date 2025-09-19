@@ -140,6 +140,6 @@ public class EAFeedbackLoopStrategy1c extends FeedbackLoop {
 
     @Override
     public String getId() {
-        return "DeltaIoTEAStrategy1bReconfigurationStrategy";
+        return "DeltaIoTEAStrategy1cReconfigurationStrategy";
     }
 }
