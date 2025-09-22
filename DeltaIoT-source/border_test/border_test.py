@@ -63,3 +63,58 @@ def test_strategy1a(jar_file, cli_path, tmp_path, CHANGE_POWER_VALUE, POWER_MIN,
     expected_result_file = tmp_path / result_file
     assert expected_result_file.exists()
 
+@pytest.mark.parametrize('CHANGE_POWER_VALUE', [1,  4])
+@pytest.mark.parametrize('POWER_MIN', [0, 5])
+@pytest.mark.parametrize('POWER_MIN_MAX_DELTA', [4, 10])
+@pytest.mark.parametrize('CHANGE_DIST_VALUE', [1, 5])
+def test_strategy1b(jar_file, cli_path, tmp_path, CHANGE_POWER_VALUE, POWER_MIN, POWER_MIN_MAX_DELTA, CHANGE_DIST_VALUE):
+    strategy = "EAStrategy1b"
+    strategy_conf = tmp_path / ("%s.json" % strategy)
+    config = {
+            "CHANGE_POWER_VALUE": CHANGE_POWER_VALUE,
+            "POWER_MIN": POWER_MIN,
+            "POWER_MIN_MAX_DELTA": POWER_MIN_MAX_DELTA,
+            "CHANGE_DIST_VALUE": CHANGE_DIST_VALUE,
+    }
+    with strategy_conf.open("w", encoding="utf-8") as f:
+        f.write(json.dumps(config, indent=2))
+
+    result_file = "result.json"
+    args = ["-jar", jar_file, "-r", result_file, "strategy", "-a", strategy, "-p", strategy_conf]
+    proc = run_cli(args, cli=cli_path, cwd=str(tmp_path))
+
+    out = (proc.stdout or "") + (proc.stderr or "")
+    assert proc.returncode == 0, f"exit {proc.returncode}\nOUT:\n{out}"
+    expected_result_file = tmp_path / result_file
+    assert expected_result_file.exists()
+
+@pytest.mark.parametrize('CHANGE_POWER_VALUE', [1,  4])
+@pytest.mark.parametrize('POWER_MIN', [0, 5])
+@pytest.mark.parametrize('POWER_MIN_MAX_DELTA', [4, 10])
+@pytest.mark.parametrize('CHANGE_DIST_VALUE_7_8', [1, 5])
+@pytest.mark.parametrize('CHANGE_DIST_VALUE_15_16', [1, 5])
+@pytest.mark.parametrize('CHANGE_DIST_VALUE_5_6', [1, 5])
+def test_strategy1c(jar_file, cli_path, tmp_path, CHANGE_POWER_VALUE, POWER_MIN, POWER_MIN_MAX_DELTA,
+                    CHANGE_DIST_VALUE_7_8, CHANGE_DIST_VALUE_15_16, CHANGE_DIST_VALUE_5_6):
+    strategy = "EAStrategy1c"
+    strategy_conf = tmp_path / ("%s.json" % strategy)
+    config = {
+        "CHANGE_POWER_VALUE": CHANGE_POWER_VALUE,
+        "POWER_MIN": POWER_MIN,
+        "POWER_MIN_MAX_DELTA": POWER_MIN_MAX_DELTA,
+        "CHANGE_DIST_VALUE_7_8": CHANGE_DIST_VALUE_7_8,
+        "CHANGE_DIST_VALUE_15_16": CHANGE_DIST_VALUE_15_16,
+        "CHANGE_DIST_VALUE_5_6": CHANGE_DIST_VALUE_5_6,
+    }
+    with strategy_conf.open("w", encoding="utf-8") as f:
+        f.write(json.dumps(config, indent=2))
+
+    result_file = "result.json"
+    args = ["-jar", jar_file, "-r", result_file, "strategy", "-a", strategy, "-p", strategy_conf]
+    proc = run_cli(args, cli=cli_path, cwd=str(tmp_path))
+
+    out = (proc.stdout or "") + (proc.stderr or "")
+    assert proc.returncode == 0, f"exit {proc.returncode}\nOUT:\n{out}"
+    expected_result_file = tmp_path / result_file
+    assert expected_result_file.exists()
+
