@@ -37,13 +37,16 @@ def run_cli(cmd_args, cli, cwd):
     return proc
 
 
-def test_strategy(script_dir, cli_path, tmp_path):
+@pytest.mark.parametrize('CHANGE_POWER_VALUE', [1,  4])
+@pytest.mark.parametrize('POWER_MIN', [0, 5])
+@pytest.mark.parametrize('POWER_MIN_MAX_DELTA', [4, 10])
+def test_strategy1a(script_dir, cli_path, tmp_path, CHANGE_POWER_VALUE, POWER_MIN, POWER_MIN_MAX_DELTA):
     strategy = "EAStrategy1a"
     strategy_conf = tmp_path / ("%s.json" % strategy)
     config = {
-            "CHANGE_POWER_VALUE": 3,
-            "POWER_MIN": 1,
-            "POWER_MIN_MAX_DELTA": 8,
+            "CHANGE_POWER_VALUE": CHANGE_POWER_VALUE,
+            "POWER_MIN": POWER_MIN,
+            "POWER_MIN_MAX_DELTA": POWER_MIN_MAX_DELTA,
     }
     with strategy_conf.open("w", encoding="utf-8") as f:
         f.write(json.dumps(config, indent=2))
