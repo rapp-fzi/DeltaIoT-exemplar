@@ -20,6 +20,9 @@ def cli_path():
 def script_dir():
     return Path(__file__).resolve().parent
 
+@pytest.fixture(scope="session")
+def jar_file(script_dir):
+    return script_dir.joinpath("../SimulatorConsole/target/SimulatorConsole-0.0.1-SNAPSHOT.jar")
 
 def run_cli(cmd_args, cli, cwd):
     """
@@ -40,7 +43,7 @@ def run_cli(cmd_args, cli, cwd):
 @pytest.mark.parametrize('CHANGE_POWER_VALUE', [1,  4])
 @pytest.mark.parametrize('POWER_MIN', [0, 5])
 @pytest.mark.parametrize('POWER_MIN_MAX_DELTA', [4, 10])
-def test_strategy1a(script_dir, cli_path, tmp_path, CHANGE_POWER_VALUE, POWER_MIN, POWER_MIN_MAX_DELTA):
+def test_strategy1a(jar_file, cli_path, tmp_path, CHANGE_POWER_VALUE, POWER_MIN, POWER_MIN_MAX_DELTA):
     strategy = "EAStrategy1a"
     strategy_conf = tmp_path / ("%s.json" % strategy)
     config = {
@@ -51,7 +54,6 @@ def test_strategy1a(script_dir, cli_path, tmp_path, CHANGE_POWER_VALUE, POWER_MI
     with strategy_conf.open("w", encoding="utf-8") as f:
         f.write(json.dumps(config, indent=2))
 
-    jar_file = script_dir.joinpath("../SimulatorConsole/target/SimulatorConsole-0.0.1-SNAPSHOT.jar")
     result_file = "result.json"
     args = ["-jar", jar_file, "-r", result_file, "strategy", "-a", strategy, "-p", strategy_conf]
     proc = run_cli(args, cli=cli_path, cwd=str(tmp_path))
