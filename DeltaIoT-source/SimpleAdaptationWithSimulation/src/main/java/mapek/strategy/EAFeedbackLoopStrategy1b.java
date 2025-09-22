@@ -17,6 +17,7 @@ public class EAFeedbackLoopStrategy1b extends FeedbackLoop {
     // private static final int DIST_MAX = DIST_UPPER - CHANGE_DIST_VALUE + 1;
 
     // will be assigned later down
+    private int POWER_LOWER = -1;
     private int POWER_UPPER = -1;
     private int POWER_MAX = -1;
     private int DIST_MAX = -1;
@@ -32,6 +33,7 @@ public class EAFeedbackLoopStrategy1b extends FeedbackLoop {
     @Override
     protected void initRun() {
         DIST_MAX = DIST_UPPER - config.CHANGE_DIST_VALUE + 1;
+        POWER_LOWER = config.POWER_MIN + config.CHANGE_POWER_VALUE - 1;
         POWER_UPPER = config.POWER_MIN + config.POWER_MIN_MAX_DELTA;
         POWER_MAX = POWER_UPPER - config.CHANGE_POWER_VALUE + 1;
     }
@@ -54,7 +56,7 @@ public class EAFeedbackLoopStrategy1b extends FeedbackLoop {
         for (Mote mote : motes) {
             for (Link link : mote.getLinks()) {
                 powerChanging = false;
-                if (link.getSNR() > 0 && link.getPower() > config.POWER_MIN) {
+                if (link.getSNR() > 0 && link.getPower() > POWER_LOWER) {
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - config.CHANGE_POWER_VALUE));
                     powerChanging = true;
                 } else if (link.getSNR() < 0 && link.getPower() < POWER_MAX) {
