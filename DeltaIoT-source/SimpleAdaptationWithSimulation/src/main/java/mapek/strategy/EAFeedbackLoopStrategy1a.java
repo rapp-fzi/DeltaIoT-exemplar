@@ -32,14 +32,14 @@ class EAFeedbackLoopStrategy1a extends FeedbackLoop {
     @Override
     protected void initRun() {
         POWER_LOWER = config.POWER_MIN + config.CHANGE_POWER_VALUE - 1;
-        POWER_UPPER = config.POWER_MIN + config.POWER_MIN_MAX_DELTA;
-        POWER_MAX = POWER_UPPER - config.CHANGE_POWER_VALUE + 1;
+        POWER_MAX = config.POWER_MIN + config.POWER_MIN_MAX_DELTA;
+        POWER_UPPER = POWER_MAX - config.CHANGE_POWER_VALUE + 1;
     }
 
     @Override
     protected boolean adaptationRequiredPower(Link link) {
         if (link.getSNR() > 0 && link.getPower() > config.POWER_MIN
-                || link.getSNR() < 0 && link.getPower() < POWER_MAX) {
+                || link.getSNR() < 0 && link.getPower() < POWER_UPPER) {
             return true;
         }
         return false;
@@ -57,7 +57,7 @@ class EAFeedbackLoopStrategy1a extends FeedbackLoop {
                 if (link.getSNR() > 0 && link.getPower() > POWER_LOWER) {
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - config.CHANGE_POWER_VALUE));
                     powerChanging = true;
-                } else if (link.getSNR() < 0 && link.getPower() < POWER_MAX) {
+                } else if (link.getSNR() < 0 && link.getPower() < POWER_UPPER) {
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + config.CHANGE_POWER_VALUE));
                     powerChanging = true;
                 }
