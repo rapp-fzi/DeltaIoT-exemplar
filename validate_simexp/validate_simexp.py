@@ -1,9 +1,15 @@
 import argparse
 import csv
 import json
+from enum import Enum
+
+
+class InputType(Enum):
+    CSV = "csv"
+    JSON = "json"
+
 
 class ValidateSimexp:
-
     def _read_csv_file(self, csv_file):
         fieldnames = ["Generation", "Reward", "Values"]
         reader = csv.DictReader(csv_file, fieldnames=fieldnames, delimiter=";")
@@ -32,11 +38,21 @@ class ValidateSimexp:
 
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
+        default = ' (default: %(default)s)'
         parser.add_argument('infile', type=argparse.FileType('r'))
+        parser.add_argument('-t', '--type',
+                                 choices=[type.name.lower() for type in InputType],
+                                 default=InputType.JSON.name.lower(), help="select input file type" + default)
         args = parser.parse_args()
 
-        #entries = self._read_csv_file(args.infile)
-        entries = self._read_json_file(args.infile)
+        entries = None
+        file_type = InputType[args.type.upper()]
+        match file_type:
+            case InputType.JSON:
+                entries = self._read_json_file(args.infile)
+            case InputType.CSV:
+                entries = self._read_csv_file(args.infile)
+
         for entry in entries:
             print("generation: %d -> %s (%s)" % (entry["Generation"], entry["Reward"], ",".join(["%s:%s" % (k, v) for k, v in entry["Values"].items()])))
 
