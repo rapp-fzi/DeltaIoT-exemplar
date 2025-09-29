@@ -1,6 +1,8 @@
 import argparse
 from enum import Enum
 
+import tabulate
+
 from input_type import InputType
 from validate import Validate
 
@@ -32,15 +34,16 @@ class ValidateSimexp:
             case InputType.CSV:
                 entries = file_type.load(args.infile)
 
-        for entry in entries:
-            value_str = ",".join(["%s:%s" % (k, v) for k, v in entry["Values"].items()])
-            print("generation: %d -> %s (%s)" % (entry["Generation"], entry["Reward"], value_str))
-
+        table_entries = []
         strategy = Strategy[args.strategy]
         validate = Validate()
         for entry in entries:
             score = validate.simulate(strategy, entry["Values"])
-            print("generation: %d reward: %s score: %s" % (entry["Generation"], entry["Reward"], score))
+            #print("generation: %d reward: %s score: %s" % (entry["Generation"], entry["Reward"], score))
+            table_entries.append([entry["Generation"], entry["Reward"], score])
+
+        table_str = tabulate.tabulate(table_entries, headers=['Generation', 'Reward', 'Score'])
+        print(table_str)
 
 if __name__ == '__main__':
     v = ValidateSimexp()
