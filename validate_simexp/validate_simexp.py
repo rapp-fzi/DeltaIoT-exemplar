@@ -2,7 +2,7 @@ import argparse
 from enum import Enum
 
 from input_type import InputType
-
+from validate import Validate
 
 class Strategy(Enum):
     EAStrategy1a = "EAStrategy1a"
@@ -20,7 +20,7 @@ class ValidateSimexp:
                                  choices=[type.type.lower() for type in InputType],
                                  default=InputType.JSON.name.lower(), help="select input file type" + default)
         parser.add_argument('-s', '--strategy', required=True,
-                            choices=[strategy.name.lower() for strategy in Strategy],
+                            choices=[strategy.name for strategy in Strategy],
                             help="strategy to execute")
         args = parser.parse_args()
 
@@ -33,8 +33,14 @@ class ValidateSimexp:
                 entries = file_type.load(args.infile)
 
         for entry in entries:
-            print("generation: %d -> %s (%s)" % (entry["Generation"], entry["Reward"], ",".join(["%s:%s" % (k, v) for k, v in entry["Values"].items()])))
+            value_str = ",".join(["%s:%s" % (k, v) for k, v in entry["Values"].items()])
+            print("generation: %d -> %s (%s)" % (entry["Generation"], entry["Reward"], value_str))
 
+        strategy = Strategy[args.strategy]
+        validate = Validate()
+        for entry in entries:
+            score = validate.simulate(strategy, entry["Values"])
+            print("generation: %d reward: %s score: %s" % (entry["Generation"], entry["Reward"], score))
 
 if __name__ == '__main__':
     v = ValidateSimexp()
