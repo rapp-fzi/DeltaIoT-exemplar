@@ -1,12 +1,9 @@
 import argparse
 import csv
 import json
-from enum import Enum
 
 
-class InputType(Enum):
-    CSV = "csv"
-    JSON = "json"
+from input_type import InputType
 
 
 class ValidateSimexp:
