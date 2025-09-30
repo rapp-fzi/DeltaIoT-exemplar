@@ -15,7 +15,12 @@ class Strategy(Enum):
 
 class ValidateSimexp:
 
-    def _write_result(self, args, result):
+    def _write_result(self, args, generations):
+        result = {
+            'strategy': args.strategy,
+            'generations': generations,
+        }
+
         json.dump(result, args.result, indent=2)
 
     def main(self):
@@ -51,13 +56,8 @@ class ValidateSimexp:
             }
             generations.append(generation)
 
-        result = {
-            'strategy': args.strategy,
-            'generations': generations,
-        }
-
         if args.result:
-            self._write_result(args, result)
+            self._write_result(args, generations)
 
         table_entries = []
         for generation in generations:
