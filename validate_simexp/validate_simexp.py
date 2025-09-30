@@ -4,7 +4,7 @@ from enum import Enum
 import tabulate
 
 from input_type import InputType
-from validate import Validate
+from simulator import Simulator
 
 class Strategy(Enum):
     EAStrategy1a = "EAStrategy1a"
@@ -36,9 +36,9 @@ class ValidateSimexp:
 
         table_entries = []
         strategy = Strategy[args.strategy]
-        validate = Validate()
+        simulator = Simulator()
         for entry in entries:
-            score = validate.simulate(strategy, entry["Values"])
+            score = simulator.simulate(strategy, entry["Values"])
             #print("generation: %d reward: %s score: %s" % (entry["Generation"], entry["Reward"], score))
             table_entries.append([entry["Generation"], entry["Reward"], score])
 

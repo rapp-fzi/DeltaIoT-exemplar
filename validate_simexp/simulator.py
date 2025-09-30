@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 
 
-class Validate:
+class Simulator:
     BINARY_JAVA = "java"
 
     def __init__(self):
