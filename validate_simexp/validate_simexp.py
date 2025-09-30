@@ -26,8 +26,10 @@ def validate_file_exists(f) -> Path:
         raise argparse.ArgumentTypeError("{0} does not exist".format(f))
     return path
 
+
 def as_path(f) -> Path:
     return Path(f)
+
 
 class ValidateSimexp:
 
@@ -38,8 +40,17 @@ class ValidateSimexp:
             'generations': generations,
         }
 
-        with  args.result.open("w", encoding="utf-8") as f:
+        with args.result.open("w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, cls=DateTimeEncoder)
+
+    def _process_generations(self, generations):
+        table_entries = []
+        for generation in generations:
+            score = generation["score"]
+            table_entries.append([generation["number"], generation["reward"], score])
+
+        table_str = tabulate.tabulate(table_entries, headers=['Generation', 'Reward', 'Score'])
+        print(table_str)
 
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
@@ -77,13 +88,7 @@ class ValidateSimexp:
         if args.result:
             self._write_result(args, generations)
 
-        table_entries = []
-        for generation in generations:
-            score = generation["score"]
-            table_entries.append([generation["number"], generation["reward"], score])
-
-        table_str = tabulate.tabulate(table_entries, headers=['Generation', 'Reward', 'Score'])
-        print(table_str)
+        self._process_generations(generations)
 
 if __name__ == '__main__':
     v = ValidateSimexp()
