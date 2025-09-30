@@ -1,6 +1,7 @@
 import json
 import subprocess
 from pathlib import Path
+import tempfile
 
 
 class Simulator:
@@ -30,12 +31,12 @@ class Simulator:
 
     def simulate(self, strategy, values):
         result_file = "result.json"
-        tmp_path = Path("/tmp/ve")
-        tmp_path.mkdir(parents=True, exist_ok=True)
-        strategy_conf = self._create_strategy_conf(tmp_path, strategy, values)
-        args = ["-r", result_file, "strategy", "-a", strategy.name, "-p", strategy_conf]
-        self._run_simulator(args, cwd=tmp_path)
-        result_path = tmp_path / result_file
-        with result_path.open("r", encoding="utf-8") as f:
-            result = json.load(f)
-            return result["score"]
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            strategy_conf = self._create_strategy_conf(tmp_path, strategy, values)
+            args = ["-r", result_file, "strategy", "-a", strategy.name, "-p", strategy_conf]
+            self._run_simulator(args, cwd=tmp_path)
+            result_path = tmp_path / result_file
+            with result_path.open("r", encoding="utf-8") as f:
+                result = json.load(f)
+                return result["score"]
