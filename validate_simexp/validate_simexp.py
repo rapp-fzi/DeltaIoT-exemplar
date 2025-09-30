@@ -1,5 +1,6 @@
 import argparse
 from enum import Enum
+import json
 
 import tabulate
 
@@ -14,10 +15,14 @@ class Strategy(Enum):
 
 class ValidateSimexp:
 
+    def _write_result(self, args, result):
+        json.dump(result, args.result, indent=2)
+
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
         default = ' (default: %(default)s)'
         parser.add_argument('infile', type=argparse.FileType('r'))
+        parser.add_argument('-r', '--result', type=argparse.FileType('w', encoding="utf-8"))
         parser.add_argument('-t', '--type',
                                  choices=[type.type.lower() for type in InputType],
                                  default=InputType.JSON.name.lower(), help="select input file type" + default)
@@ -34,13 +39,30 @@ class ValidateSimexp:
             case InputType.CSV:
                 entries = file_type.load(args.infile)
 
-        table_entries = []
+        generations = []
         strategy = Strategy[args.strategy]
         simulator = Simulator()
         for entry in entries:
             score = simulator.simulate(strategy, entry["Values"])
-            #print("generation: %d reward: %s score: %s" % (entry["Generation"], entry["Reward"], score))
-            table_entries.append([entry["Generation"], entry["Reward"], score])
+            generation = {
+                'number': entry["Generation"],
+                'reward': entry["Reward"],
+                'score': score,
+            }
+            generations.append(generation)
+
+        result = {
+            'strategy': args.strategy,
+            'generations': generations,
+        }
+
+        if args.result:
+            self._write_result(args, result)
+
+        table_entries = []
+        for generation in generations:
+            score = generation["score"]
+            table_entries.append([generation["number"], generation["reward"], score])
 
         table_str = tabulate.tabulate(table_entries, headers=['Generation', 'Reward', 'Score'])
         print(table_str)
