@@ -23,8 +23,6 @@ class DateTimeEncoder(json.JSONEncoder):
 def validate_file_exists(f) -> Path:
     path = Path(f)
     if not path.exists():
-        # Argparse uses the ArgumentTypeError to give a rejection message like:
-        # error: argument input: x does not exist
         raise argparse.ArgumentTypeError("{0} does not exist".format(f))
     return path
 
