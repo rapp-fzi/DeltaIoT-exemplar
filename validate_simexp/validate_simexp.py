@@ -2,6 +2,7 @@ import argparse
 from enum import Enum
 import json
 import datetime
+from pathlib import Path
 
 import tabulate
 
@@ -19,6 +20,17 @@ class DateTimeEncoder(json.JSONEncoder):
         if isinstance(obj, (datetime.date, datetime.datetime)):
             return obj.isoformat()
 
+def validate_file_exists(f) -> Path:
+    path = Path(f)
+    if not path.exists():
+        # Argparse uses the ArgumentTypeError to give a rejection message like:
+        # error: argument input: x does not exist
+        raise argparse.ArgumentTypeError("{0} does not exist".format(f))
+    return path
+
+def as_path(f) -> Path:
+    return Path(f)
+
 class ValidateSimexp:
 
     def _write_result(self, args, generations):
@@ -28,13 +40,14 @@ class ValidateSimexp:
             'generations': generations,
         }
 
-        json.dump(result, args.result, indent=2, cls=DateTimeEncoder)
+        with  args.result.open("w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2, cls=DateTimeEncoder)
 
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
         default = ' (default: %(default)s)'
-        parser.add_argument('infile', type=argparse.FileType('r'))
-        parser.add_argument('-r', '--result', type=argparse.FileType('w', encoding="utf-8"))
+        parser.add_argument('infile', type=validate_file_exists)
+        parser.add_argument('-r', '--result', type=as_path, help="result json file")
         parser.add_argument('-t', '--type',
                                  choices=[type.type.lower() for type in InputType],
                                  default=InputType.JSON.name.lower(), help="select input file type" + default)

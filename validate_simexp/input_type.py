@@ -9,9 +9,11 @@ class Input:
     type: str
     load: Callable
 
+
 def _read_csv_file(csv_file):
     fieldnames = ["Generation", "Reward", "Values"]
-    reader = csv.DictReader(csv_file, fieldnames=fieldnames, delimiter=";")
+    with csv_file.open("r", encoding="utf-8") as f:
+        reader = csv.DictReader(csv_file, fieldnames=fieldnames, delimiter=";")
     next(reader)  # skip header
     result = []
     for row in reader:
@@ -27,7 +29,8 @@ def _read_csv_file(csv_file):
 
 
 def _read_json_file(json_file):
-    content = json.load(json_file)
+    with json_file.open("r", encoding="utf-8") as f:
+        content = json.load(f)
     result = []
     for entry in content:
         generation = int(entry['generation'])
