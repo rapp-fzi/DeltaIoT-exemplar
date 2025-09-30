@@ -1,6 +1,7 @@
 import argparse
 from enum import Enum
 import json
+import datetime
 
 import tabulate
 
@@ -12,16 +13,22 @@ class Strategy(Enum):
     EAStrategy1b = "EAStrategy1b"
     EAStrategy1c = "EAStrategy1c"
 
+class DateTimeEncoder(json.JSONEncoder):
+    # Override the default method
+    def default(self, obj):
+        if isinstance(obj, (datetime.date, datetime.datetime)):
+            return obj.isoformat()
 
 class ValidateSimexp:
 
     def _write_result(self, args, generations):
         result = {
             'strategy': args.strategy,
+            'date': datetime.datetime.now(datetime.timezone.utc),
             'generations': generations,
         }
 
-        json.dump(result, args.result, indent=2)
+        json.dump(result, args.result, indent=2, cls=DateTimeEncoder)
 
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
