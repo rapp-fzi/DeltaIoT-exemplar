@@ -9,16 +9,19 @@ import tabulate
 from input_type import InputType
 from simulator import Simulator
 
+
 class Strategy(Enum):
     EAStrategy1a = "EAStrategy1a"
     EAStrategy1b = "EAStrategy1b"
     EAStrategy1c = "EAStrategy1c"
+
 
 class DateTimeEncoder(json.JSONEncoder):
     # Override the default method
     def default(self, obj):
         if isinstance(obj, (datetime.date, datetime.datetime)):
             return obj.isoformat()
+
 
 def validate_file_exists(f) -> Path:
     path = Path(f)
@@ -89,6 +92,7 @@ class ValidateSimexp:
             self._write_result(args, generations)
 
         self._process_generations(generations)
+
 
 if __name__ == '__main__':
     v = ValidateSimexp()

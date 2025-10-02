@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Callable
 from dataclasses import dataclass
 
+
 @dataclass
 class Input:
     type: str
