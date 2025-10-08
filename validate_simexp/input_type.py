@@ -36,7 +36,7 @@ def _read_json_file(json_file):
     for entry in content:
         generation = int(entry['generation'])
         reward = entry['reward']
-        values = {name: value for name, value in entry['optimizables'].items()}
+        values = {name: value for name, value in entry['values'].items()}
         result.append({"Generation": generation, "Reward": reward, "Values": values})
     return result
 
