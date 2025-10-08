@@ -1,5 +1,4 @@
 import argparse
-from enum import Enum
 import json
 import datetime
 from pathlib import Path
@@ -8,12 +7,7 @@ import tabulate
 
 from input_type import InputType
 from simulator import Simulator
-
-
-class Strategy(Enum):
-    EAStrategy1a = "EAStrategy1a"
-    EAStrategy1b = "EAStrategy1b"
-    EAStrategy1c = "EAStrategy1c"
+from strategy import Strategy
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -60,6 +54,7 @@ class ValidateSimexp:
         default = ' (default: %(default)s)'
         parser.add_argument('infile', type=validate_file_exists)
         parser.add_argument('-r', '--result', type=as_path, help="result json file")
+        parser.add_argument('--seed', type=int, help="simulator seed")
         parser.add_argument('-t', '--type',
                                  choices=[type.type.lower() for type in InputType],
                                  default=InputType.JSON.name.lower(), help="select input file type" + default)
@@ -77,10 +72,9 @@ class ValidateSimexp:
                 entries = file_type.load(args.infile)
 
         generations = []
-        strategy = Strategy[args.strategy]
         simulator = Simulator()
         for entry in entries:
-            score = simulator.simulate(strategy, entry["Values"])
+            score = simulator.simulate(args, entry["Values"])
             generation = {
                 'number': entry["Generation"],
                 'reward': entry["Reward"],

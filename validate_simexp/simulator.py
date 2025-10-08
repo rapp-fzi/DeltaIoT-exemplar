@@ -3,6 +3,8 @@ import subprocess
 from pathlib import Path
 import tempfile
 
+from strategy import Strategy
+
 
 class Simulator:
     BINARY_JAVA = "java"
@@ -29,12 +31,16 @@ class Simulator:
             json.dump(values, f, indent=2)
         return strategy_path
 
-    def simulate(self, strategy, values):
+    def simulate(self, args, values):
+        strategy = Strategy[args.strategy]
         result_file = "result.json"
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             strategy_conf = self._create_strategy_conf(tmp_path, strategy, values)
-            args = ["-r", result_file, "strategy", "-a", strategy.name, "-p", strategy_conf]
+            base_args = ["-r", result_file]
+            if args.seed is not None:
+                base_args.extend(["--seed", str(args.seed)])
+            args = base_args + ["strategy", "-a", strategy.name, "-p", strategy_conf]
             self._run_simulator(args, cwd=tmp_path)
             result_path = tmp_path / result_file
             with result_path.open("r", encoding="utf-8") as f:
