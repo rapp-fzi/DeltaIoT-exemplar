@@ -178,6 +178,6 @@ def test_strategy2a(jar_file, cli_path, tmp_path,
     proc = run_cli(args, cli=cli_path, cwd=str(tmp_path))
 
     out = (proc.stdout or "") + (proc.stderr or "")
-    assert proc.returncode == 0, f"exit {proc.returncode}\nOUT:\n{out}"
+    assert proc.returncode == 0, f"exit {proc.returncode}\nOUT:\n{out}\nstrategy config:\n{config}"
     expected_result_file = tmp_path / result_file
-    assert expected_result_file.exists()
+    assert expected_result_file.exists(), f"missing result file\nstrategy config:\n{config}"
