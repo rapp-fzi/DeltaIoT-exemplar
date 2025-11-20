@@ -124,7 +124,7 @@ def test_strategy1c(jar_file, cli_path, tmp_path, CHANGE_POWER_VALUE, POWER_MIN,
 @pytest.mark.parametrize('CHANGE_POWER_VALUE17', [1,  4])
 @pytest.mark.parametrize('POWER_MIN', [0, 5])
 @pytest.mark.parametrize('POWER_MIN_MAX_DELTA', [4, 10])
-def _test_strategy2a(jar_file, cli_path, tmp_path,
+def test_strategy2a(jar_file, cli_path, tmp_path,
                     CHANGE_POWER_VALUE1, CHANGE_POWER_VALUE2, CHANGE_POWER_VALUE3, CHANGE_POWER_VALUE4,
                     CHANGE_POWER_VALUE5, CHANGE_POWER_VALUE6, CHANGE_POWER_VALUE7, CHANGE_POWER_VALUE8,
                     CHANGE_POWER_VALUE9, CHANGE_POWER_VALUE10, CHANGE_POWER_VALUE11, CHANGE_POWER_VALUE12,
