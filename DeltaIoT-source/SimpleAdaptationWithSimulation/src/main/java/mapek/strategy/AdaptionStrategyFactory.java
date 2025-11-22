@@ -13,6 +13,7 @@ public class AdaptionStrategyFactory {
         EAStrategy1c(StrategyConfigurationEAStrategy1c.class), //
         EAStrategy2a(StrategyConfigurationEAStrategy2a.class), //
         EAStrategy2b(StrategyConfigurationEAStrategy2b.class), //
+        EAStrategy3a(StrategyConfigurationEAStrategy3a.class), //
         ;
 
         private final Class<? extends IStrategyConfiguration> strategyConfiguration;
@@ -42,6 +43,8 @@ public class AdaptionStrategyFactory {
                 (StrategyConfigurationEAStrategy2a) config);
         case EAStrategy2b -> new EAFeedbackLoopStrategy2b(networkMgmt, moteWriter,
                 (StrategyConfigurationEAStrategy2b) config);
+        case EAStrategy3a -> new EAFeedbackLoopStrategy3a(networkMgmt, moteWriter,
+                (StrategyConfigurationEAStrategy3a) config);
         };
     }
 }
