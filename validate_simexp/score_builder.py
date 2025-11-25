@@ -17,15 +17,18 @@ class ScoreBuilder:
         for i in range(count):
             score = self._simulator.simulate(strategy, values, seed)
             scores.append(score)
-        average_score = sum(scores) / len(scores)
-        return average_score
+        return scores
 
     def build_scores(self, entries, strategy, seed, count):
         groups = self._group_entries(entries)
 
-        scores = []
-        for group in groups.values():
-            values = group[0]["Values"]
-            score = self._build_score(strategy, seed, values, count)
-            scores.extend([score] * len(group))
-        return scores
+        score_entries = {}
+        for group, value in groups.items():
+            values = value[0]["Values"]
+            scores = self._build_score(strategy, seed, values, count)
+            average_score = sum(scores) / len(scores)
+            score_entries[group] = {
+                "average_score": average_score,
+                "scores": scores,
+            }
+        return score_entries

@@ -29,33 +29,45 @@ def as_path(f) -> Path:
 
 
 class ValidateSimexp:
+    def _write_result(self, args, entries, score_entries):
+        groups = self.group_entries(entries)
+        group_entries = []
+        for i, entry in enumerate(groups.items()):
+            group, group_generations = entry
+            group_generation_entries = []
+            for generation in group_generations:
+                group_generation_entries.append({
+                    "generation": generation["Generation"],
+                    "reward": generation["Reward"],
+                })
+            group_entries.append({
+                "optimizable values": {name: value for name, value in group_generations[0]["Values"].items()},
+                "score": {
+                    "average": score_entries[group]["average_score"],
+                    "scores": score_entries[group]["scores"],
+                },
+                "entries": group_generation_entries,
+            })
 
-    def _write_result(self, args, generations):
         result = {
             'strategy': args.strategy,
             'date': datetime.datetime.now(datetime.timezone.utc),
-            'generations': generations,
+            'groups': group_entries,
         }
 
         with args.result.open("w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, cls=DateTimeEncoder)
 
-    def group_entries(self, entries):
-        groups = {}
-        for item in entries:
-            key = str(item['values'])
-            groups.setdefault(key, []).append(item)
-        return groups
-
-    def _process_generations(self, generations):
+    def _process_generations(self, entries, score_entries):
         table_entries = []
-        groups = self.group_entries(generations)
-        for i, group in enumerate(groups.values()):
-            for generation in group[:-1]:
-                table_entries.append([generation["number"], generation["reward"], None])
-            generation = group[-1]
-            score = generation["score"]
-            table_entries.append([generation["number"], generation["reward"], score])
+        groups = self.group_entries(entries)
+        for i, entry in enumerate(groups.items()):
+            group, group_generations = entry
+            for generation in group_generations[:-1]:
+                table_entries.append([generation["Generation"], generation["Reward"], None])
+            generation = group_generations[-1]
+            score = score_entries[group]["average_score"]
+            table_entries.append([generation["Generation"], generation["Reward"], score])
             if i < len(groups.values()) - 1:
                 table_entries.append(SEPARATING_LINE)
 
@@ -64,6 +76,13 @@ class ValidateSimexp:
                              tablefmt="simple"
                              )
         print(table_str)
+
+    def group_entries(self, entries):
+        groups = {}
+        for item in entries:
+            key = str(item['Values'])
+            groups.setdefault(key, []).append(item)
+        return groups
 
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
@@ -89,22 +108,11 @@ class ValidateSimexp:
                 entries = file_type.load(args.infile)
 
         score_builder = ScoreBuilder()
-        scores = score_builder.build_scores(entries, args.strategy, args.seed, args.count)
-        generations = []
-        for i, entry in enumerate(entries):
-            score = scores[i]
-            generation = {
-                'number': entry["Generation"],
-                'values': entry["Values"],
-                'reward': entry["Reward"],
-                'score': score,
-            }
-            generations.append(generation)
+        score_entries = score_builder.build_scores(entries, args.strategy, args.seed, args.count)
 
         if args.result:
-            self._write_result(args, generations)
-
-        self._process_generations(generations)
+            self._write_result(args, entries, score_entries)
+        self._process_generations(entries, score_entries)
 
 
 if __name__ == '__main__':
