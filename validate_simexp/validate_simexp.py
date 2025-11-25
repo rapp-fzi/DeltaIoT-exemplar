@@ -72,7 +72,7 @@ class ValidateSimexp:
                 entries = file_type.load(args.infile)
 
         score_builder = ScoreBuilder()
-        scores = score_builder.build_scores(entries, args)
+        scores = score_builder.build_scores(entries, args.strategy, args.seed)
         generations = []
         for i, entry in enumerate(entries):
             score = scores[i]
