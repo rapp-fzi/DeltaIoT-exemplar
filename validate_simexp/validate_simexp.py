@@ -50,11 +50,14 @@ class ValidateSimexp:
     def _process_generations(self, generations):
         table_entries = []
         groups = self.group_entries(generations)
-        for group in groups.values():
-            for generation in group:
-                score = generation["score"]
-                table_entries.append([generation["number"], generation["reward"], score])
-            table_entries.append(SEPARATING_LINE)
+        for i, group in enumerate(groups.values()):
+            for generation in group[:-1]:
+                table_entries.append([generation["number"], generation["reward"], None])
+            generation = group[-1]
+            score = generation["score"]
+            table_entries.append([generation["number"], generation["reward"], score])
+            if i < len(groups.values()) - 1:
+                table_entries.append(SEPARATING_LINE)
 
         table_str = tabulate(table_entries,
                              headers=['Generation', 'Reward', 'Score'],

@@ -17,8 +17,7 @@ class ScoreBuilder:
 
         scores = []
         for group in groups.values():
-            scores.extend([None] * (len(group) - 1))
             values = group[0]["Values"]
             score = self._simulator.simulate(strategy, values, seed)
-            scores.append(score)
+            scores.extend([score] * len(group))
         return scores
