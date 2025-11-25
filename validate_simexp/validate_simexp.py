@@ -40,16 +40,16 @@ class ValidateSimexp:
         with args.result.open("w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, cls=DateTimeEncoder)
 
-    def group_preserve_order(self, seq):
+    def group_entries(self, entries):
         groups = {}
-        for item in seq:
+        for item in entries:
             key = str(item['values'])
             groups.setdefault(key, []).append(item)
         return groups
 
     def _process_generations(self, generations):
         table_entries = []
-        groups = self.group_preserve_order(generations)
+        groups = self.group_entries(generations)
         for group in groups.values():
             for generation in group:
                 score = generation["score"]
