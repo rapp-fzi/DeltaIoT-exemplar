@@ -60,7 +60,7 @@ class ValidateSimexp:
                 table_entries.append(SEPARATING_LINE)
 
         table_str = tabulate(table_entries,
-                             headers=['Generation', 'Reward', 'Score'],
+                             headers=['Generation', 'Reward', 'Average Score'],
                              tablefmt="simple"
                              )
         print(table_str)
@@ -71,6 +71,7 @@ class ValidateSimexp:
         parser.add_argument('infile', type=validate_file_exists)
         parser.add_argument('-r', '--result', type=as_path, help="result json file")
         parser.add_argument('--seed', type=int, help="simulator seed")
+        parser.add_argument('--count', type=int, default=30, help="amount of simulations to run" + default)
         parser.add_argument('-t', '--type',
                                  choices=[type.type.lower() for type in InputType],
                                  default=InputType.JSON.name.lower(), help="select input file type" + default)
@@ -88,7 +89,7 @@ class ValidateSimexp:
                 entries = file_type.load(args.infile)
 
         score_builder = ScoreBuilder()
-        scores = score_builder.build_scores(entries, args.strategy, args.seed)
+        scores = score_builder.build_scores(entries, args.strategy, args.seed, args.count)
         generations = []
         for i, entry in enumerate(entries):
             score = scores[i]
