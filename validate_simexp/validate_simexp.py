@@ -6,8 +6,8 @@ from pathlib import Path
 import tabulate
 
 from input_type import InputType
-from simulator import Simulator
 from strategy import Strategy
+from score_builder import ScoreBuilder
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -71,10 +71,11 @@ class ValidateSimexp:
             case InputType.CSV:
                 entries = file_type.load(args.infile)
 
+        score_builder = ScoreBuilder()
+        scores = score_builder.build_scores(entries, args)
         generations = []
-        simulator = Simulator()
-        for entry in entries:
-            score = simulator.simulate(args, entry["Values"])
+        for i, entry in enumerate(entries):
+            score = scores[i]
             generation = {
                 'number': entry["Generation"],
                 'reward': entry["Reward"],
