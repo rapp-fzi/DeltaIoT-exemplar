@@ -3,7 +3,7 @@ import json
 import datetime
 from pathlib import Path
 
-import tabulate
+from tabulate import tabulate, SEPARATING_LINE
 
 from input_type import InputType
 from strategy import Strategy
@@ -40,13 +40,26 @@ class ValidateSimexp:
         with args.result.open("w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, cls=DateTimeEncoder)
 
+    def group_preserve_order(self, seq):
+        groups = {}
+        for item in seq:
+            key = str(item['values'])
+            groups.setdefault(key, []).append(item)
+        return groups
+
     def _process_generations(self, generations):
         table_entries = []
-        for generation in generations:
-            score = generation["score"]
-            table_entries.append([generation["number"], generation["reward"], score])
+        groups = self.group_preserve_order(generations)
+        for group in groups.values():
+            for generation in group:
+                score = generation["score"]
+                table_entries.append([generation["number"], generation["reward"], score])
+            table_entries.append(SEPARATING_LINE)
 
-        table_str = tabulate.tabulate(table_entries, headers=['Generation', 'Reward', 'Score'])
+        table_str = tabulate(table_entries,
+                             headers=['Generation', 'Reward', 'Score'],
+                             tablefmt="simple"
+                             )
         print(table_str)
 
     def main(self):
@@ -78,6 +91,7 @@ class ValidateSimexp:
             score = scores[i]
             generation = {
                 'number': entry["Generation"],
+                'values': entry["Values"],
                 'reward': entry["Reward"],
                 'score': score,
             }
