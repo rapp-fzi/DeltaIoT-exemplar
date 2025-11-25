@@ -9,7 +9,7 @@ class ScoreBuilder:
         scores = []
         simulator = Simulator()
         for entry in entries:
-            score = simulator.simulate(args, entry["Values"])
+            score = simulator.simulate(args.strategy, entry["Values"], args.seed)
             generation = {
                 'number': entry["Generation"],
                 'reward': entry["Reward"],

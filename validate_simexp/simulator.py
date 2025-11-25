@@ -31,15 +31,15 @@ class Simulator:
             json.dump(values, f, indent=2)
         return strategy_path
 
-    def simulate(self, args, values):
-        strategy = Strategy[args.strategy]
+    def simulate(self, strategy, values, seed):
+        strategy = Strategy[strategy]
         result_file = "result.json"
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             strategy_conf = self._create_strategy_conf(tmp_path, strategy, values)
             base_args = ["-r", result_file]
-            if args.seed is not None:
-                base_args.extend(["--seed", str(args.seed)])
+            if seed is not None:
+                base_args.extend(["--seed", str(seed)])
             args = base_args + ["strategy", "-a", strategy.name, "-p", strategy_conf]
             self._run_simulator(args, cwd=tmp_path)
             result_path = tmp_path / result_file
