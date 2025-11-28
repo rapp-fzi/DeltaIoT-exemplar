@@ -140,7 +140,7 @@ public class DeltaIoTEmulatorMain extends Application implements ISimulatorProvi
                 LOGGER.info("strategy: {}", qosResult.getStrategyName());
                 LOGGER.info("result average energy {}, packet loss {}", qosResult.getEnergyConsumptionAverage(),
                         qosResult.getPacketLossAverage());
-                LOGGER.info("result score: {}", qosResult.getScore());
+                LOGGER.info("result score: {}", qosResult.getAverageScore());
                 displayData(qosResult.getQosEntries(), qosResult.getStrategyName());
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);

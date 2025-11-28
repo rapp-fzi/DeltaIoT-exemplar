@@ -37,10 +37,10 @@ public class QoSCalculatorTest {
     }
 
     @Test
-    public void testCalcScore() {
+    public void testCalcAverageScore() {
         List<QoS> qos = Arrays.asList(new QoS(0, 1, 0), new QoS(0, 2, 1));
 
-        double actualScore = calculator.calcScore(qos);
+        double actualScore = calculator.averageScore(qos);
 
         assertEquals(actualScore, 1.0, EPSILON);
     }

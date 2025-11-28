@@ -9,7 +9,7 @@ public class QoSResult {
     private final List<QoS> qosEntries;
     private final double energyConsumptionAverage;
     private final double packetLossAverage;
-    private final double score;
+    private final double averageScore;
 
     public QoSResult(String strategyName, List<QoS> qosEntries, double energyConsumptionAverage,
             double packetLossAverage, double score) {
@@ -17,7 +17,7 @@ public class QoSResult {
         this.qosEntries = qosEntries;
         this.energyConsumptionAverage = energyConsumptionAverage;
         this.packetLossAverage = packetLossAverage;
-        this.score = score;
+        this.averageScore = score;
     }
 
     public String getStrategyName() {
@@ -36,7 +36,7 @@ public class QoSResult {
         return packetLossAverage;
     }
 
-    public double getScore() {
-        return score;
+    public double getAverageScore() {
+        return averageScore;
     }
 }

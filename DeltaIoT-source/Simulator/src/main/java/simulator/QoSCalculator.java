@@ -20,7 +20,7 @@ public class QoSCalculator {
         return average;
     }
 
-    public double calcScore(List<QoS> qos) {
+    public double averageScore(List<QoS> qos) {
         double energyConsumptionAverage = calcEnergyConsumptionAverage(qos);
         double packetLossAverage = calcPacketLossAverage(qos);
         return (energyConsumptionAverage + packetLossAverage) / 2;

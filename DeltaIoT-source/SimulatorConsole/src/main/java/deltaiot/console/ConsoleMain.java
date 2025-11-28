@@ -115,18 +115,18 @@ public class ConsoleMain {
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
-        double score = qoSCalculator.calcScore(qos);
+        double averageScore = qoSCalculator.averageScore(qos);
         LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
-        LOGGER.info("result score: {}", score);
+        LOGGER.info("result average score: {}", averageScore);
 
         QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos, energyConsumptionAverage,
-                packetLossAverage, score);
+                packetLossAverage, averageScore);
         IQOSWriter qosWriter = new JsonQOSWriter(baseLocation);
         qosWriter.saveQoS(qosResult);
 
         if (args.resultPath != null) {
             Result result = new Result(strategyName, strategyConfig, args.num_runs, energyConsumptionAverage,
-                    packetLossAverage, score, qos);
+                    packetLossAverage, averageScore, qos);
             writeResult(result, args.resultPath);
         }
     }

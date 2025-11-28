@@ -96,7 +96,7 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
-        double score = qoSCalculator.calcScore(qos);
+        double score = qoSCalculator.averageScore(qos);
         LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
         LOGGER.info("result score: {}", score);
 
