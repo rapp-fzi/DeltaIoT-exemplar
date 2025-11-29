@@ -1,6 +1,11 @@
 package simulator;
 
+import org.apache.commons.lang3.Range;
+
 public class QoS {
+    public final static Range<Double> RANGE_PACKET_LOSS = Range.of(0.025, 0.2);
+    public final static Range<Double> RANGE_ENERGY_CONSUMPTION = Range.of(10.0, 26.0);
+
     private final double packetLoss;
     private final double powerConsumption;
     private final int period;

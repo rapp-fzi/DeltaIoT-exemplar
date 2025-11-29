@@ -20,28 +20,56 @@ public class QoSCalculatorTest {
 
     @Test
     public void testCalcPowerAverage() {
-        List<QoS> qos = Arrays.asList(new QoS(0, 0, 0), new QoS(0, 0, 1));
+        List<QoS> qos = Arrays.asList(new QoS(0, 0, 10), new QoS(0, 0, 20));
 
         double actualAverage = calculator.calcEnergyConsumptionAverage(qos);
 
-        assertEquals(actualAverage, 0.5, EPSILON);
+        assertEquals(actualAverage, 15, EPSILON);
     }
 
     @Test
     public void testCalcPacketLossAverage() {
-        List<QoS> qos = Arrays.asList(new QoS(0, 1, 0), new QoS(0, 2, 0));
+        List<QoS> qos = Arrays.asList(new QoS(0, 0.1, 12), new QoS(0, 0.2, 10));
 
         double actualAverage = calculator.calcPacketLossAverage(qos);
 
-        assertEquals(actualAverage, 1.5, EPSILON);
+        assertEquals(actualAverage, 0.15, EPSILON);
     }
 
     @Test
     public void testCalcAverageScore() {
-        List<QoS> qos = Arrays.asList(new QoS(0, 1, 0), new QoS(0, 2, 1));
+        List<QoS> qos = Arrays.asList(new QoS(0, 0.1, 10), new QoS(0, 0.2, 20));
 
         double actualScore = calculator.averageScore(qos);
 
-        assertEquals(actualScore, 1.0, EPSILON);
+        assertEquals(actualScore, 7.575, EPSILON);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCalcPowerAverageLowerBoundsValidation() {
+        List<QoS> qos = Arrays.asList(new QoS(0, 0, QoS.RANGE_ENERGY_CONSUMPTION.getMinimum() - 0.1));
+
+        calculator.calcEnergyConsumptionAverage(qos);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCalcPowerAverageUpperBoundsValidation() {
+        List<QoS> qos = Arrays.asList(new QoS(0, 0, QoS.RANGE_ENERGY_CONSUMPTION.getMaximum() + 0.1));
+
+        calculator.calcEnergyConsumptionAverage(qos);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCalcPacketLossAverageLowerBoundsValidation() {
+        List<QoS> qos = Arrays.asList(new QoS(0, QoS.RANGE_PACKET_LOSS.getMinimum() - 0.1, 0));
+
+        calculator.calcPacketLossAverage(qos);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCalcPacketLossAverageUpperBoundsValidation() {
+        List<QoS> qos = Arrays.asList(new QoS(0, QoS.RANGE_PACKET_LOSS.getMaximum() + 0.1, 0));
+
+        calculator.calcPacketLossAverage(qos);
     }
 }

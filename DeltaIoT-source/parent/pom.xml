@@ -23,6 +23,7 @@
     
     <slf4j-version>2.0.17</slf4j-version>
     <commons-csv-version>1.10.0</commons-csv-version>
+    <commons-lang3-version>3.20.0</commons-lang3-version>
     <jcommander-version>2.0</jcommander-version>
     
     <junit-version>4.12</junit-version>
