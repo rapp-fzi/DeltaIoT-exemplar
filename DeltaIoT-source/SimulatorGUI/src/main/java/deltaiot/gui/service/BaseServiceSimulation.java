@@ -18,6 +18,7 @@ import javafx.scene.control.Button;
 import simulator.IRunMonitor;
 import simulator.QoS;
 import simulator.QoSCalculator;
+import simulator.QoSValidator;
 import simulator.Simulator;
 import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
@@ -93,19 +94,24 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
     protected void executeRunner(ISimulationRunner runner, IQOSWriter qosWriter) throws IOException {
         ISimulationResult result = runner.run();
         List<QoS> qos = result.getQoS();
-        QoSCalculator qoSCalculator = new QoSCalculator();
-        try {
-            double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
-            double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
-            double averageScore = qoSCalculator.averageScore(qos);
-            LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
-            LOGGER.info("result average score: {}", averageScore);
 
-            QoSResult qosResult = new QoSResult(result.getStrategyId(), qos, energyConsumptionAverage,
-                    packetLossAverage, averageScore);
-            qosWriter.saveQoS(qosResult);
+        QoSValidator validator = new QoSValidator();
+        try {
+            validator.validate(qos);
         } catch (IllegalArgumentException e) {
             LOGGER.error(e.getMessage(), e);
+            return;
         }
+
+        QoSCalculator qoSCalculator = new QoSCalculator();
+        double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
+        double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
+        double averageScore = qoSCalculator.averageScore(qos);
+        LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
+        LOGGER.info("result average score: {}", averageScore);
+
+        QoSResult qosResult = new QoSResult(result.getStrategyId(), qos, energyConsumptionAverage, packetLossAverage,
+                averageScore);
+        qosWriter.saveQoS(qosResult);
     }
 }

@@ -31,6 +31,7 @@ import mapek.strategy.IAdaptionStrategy;
 import mapek.strategy.IStrategyConfiguration;
 import simulator.QoS;
 import simulator.QoSCalculator;
+import simulator.QoSValidator;
 import simulator.Simulator;
 import simulator.SimulatorConfig;
 import simulator.SimulatorFactory;
@@ -112,6 +113,8 @@ public class ConsoleMain {
         }
         ISimulationResult simulationResult = runner.run();
         List<QoS> qos = simulationResult.getQoS();
+        QoSValidator validator = new QoSValidator();
+        validator.validate(qos);
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);

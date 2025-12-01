@@ -44,32 +44,4 @@ public class QoSCalculatorTest {
 
         assertEquals(actualScore, 7.575, EPSILON);
     }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCalcPowerAverageLowerBoundsValidation() {
-        List<QoS> qos = Arrays.asList(new QoS(0, 0, QoS.RANGE_ENERGY_CONSUMPTION.getMinimum() - 0.1));
-
-        calculator.calcEnergyConsumptionAverage(qos);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCalcPowerAverageUpperBoundsValidation() {
-        List<QoS> qos = Arrays.asList(new QoS(0, 0, QoS.RANGE_ENERGY_CONSUMPTION.getMaximum() + 0.1));
-
-        calculator.calcEnergyConsumptionAverage(qos);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCalcPacketLossAverageLowerBoundsValidation() {
-        List<QoS> qos = Arrays.asList(new QoS(0, QoS.RANGE_PACKET_LOSS.getMinimum() - 0.1, 0));
-
-        calculator.calcPacketLossAverage(qos);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCalcPacketLossAverageUpperBoundsValidation() {
-        List<QoS> qos = Arrays.asList(new QoS(0, QoS.RANGE_PACKET_LOSS.getMaximum() + 0.1, 0));
-
-        calculator.calcPacketLossAverage(qos);
-    }
 }
