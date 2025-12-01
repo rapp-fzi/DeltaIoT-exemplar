@@ -20,19 +20,13 @@ public class QoSCalculator {
     }
 
     public double calcEnergyConsumptionAverage(List<QoS> qos) {
-        double average = qos.stream()
-            .mapToDouble(QoS::getEnergyConsumption)
-            .average()
-            .orElse(Double.NaN);
-        return average;
+        DoubleSummaryStatistics energyStats = calcEnergyConsumptionStatistics(qos);
+        return energyStats.getAverage();
     }
 
     public double calcPacketLossAverage(List<QoS> qos) {
-        double average = qos.stream()
-            .mapToDouble(QoS::getPacketLoss)
-            .average()
-            .orElse(Double.NaN);
-        return average;
+        DoubleSummaryStatistics packetStats = calcPacketLossStatistics(qos);
+        return packetStats.getAverage();
     }
 
     public double averageScore(List<QoS> qos) {
