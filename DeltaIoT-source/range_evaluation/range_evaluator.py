@@ -7,6 +7,7 @@ import json
 import statistics
 
 from tabulate import tabulate
+from progress.bar import Bar
 
 from strategy_kind import StrategyKind
 from sample_estimator import calculate_required_samples
@@ -60,10 +61,12 @@ class RangeEvaluator:
 
     def _collect_samples(self, count, strategy: StrategyKind):
         samples = []
-        for i in range(0, count):
-            with tempfile.TemporaryDirectory() as tmpdir_name:
-                result = self._execute_simulator(strategy, Path(tmpdir_name))
-                samples.append(result["statistics"])
+        with Bar("Sampling", max=count) as bar:
+            for i in range(0, count):
+                with tempfile.TemporaryDirectory() as tmpdir_name:
+                    result = self._execute_simulator(strategy, Path(tmpdir_name))
+                    samples.append(result["statistics"])
+                    bar.next()
         return samples
 
     def main(self):
