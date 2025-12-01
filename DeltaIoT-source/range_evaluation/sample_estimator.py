@@ -1,5 +1,6 @@
 import math
 
+
 def calculate_required_samples(confidence_percent, epsilon):
     """
     Computes the number of samples needed so that BOTH:
@@ -9,6 +10,9 @@ def calculate_required_samples(confidence_percent, epsilon):
 
     Uses the exact order-statistics formulas for Uniform(0,1).
     """
+    if not (0 < confidence_percent < 100):
+        raise ValueError("Confidence must be between 0 and 100 (exclusive).")
+
     p = confidence_percent / 100.0
 
     # We want: P(min ≤ ε AND max ≥ 1 - ε) ≥ p
@@ -21,8 +25,5 @@ def calculate_required_samples(confidence_percent, epsilon):
     # → n ≥ log((1 − p)/2) / log(1 − ε)
 
     rhs = (1 - p) / 2
-    if rhs <= 0:
-        raise ValueError("Confidence must be < 100%.")
-
     n = math.log(rhs) / math.log(1 - epsilon)
     return math.ceil(n)
