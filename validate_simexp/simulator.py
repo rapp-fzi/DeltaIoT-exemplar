@@ -19,7 +19,7 @@ class Simulator:
             text=True,
             capture_output=True,
             cwd=str(cwd),
-            check=True,
+            check=False,
         )
         out = (proc.stdout or "") + (proc.stderr or "")
         if proc.returncode != 0:
