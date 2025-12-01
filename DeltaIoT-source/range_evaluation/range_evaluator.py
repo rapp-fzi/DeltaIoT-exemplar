@@ -1,3 +1,4 @@
+import os
 import argparse
 import subprocess
 from pathlib import Path
@@ -5,6 +6,7 @@ import shutil
 import tempfile
 import json
 import statistics
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from tabulate import tabulate
 from progress.bar import Bar
@@ -59,13 +61,21 @@ class RangeEvaluator:
         result = self._read_result_file(expected_result_file)
         return result
 
-    def _collect_samples(self, count, strategy: StrategyKind):
+    def _collect_sample(self, strategy: StrategyKind):
+        with tempfile.TemporaryDirectory() as tmpdir_name:
+            result = self._execute_simulator(strategy, Path(tmpdir_name))
+            return result["statistics"]
+
+    def _collect_samples(self, count, strategy: StrategyKind, max_workers):
         samples = []
         with Bar("Sampling", max=count) as bar:
-            for i in range(0, count):
-                with tempfile.TemporaryDirectory() as tmpdir_name:
-                    result = self._execute_simulator(strategy, Path(tmpdir_name))
-                    samples.append(result["statistics"])
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = []
+                for i in range(0, count):
+                    future = executor.submit(self._collect_sample, strategy)
+                    futures.append(future)
+                for future in as_completed(futures):
+                    samples.append(future.result())
                     bar.next()
         return samples
 
@@ -77,6 +87,8 @@ class RangeEvaluator:
         parser.add_argument('-t', '--type',
                             choices=[_type.type.lower() for _type in StrategyKind],
                             default=StrategyKind.NONE.type.lower(), help="select adaption strategy type" + default)
+        parser.add_argument('--max_workers', type=int, default=1, help="max worker threads" + default)
+
         args = parser.parse_args()
 
         if not self._java_path:
@@ -88,7 +100,7 @@ class RangeEvaluator:
         sample_count = calculate_required_samples(args.confidence, args.accuracy)
         print(f"sample count for confidence = {args.confidence}% and accuracy = {args.accuracy}: {sample_count}")
         print(f"using adaption strategy: {strategy.type}")
-        samples = self._collect_samples(sample_count, strategy)
+        samples = self._collect_samples(sample_count, strategy, args.max_workers)
         energy_consumption_min = min([sample["energyConsumption"]["min"] for sample in samples])
         energy_consumption_max = max([sample["energyConsumption"]["max"] for sample in samples])
         energy_consumption_average = statistics.mean([sample["energyConsumption"]["average"] for sample in samples])
