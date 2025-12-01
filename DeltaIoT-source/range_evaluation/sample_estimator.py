@@ -8,6 +8,8 @@ def calculate_required_samples(confidence_percent, epsilon):
       max(X) ≥ 1 - ε
     hold with probability ≥ confidence_percent.
 
+    We want both endpoints within ±0.01 of 0 and 1
+
     Uses the exact order-statistics formulas for Uniform(0,1).
     """
     if not (0 < confidence_percent < 100):

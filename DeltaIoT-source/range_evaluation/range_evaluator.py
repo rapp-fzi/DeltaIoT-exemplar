@@ -72,7 +72,8 @@ class RangeEvaluator:
         parser = argparse.ArgumentParser(prog="range_evaluator", description="Establish DeltaIoT range boundaries")
         default = ' (default: %(default)s)'
         #parser.add_argument('-r', '--result', type=as_path, help="result json file")
-        #parser.add_argument('--count', type=int, default=30, help="amount of simulations to run" + default)
+        parser.add_argument('--confidence', type=int, default=95, help="confidence in percent" + default)
+        parser.add_argument('--accuracy', type=float, default=0.01, help="accuracy of result" + default)
         args = parser.parse_args()
 
         if not self._java_path:
@@ -80,10 +81,8 @@ class RangeEvaluator:
         if not self._jar_file:
             raise RuntimeError("unable to find: %s" % self._jar_file)
 
-        confidence = 95  # percent
-        epsilon = 0.01  # want endpoints within ±0.01 of 0 and 1
-        sample_count = calculate_required_samples(confidence, epsilon)
-        print(f"sample count for confidence {confidence}% and epsilon {epsilon} = {sample_count}")
+        sample_count = calculate_required_samples(args.confidence, args.accuracy)
+        print(f"sample count for confidence {args.confidence}% and accuracy {args.accuracy} = {sample_count}")
         #samples = self._collect_samples(sample_count)
 
 
