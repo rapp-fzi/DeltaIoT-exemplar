@@ -1,17 +1,20 @@
 package simulator;
 
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class QoSCalculator {
 
     public double calcEnergyConsumptionAverage(List<QoS> qos) {
-        qos.stream()
-            .filter(e -> !QoS.RANGE_ENERGY_CONSUMPTION.contains(e.getEnergyConsumption()))
-            .findFirst()
-            .ifPresent(e -> {
-                throw new IllegalArgumentException(String.format("energy consumtion out of bounds: %s (%s)",
-                        e.getEnergyConsumption(), QoS.RANGE_ENERGY_CONSUMPTION));
-            });
+        DoubleSummaryStatistics stats = qos.stream()
+            .map(e -> e.getEnergyConsumption())
+            .collect(Collectors.summarizingDouble((Double::doubleValue)));
+        if (!QoS.RANGE_ENERGY_CONSUMPTION.contains(stats.getMin())
+                || !QoS.RANGE_ENERGY_CONSUMPTION.contains(stats.getMax())) {
+            throw new IllegalArgumentException(String.format("energy consumtion min/max out of bounds %s: %s/%s",
+                    QoS.RANGE_ENERGY_CONSUMPTION, stats.getMin(), stats.getMax()));
+        }
 
         double average = qos.stream()
             .mapToDouble(QoS::getEnergyConsumption)
@@ -21,13 +24,13 @@ public class QoSCalculator {
     }
 
     public double calcPacketLossAverage(List<QoS> qos) {
-        qos.stream()
-            .filter(e -> !QoS.RANGE_PACKET_LOSS.contains(e.getPacketLoss()))
-            .findFirst()
-            .ifPresent(e -> {
-                throw new IllegalArgumentException(String.format("packet loss out of bounds: %s (%s)",
-                        e.getPacketLoss(), QoS.RANGE_PACKET_LOSS));
-            });
+        DoubleSummaryStatistics stats = qos.stream()
+            .map(e -> e.getPacketLoss())
+            .collect(Collectors.summarizingDouble((Double::doubleValue)));
+        if (!QoS.RANGE_PACKET_LOSS.contains(stats.getMin()) || !QoS.RANGE_PACKET_LOSS.contains(stats.getMax())) {
+            throw new IllegalArgumentException(String.format("packet loss min/max out of bounds %s: %f/%f",
+                    QoS.RANGE_PACKET_LOSS, stats.getMin(), stats.getMax()));
+        }
 
         double average = qos.stream()
             .mapToDouble(QoS::getPacketLoss)
