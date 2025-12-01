@@ -1,7 +1,9 @@
 package deltaiot.console;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import mapek.strategy.IStrategyConfiguration;
 import simulator.QoS;
@@ -10,12 +12,7 @@ public class Result {
     public final String strategy;
     public final IStrategyConfiguration strategyConfig;
     public final int num_runs;
-    public final double energyConsumptionMin;
-    public final double energyConsumptionMax;
-    public final double energyConsumptionAverage;
-    public final double packetLossMin;
-    public final double packetLossMax;
-    public final double packetLossAverage;
+    public final Map<String, Map<String, Double>> statistics;
     public final double averageScore;
     public final List<QoS> qos;
 
@@ -25,12 +22,17 @@ public class Result {
         this.strategy = strategy;
         this.strategyConfig = strategyConfig;
         this.num_runs = num_runs;
-        this.energyConsumptionMin = energyConsumptionMin;
-        this.energyConsumptionMax = energyConsumptionMax;
-        this.energyConsumptionAverage = energyConsumptionAverage;
-        this.packetLossMin = packetLossMin;
-        this.packetLossMax = packetLossMax;
-        this.packetLossAverage = packetLossAverage;
+        this.statistics = new LinkedHashMap<>();
+        Map<String, Double> energyStats = new LinkedHashMap<>();
+        energyStats.put("min", energyConsumptionMin);
+        energyStats.put("max", energyConsumptionMax);
+        energyStats.put("average", energyConsumptionAverage);
+        this.statistics.put("energyConsumption", energyStats);
+        Map<String, Double> packageLossStats = new LinkedHashMap<>();
+        packageLossStats.put("min", packetLossMin);
+        packageLossStats.put("max", packetLossMax);
+        packageLossStats.put("average", packetLossAverage);
+        this.statistics.put("packageLoss", packageLossStats);
         this.averageScore = averageScore;
         this.qos = new ArrayList<>(qos);
     }
