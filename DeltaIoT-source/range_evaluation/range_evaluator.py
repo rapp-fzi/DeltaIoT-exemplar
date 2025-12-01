@@ -5,6 +5,8 @@ import shutil
 import tempfile
 import json
 
+from sample_estimator import calculate_required_samples
+
 
 class RangeEvaluator:
     BINARY_JAVA = "java"
@@ -55,6 +57,17 @@ class RangeEvaluator:
         result = self._read_result_file(expected_result_file)
         return result
 
+    def _collect_samples(self, count):
+        samples = []
+        for i in range(0, count):
+            with tempfile.TemporaryDirectory() as tmpdir_name:
+                strategy = None
+                config = {}
+                result = self._execute_simulator(strategy, config, Path(tmpdir_name))
+                samples.append(result["statistics"])
+                print(f"result: {json.dumps(result["statistics"], indent=2)}")
+        return samples
+
     def main(self):
         parser = argparse.ArgumentParser(prog="range_evaluator", description="Establish DeltaIoT range boundaries")
         default = ' (default: %(default)s)'
@@ -67,11 +80,12 @@ class RangeEvaluator:
         if not self._jar_file:
             raise RuntimeError("unable to find: %s" % self._jar_file)
 
-        with tempfile.TemporaryDirectory() as tmpdir_name:
-            strategy = None
-            config = {}
-            result = self._execute_simulator(strategy, config, Path(tmpdir_name))
-            print(f"result: {json.dumps(result["statistics"], indent=2)}")
+        confidence = 95  # percent
+        epsilon = 0.01  # want endpoints within ±0.01 of 0 and 1
+        sample_count = calculate_required_samples(confidence, epsilon)
+        print(f"sample count for confidence {confidence}% and epsilon {epsilon} = {sample_count}")
+        #samples = self._collect_samples(sample_count)
+
 
 
 if __name__ == '__main__':
