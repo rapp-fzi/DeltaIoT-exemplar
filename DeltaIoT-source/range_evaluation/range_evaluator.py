@@ -4,8 +4,9 @@ from pathlib import Path
 import shutil
 import tempfile
 import json
+import statistics
 
-from tabulate import tabulate, SEPARATING_LINE
+from tabulate import tabulate
 
 from sample_estimator import calculate_required_samples
 
@@ -88,14 +89,16 @@ class RangeEvaluator:
         samples = self._collect_samples(sample_count)
         energy_consumption_min = min([sample["energyConsumption"]["min"] for sample in samples])
         energy_consumption_max = max([sample["energyConsumption"]["max"] for sample in samples])
+        energy_consumption_average = statistics.mean([sample["energyConsumption"]["average"] for sample in samples])
         packet_loss_min = min([sample["packetLoss"]["min"] for sample in samples])
         packet_loss_max = max([sample["packetLoss"]["max"] for sample in samples])
+        packet_loss_average = statistics.mean([sample["packetLoss"]["average"] for sample in samples])
 
         table_entries = []
-        table_entries.append(["energy consumption", energy_consumption_min, energy_consumption_max])
-        table_entries.append(["packet loss", packet_loss_min, packet_loss_max])
+        table_entries.append(["energy consumption", energy_consumption_min, energy_consumption_max, energy_consumption_average])
+        table_entries.append(["packet loss", packet_loss_min, packet_loss_max, packet_loss_average])
         table_str = tabulate(table_entries,
-                             headers=['Attribute', 'Min', 'Max'],
+                             headers=['Attribute', 'Min', 'Max', 'Average'],
                              tablefmt="simple"
                              )
         print(table_str)
