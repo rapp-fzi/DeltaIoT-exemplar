@@ -85,7 +85,7 @@ class RangeEvaluator:
             raise RuntimeError("unable to find: %s" % self._jar_file)
 
         sample_count = calculate_required_samples(args.confidence, args.accuracy)
-        print(f"sample count for confidence {args.confidence}% and accuracy {args.accuracy} = {sample_count}")
+        print(f"sample count for confidence {args.confidence}% and accuracy {args.accuracy}: {sample_count}")
         samples = self._collect_samples(sample_count)
         energy_consumption_min = min([sample["energyConsumption"]["min"] for sample in samples])
         energy_consumption_max = max([sample["energyConsumption"]["max"] for sample in samples])
