@@ -3,9 +3,14 @@ package simulator;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class QoSValidator {
+    private final QoSCalculator qosCalculator;
+
+    public QoSValidator() {
+        qosCalculator = new QoSCalculator();
+    }
+
     public void validate(List<QoS> qos) {
         Optional<String> energyResult = validateEnergy(qos);
         Optional<String> packetLossresult = validatePacketLoss(qos);
@@ -29,9 +34,7 @@ public class QoSValidator {
     }
 
     private Optional<String> validateEnergy(List<QoS> qos) {
-        DoubleSummaryStatistics energyStats = qos.stream()
-            .map(e -> e.getEnergyConsumption())
-            .collect(Collectors.summarizingDouble((Double::doubleValue)));
+        DoubleSummaryStatistics energyStats = qosCalculator.calcEnergyConsumptionStatistics(qos);
         if (QoS.RANGE_ENERGY_CONSUMPTION.contains(energyStats.getMin())
                 && QoS.RANGE_ENERGY_CONSUMPTION.contains(energyStats.getMax())) {
             return Optional.empty();
@@ -43,9 +46,7 @@ public class QoSValidator {
     }
 
     private Optional<String> validatePacketLoss(List<QoS> qos) {
-        DoubleSummaryStatistics packetStats = qos.stream()
-            .map(e -> e.getPacketLoss())
-            .collect(Collectors.summarizingDouble((Double::doubleValue)));
+        DoubleSummaryStatistics packetStats = qosCalculator.calcPacketLossStatistics(qos);
         if (QoS.RANGE_PACKET_LOSS.contains(packetStats.getMin())
                 && QoS.RANGE_PACKET_LOSS.contains(packetStats.getMax())) {
             return Optional.empty();
