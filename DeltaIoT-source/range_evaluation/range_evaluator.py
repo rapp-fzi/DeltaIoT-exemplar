@@ -5,6 +5,8 @@ import shutil
 import tempfile
 import json
 
+from tabulate import tabulate, SEPARATING_LINE
+
 from sample_estimator import calculate_required_samples
 
 
@@ -88,8 +90,16 @@ class RangeEvaluator:
         energy_consumption_max = max([sample["energyConsumption"]["max"] for sample in samples])
         packet_loss_min = min([sample["packetLoss"]["min"] for sample in samples])
         packet_loss_max = max([sample["packetLoss"]["max"] for sample in samples])
-        print("min/max energy:      %f / %f" % (energy_consumption_min, energy_consumption_max))
-        print("min/max packet loss: %f / %f" % (packet_loss_min, packet_loss_max))
+
+        table_entries = []
+        table_entries.append(["energy consumption", energy_consumption_min, energy_consumption_max])
+        table_entries.append(["packet loss", packet_loss_min, packet_loss_max])
+        table_str = tabulate(table_entries,
+                             headers=['Attribute', 'Min', 'Max'],
+                             tablefmt="simple"
+                             )
+        print(table_str)
+
 
 
 if __name__ == '__main__':
