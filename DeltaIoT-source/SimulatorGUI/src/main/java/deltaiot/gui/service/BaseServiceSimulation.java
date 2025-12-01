@@ -97,12 +97,12 @@ public abstract class BaseServiceSimulation extends Service<Void> implements ISi
         try {
             double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
             double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
-            double score = qoSCalculator.averageScore(qos);
+            double averageScore = qoSCalculator.averageScore(qos);
             LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
-            LOGGER.info("result score: {}", score);
+            LOGGER.info("result average score: {}", averageScore);
 
             QoSResult qosResult = new QoSResult(result.getStrategyId(), qos, energyConsumptionAverage,
-                    packetLossAverage, score);
+                    packetLossAverage, averageScore);
             qosWriter.saveQoS(qosResult);
         } catch (IllegalArgumentException e) {
             LOGGER.error(e.getMessage(), e);
