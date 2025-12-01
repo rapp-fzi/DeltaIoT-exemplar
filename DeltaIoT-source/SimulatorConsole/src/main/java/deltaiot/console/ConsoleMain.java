@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Random;
 
@@ -118,11 +119,16 @@ public class ConsoleMain {
             validator.validate(qos);
         }
         QoSCalculator qoSCalculator = new QoSCalculator();
+        DoubleSummaryStatistics energyStats = qoSCalculator.calcEnergyConsumptionStatistics(qos);
+        DoubleSummaryStatistics packetStats = qoSCalculator.calcPacketLossStatistics(qos);
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
         double averageScore = qoSCalculator.averageScore(qos);
-        LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
-        LOGGER.info("result average score: {}", averageScore);
+        LOGGER.info("result min/max energy:      {} / {}", energyStats.getMin(), energyStats.getMax());
+        LOGGER.info("result min/max packet loss: {} / {}", packetStats.getMin(), packetStats.getMax());
+        LOGGER.info("result average energy:      {}", energyConsumptionAverage);
+        LOGGER.info("result average packet loss: {}", packetLossAverage);
+        LOGGER.info("result average score:       {}", averageScore);
 
         QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos, energyConsumptionAverage,
                 packetLossAverage, averageScore);
