@@ -65,7 +65,7 @@ class RangeEvaluator:
                 config = {}
                 result = self._execute_simulator(strategy, config, Path(tmpdir_name))
                 samples.append(result["statistics"])
-                print(f"result: {json.dumps(result["statistics"], indent=2)}")
+                #print(f"result: {json.dumps(result["statistics"], indent=2)}")
         return samples
 
     def main(self):
@@ -83,8 +83,13 @@ class RangeEvaluator:
 
         sample_count = calculate_required_samples(args.confidence, args.accuracy)
         print(f"sample count for confidence {args.confidence}% and accuracy {args.accuracy} = {sample_count}")
-        #samples = self._collect_samples(sample_count)
-
+        samples = self._collect_samples(sample_count)
+        energy_consumption_min = min([sample["energyConsumption"]["min"] for sample in samples])
+        energy_consumption_max = max([sample["energyConsumption"]["max"] for sample in samples])
+        packet_loss_min = min([sample["packetLoss"]["min"] for sample in samples])
+        packet_loss_max = max([sample["packetLoss"]["max"] for sample in samples])
+        print("min/max energy:      %f / %f" % (energy_consumption_min, energy_consumption_max))
+        print("min/max packet loss: %f / %f" % (packet_loss_min, packet_loss_max))
 
 
 if __name__ == '__main__':
