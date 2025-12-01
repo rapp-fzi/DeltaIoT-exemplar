@@ -28,11 +28,11 @@ public class Result {
         energyStats.put("max", energyConsumptionMax);
         energyStats.put("average", energyConsumptionAverage);
         this.statistics.put("energyConsumption", energyStats);
-        Map<String, Double> packageLossStats = new LinkedHashMap<>();
-        packageLossStats.put("min", packetLossMin);
-        packageLossStats.put("max", packetLossMax);
-        packageLossStats.put("average", packetLossAverage);
-        this.statistics.put("packageLoss", packageLossStats);
+        Map<String, Double> packetLossStats = new LinkedHashMap<>();
+        packetLossStats.put("min", packetLossMin);
+        packetLossStats.put("max", packetLossMax);
+        packetLossStats.put("average", packetLossAverage);
+        this.statistics.put("packetLoss", packetLossStats);
         this.averageScore = averageScore;
         this.qos = new ArrayList<>(qos);
     }
