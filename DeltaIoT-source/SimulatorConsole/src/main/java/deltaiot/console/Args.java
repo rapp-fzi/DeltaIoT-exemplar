@@ -34,6 +34,9 @@ public class Args {
     @Parameter(names = { "-s", "--seed" }, description = "PRNG seed")
     public Long seed;
 
+    @Parameter(names = { "--no_validation" }, description = "disable QoS range validation")
+    public boolean no_validation = false;
+
     @Parameters
     public static class CommandStrategy {
         public static final String ID = "strategy";

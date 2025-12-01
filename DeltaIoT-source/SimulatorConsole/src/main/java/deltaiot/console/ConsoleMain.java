@@ -113,8 +113,10 @@ public class ConsoleMain {
         }
         ISimulationResult simulationResult = runner.run();
         List<QoS> qos = simulationResult.getQoS();
-        QoSValidator validator = new QoSValidator();
-        validator.validate(qos);
+        if (!args.no_validation) {
+            QoSValidator validator = new QoSValidator();
+            validator.validate(qos);
+        }
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
