@@ -9,26 +9,28 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.beust.jcommander.IUsageFormatter;
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import deltaiot.DeltaIoTSimulator;
 import deltaiot.client.ISimulationResult;
 import deltaiot.client.ISimulationRunner;
 import deltaiot.client.SimpleRunner;
 import deltaiot.client.SimulationClient;
-import deltaiot.console.Args.CommandStrategy;
 import deltaiot.console.json.StrictFieldsTypeAdapterFactory;
 import main.SimpleAdaptation;
 import mapek.strategy.AdaptionStrategyFactory;
+import mapek.strategy.AdaptionStrategyFactory.Kind;
 import mapek.strategy.IAdaptionStrategy;
 import mapek.strategy.IStrategyConfiguration;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 import simulator.QoS;
 import simulator.QoSCalculator;
 import simulator.Simulator;
@@ -41,55 +43,39 @@ import util.IResultWriter;
 import util.JsonQOSWriter;
 import util.QoSResult;
 
-public class ConsoleMain {
+@Command(name = "SimulatorConsole", mixinStandardHelpOptions = true)
+public class ConsoleMain implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleMain.class);
+
+    @Option(names = { "-r", "--result" }, description = "result file")
+    private Path resultPath;
+
+    @Option(names = { "-n", "--num_runs" }, description = "number of runs")
+    private int num_runs = DeltaIoTSimulator.NUM_OF_RUNS;
+
+    @Option(names = { "-s", "--seed" }, description = "PRNG seed")
+    public Long seed;
 
     public ConsoleMain() {
     }
 
     public static void main(String[] args) {
-        ConsoleMain main = new ConsoleMain();
-        int returnCode = main.run(args);
-        System.exit(returnCode);
+        int exitCode = new CommandLine(new ConsoleMain()).execute(args);
+        System.exit(exitCode);
     }
 
-    private int run(String[] argv) {
-        Args args = new Args();
-        CommandStrategy strategy = new CommandStrategy();
-        JCommander parser = JCommander.newBuilder()
-            .addObject(args)
-            .addCommand(CommandStrategy.ID, strategy)
-            .build();
+    @Command(name = "strategy", description = "Simulate with strategy", mixinStandardHelpOptions = true)
+    int strategy(@Option(names = { "-a",
+            "--adaption" }, required = true, description = "Adatption type: ${COMPLETION-CANDIDATES}") Kind strategyKind,
+            @Option(names = { "-p",
+                    "--param" }, required = true, description = "json parameter file") Path parameterFile)
+            throws IOException {
 
-        try {
-            parser.parse(argv);
-            if (args.help) {
-                StringBuilder sb = new StringBuilder();
-                IUsageFormatter usageFormatter = parser.getUsageFormatter();
-                usageFormatter.usage(sb);
-                LOGGER.info("{}", sb);
-                return 1;
-            }
-
-            runSimulation(args, parser);
-            return 0;
-        } catch (ParameterException e) {
-            StringBuilder sb = new StringBuilder();
-            IUsageFormatter usageFormatter = parser.getUsageFormatter();
-            usageFormatter.usage(sb);
-            LOGGER.error("{}\n{}", e.getMessage(), e);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return 2;
-    }
-
-    private void runSimulation(Args args, JCommander parser) throws IOException {
         Random randomGenerator = new Random();
-        if (args.seed != null) {
-            randomGenerator.setSeed(args.seed);
+        if (seed != null) {
+            randomGenerator.setSeed(seed);
         }
-        SimulatorConfig config = new SimulatorConfig(args.num_runs, randomGenerator);
+        SimulatorConfig config = new SimulatorConfig(num_runs, randomGenerator);
         Simulator simulator = SimulatorFactory.createExperimentSimulator(config, new NullRunMonitor());
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         IResultWriter resultWriter = new CsvFileWriter(baseLocation);
@@ -97,24 +83,12 @@ public class ConsoleMain {
         final ISimulationRunner runner;
         final String strategyName;
         final IStrategyConfiguration strategyConfig;
-        String command = parser.getParsedCommand();
 
-        if (CommandStrategy.ID.equals(command)) {
-            JCommander commander = parser.getCommands()
-                .get(command);
-            CommandStrategy strategy = (CommandStrategy) commander.getObjects()
-                .get(0);
-            strategyName = strategy.strategyKind.name();
-            LOGGER.info("running with strategy: {}", strategy.strategyKind);
-            strategyConfig = readStrategyParameter(strategy.parameterFile,
-                    strategy.strategyKind.getStrategyConfiguration());
-            runner = runWithAdaption(simulator, strategy, strategyConfig, resultWriter);
-        } else {
-            strategyName = "none";
-            strategyConfig = null;
-            LOGGER.info("running without strategy");
-            runner = runNoAdaption(simulator);
-        }
+        strategyName = strategyKind.name();
+        LOGGER.info("running with strategy: {}", strategyKind);
+        strategyConfig = readStrategyParameter(parameterFile, strategyKind.getStrategyConfiguration());
+        runner = runWithAdaption(simulator, strategyKind, strategyConfig, resultWriter);
+
         ISimulationResult simulationResult = runner.run();
         List<QoS> qos = simulationResult.getQoS();
         QoSCalculator qoSCalculator = new QoSCalculator();
@@ -129,10 +103,62 @@ public class ConsoleMain {
         IQOSWriter qosWriter = new JsonQOSWriter(baseLocation);
         qosWriter.saveQoS(qosResult);
 
-        if (args.resultPath != null) {
-            Result result = new Result(strategyName, strategyConfig, args.num_runs, energyConsumptionAverage,
+        if (resultPath != null) {
+            Result result = new Result(strategyName, strategyConfig, num_runs, energyConsumptionAverage,
                     packetLossAverage, score, qos);
-            writeResult(result, args.resultPath);
+            writeResult(result, resultPath);
+        }
+
+        return 0;
+    }
+
+    @Override
+    public Integer call() throws Exception {
+        try {
+            runSimulation();
+            return 0;
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return 2;
+    }
+
+    private void runSimulation() throws IOException {
+        Random randomGenerator = new Random();
+        if (seed != null) {
+            randomGenerator.setSeed(seed);
+        }
+        SimulatorConfig config = new SimulatorConfig(num_runs, randomGenerator);
+        Simulator simulator = SimulatorFactory.createExperimentSimulator(config, new NullRunMonitor());
+        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+
+        final ISimulationRunner runner;
+        final String strategyName;
+        final IStrategyConfiguration strategyConfig;
+
+        strategyName = "none";
+        strategyConfig = null;
+        LOGGER.info("running without strategy");
+        runner = runNoAdaption(simulator);
+
+        ISimulationResult simulationResult = runner.run();
+        List<QoS> qos = simulationResult.getQoS();
+        QoSCalculator qoSCalculator = new QoSCalculator();
+        double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
+        double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
+        double score = qoSCalculator.calcScore(qos);
+        LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
+        LOGGER.info("result score: {}", score);
+
+        QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos, energyConsumptionAverage,
+                packetLossAverage, score);
+        IQOSWriter qosWriter = new JsonQOSWriter(baseLocation);
+        qosWriter.saveQoS(qosResult);
+
+        if (resultPath != null) {
+            Result result = new Result(strategyName, strategyConfig, num_runs, energyConsumptionAverage,
+                    packetLossAverage, score, qos);
+            writeResult(result, resultPath);
         }
     }
 
@@ -152,14 +178,14 @@ public class ConsoleMain {
         return simpleRunner;
     }
 
-    private ISimulationRunner runWithAdaption(Simulator simulator, CommandStrategy strategy,
+    private ISimulationRunner runWithAdaption(Simulator simulator, Kind strategyKind,
             IStrategyConfiguration strategyConfig, IMoteWriter moteWriter) throws IOException {
         SimulationClient simulationClient = new SimulationClient(simulator);
         // Create Feedback loop
         AdaptionStrategyFactory adaptionStrategyFactory = new AdaptionStrategyFactory();
         // FeedbackLoop feedbackLoop = new QualityBasedFeedbackLoop(networkMgmt);
-        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(strategy.strategyKind, simulationClient,
-                moteWriter, strategyConfig);
+        IAdaptionStrategy feedbackLoop = adaptionStrategyFactory.create(strategyKind, simulationClient, moteWriter,
+                strategyConfig);
         SimpleAdaptation adaption = new SimpleAdaptation(simulationClient, feedbackLoop);
         return adaption;
     }
