@@ -60,7 +60,7 @@ public class ConsoleMain {
     public Long seed;
 
     @Option(names = { "--no_validation" }, description = "disable QoS range validation")
-    public boolean no_validation = false;
+    public boolean validate = true;
 
     public static void main(String[] args) {
         CommandLine commandLine = new CommandLine(new ConsoleMain());
@@ -112,7 +112,7 @@ public class ConsoleMain {
     private void processSimulationResult(ISimulationResult simulationResult, String strategyName,
             IStrategyConfiguration strategyConfig, Path baseLocation) throws IOException {
         List<QoS> qos = simulationResult.getQoS();
-        if (!no_validation) {
+        if (validate) {
             QoSValidator validator = new QoSValidator();
             validator.validate(qos);
         }
