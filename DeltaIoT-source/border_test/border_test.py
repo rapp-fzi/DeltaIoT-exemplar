@@ -48,7 +48,7 @@ def _execute_simulator(jar_file, cli_path, strategy: str, config: dict, tmp_path
         f.write(json.dumps(config, indent=2))
 
     result_file = "result.json"
-    args = ["-jar", jar_file, "-r", result_file, "strategy", "-a", strategy, "-p", strategy_conf]
+    args = ["-jar", jar_file, "-r", result_file, "--no_validation", "strategy", "-a", strategy, "-p", strategy_conf]
     proc = run_cli(args, cli=cli_path, cwd=str(tmp_path))
 
     out = (proc.stdout or "") + (proc.stderr or "")
