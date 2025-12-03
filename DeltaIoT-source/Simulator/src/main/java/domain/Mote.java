@@ -11,7 +11,7 @@ public class Mote extends Node {
     private double batteryCapacity;
     private double batteryRemaining;
 
-    private int load; // = number of packets to send in a turn
+    private final int load; // = number of packets to send in a turn
     private Profile<Double> activationProbability = new Constant<>(1.0); // = chance this mote will
                                                                          // send packets
 

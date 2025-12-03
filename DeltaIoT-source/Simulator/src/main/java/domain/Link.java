@@ -5,8 +5,8 @@ import java.util.random.RandomGenerator;
 public class Link {
     private final RandomGenerator randomGenerator;
 
-    private Node from;
-    private Node to;
+    private final Node from;
+    private final Node to;
 
     private double latency;
     private int powerNumber;
