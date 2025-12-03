@@ -14,11 +14,12 @@ public class Result {
     public final int num_runs;
     public final Map<String, Map<String, Double>> statistics;
     public final double averageScore;
+    public final double normalizedScore;
     public final List<QoS> qos;
 
     public Result(String strategy, IStrategyConfiguration strategyConfig, int num_runs, double energyConsumptionMin,
             double energyConsumptionMax, double energyConsumptionAverage, double packetLossMin, double packetLossMax,
-            double packetLossAverage, double averageScore, List<QoS> qos) {
+            double packetLossAverage, double averageScore, double normalizedScore, List<QoS> qos) {
         this.strategy = strategy;
         this.strategyConfig = strategyConfig;
         this.num_runs = num_runs;
@@ -34,6 +35,7 @@ public class Result {
         packetLossStats.put("average", packetLossAverage);
         this.statistics.put("packetLoss", packetLossStats);
         this.averageScore = averageScore;
+        this.normalizedScore = normalizedScore;
         this.qos = new ArrayList<>(qos);
     }
 

@@ -122,11 +122,13 @@ public class ConsoleMain {
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
         double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
         double averageScore = qoSCalculator.averageScore(qos);
+        double normalizedScore = qoSCalculator.normalizedScore(qos);
         LOGGER.info("result min/max energy:      {} / {}", energyStats.getMin(), energyStats.getMax());
         LOGGER.info("result min/max packet loss: {} / {}", packetStats.getMin(), packetStats.getMax());
         LOGGER.info("result average energy:      {}", energyConsumptionAverage);
         LOGGER.info("result average packet loss: {}", packetLossAverage);
         LOGGER.info("result average score:       {}", averageScore);
+        LOGGER.info("result normalized score:    {}", normalizedScore);
 
         QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos, energyConsumptionAverage,
                 packetLossAverage, averageScore);
@@ -136,7 +138,7 @@ public class ConsoleMain {
         if (resultPath != null) {
             Result result = new Result(strategyName, strategyConfig, num_runs, energyStats.getMin(),
                     energyStats.getMax(), energyConsumptionAverage, packetStats.getMin(), packetStats.getMax(),
-                    packetLossAverage, averageScore, qos);
+                    packetLossAverage, averageScore, normalizedScore, qos);
             writeResult(result, resultPath);
         }
     }

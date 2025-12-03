@@ -5,11 +5,12 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Range;
 import org.junit.Before;
 import org.junit.Test;
 
 public class QoSCalculatorTest {
-    private static final double EPSILON = 0.000001d;
+    private static final double EPSILON = 0.00001d;
 
     private QoSCalculator calculator;
 
@@ -24,7 +25,7 @@ public class QoSCalculatorTest {
 
         double actualAverage = calculator.calcEnergyConsumptionAverage(qos);
 
-        assertEquals(actualAverage, 15, EPSILON);
+        assertEquals(15, actualAverage, EPSILON);
     }
 
     @Test
@@ -33,15 +34,51 @@ public class QoSCalculatorTest {
 
         double actualAverage = calculator.calcPacketLossAverage(qos);
 
-        assertEquals(actualAverage, 0.15, EPSILON);
+        assertEquals(0.15, actualAverage, EPSILON);
     }
 
     @Test
-    public void testCalcAverageScore() {
+    public void testAverageScore() {
         List<QoS> qos = Arrays.asList(new QoS(0, 0.1, 10), new QoS(0, 0.2, 20));
 
         double actualScore = calculator.averageScore(qos);
 
-        assertEquals(actualScore, 7.575, EPSILON);
+        assertEquals(7.575, actualScore, EPSILON);
+    }
+
+    @Test
+    public void testNormalizedScore() {
+        List<QoS> qos = Arrays.asList(new QoS(0, 0.1, 10), new QoS(0, 0.2, 20));
+
+        double actualScore = calculator.normalizedScore(qos);
+
+        assertEquals(0.51339, actualScore, EPSILON);
+    }
+
+    @Test
+    public void testNormalize() {
+        Range<Double> range = Range.of(0.0, 20.0);
+
+        double actualNormalized = calculator.normalize(5, range);
+
+        assertEquals(0.25, actualNormalized, EPSILON);
+    }
+
+    @Test
+    public void testNormalizeBelow() {
+        Range<Double> range = Range.of(10.0, 20.0);
+
+        double actualNormalized = calculator.normalize(5, range);
+
+        assertEquals(0.0, actualNormalized, EPSILON);
+    }
+
+    @Test
+    public void testNormalizeAbove() {
+        Range<Double> range = Range.of(10.0, 20.0);
+
+        double actualNormalized = calculator.normalize(22, range);
+
+        assertEquals(1.0, actualNormalized, EPSILON);
     }
 }
