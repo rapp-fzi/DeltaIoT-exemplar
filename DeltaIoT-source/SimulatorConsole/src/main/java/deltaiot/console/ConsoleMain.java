@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,7 @@ import util.JsonQOSWriter;
 import util.QoSResult;
 
 @Command(name = "SimulatorConsole", mixinStandardHelpOptions = true)
-public class ConsoleMain implements Callable<Integer> {
+public class ConsoleMain {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleMain.class);
 
     @Option(names = { "-r", "--result" }, description = "result file")
@@ -57,9 +56,6 @@ public class ConsoleMain implements Callable<Integer> {
 
     @Option(names = { "-s", "--seed" }, description = "PRNG seed")
     public Long seed;
-
-    public ConsoleMain() {
-    }
 
     public static void main(String[] args) {
         CommandLine commandLine = new CommandLine(new ConsoleMain());
@@ -77,32 +73,39 @@ public class ConsoleMain implements Callable<Integer> {
         System.exit(exitCode);
     }
 
-    @Command(name = "strategy", description = "Simulate with strategy", mixinStandardHelpOptions = true)
-    int strategy(@Option(names = { "-a",
+    @Command(name = "noadaption", description = "Simulate without adaption", mixinStandardHelpOptions = true)
+    private void no_adaption() throws IOException {
+        Simulator simulator = createSimulator();
+        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
+
+        LOGGER.info("running without strategy");
+        ISimulationRunner runner = runNoAdaption(simulator);
+
+        ISimulationResult simulationResult = runner.run();
+        processSimulationResult(simulationResult, "none", null, baseLocation);
+    }
+
+    @Command(name = "strategy", description = "Simulate with adaption strategy", mixinStandardHelpOptions = true)
+    void strategy(@Option(names = { "-a",
             "--adaption" }, required = true, description = "Adatption type: ${COMPLETION-CANDIDATES}") Kind strategyKind,
             @Option(names = { "-p",
                     "--param" }, required = true, description = "json parameter file") Path parameterFile)
             throws IOException {
-
-        Random randomGenerator = new Random();
-        if (seed != null) {
-            randomGenerator.setSeed(seed);
-        }
-        SimulatorConfig config = new SimulatorConfig(num_runs, randomGenerator);
-        Simulator simulator = SimulatorFactory.createExperimentSimulator(config, new NullRunMonitor());
+        Simulator simulator = createSimulator();
         Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
         IResultWriter resultWriter = new CsvFileWriter(baseLocation);
 
-        final ISimulationRunner runner;
-        final String strategyName;
-        final IStrategyConfiguration strategyConfig;
-
-        strategyName = strategyKind.name();
         LOGGER.info("running with strategy: {}", strategyKind);
-        strategyConfig = readStrategyParameter(parameterFile, strategyKind.getStrategyConfiguration());
-        runner = runWithAdaption(simulator, strategyKind, strategyConfig, resultWriter);
+        IStrategyConfiguration strategyConfig = readStrategyParameter(parameterFile,
+                strategyKind.getStrategyConfiguration());
+        ISimulationRunner runner = runWithAdaption(simulator, strategyKind, strategyConfig, resultWriter);
 
         ISimulationResult simulationResult = runner.run();
+        processSimulationResult(simulationResult, strategyKind.name(), strategyConfig, baseLocation);
+    }
+
+    private void processSimulationResult(ISimulationResult simulationResult, String strategyName,
+            IStrategyConfiguration strategyConfig, Path baseLocation) throws IOException {
         List<QoS> qos = simulationResult.getQoS();
         QoSCalculator qoSCalculator = new QoSCalculator();
         double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
@@ -121,53 +124,26 @@ public class ConsoleMain implements Callable<Integer> {
                     packetLossAverage, score, qos);
             writeResult(result, resultPath);
         }
-
-        return 0;
     }
 
-    @Override
-    public Integer call() throws Exception {
-        runSimulation();
-        return 0;
+    private Simulator createSimulator() {
+        SimulatorConfig config = createSimulatorConfig();
+        Simulator simulator = SimulatorFactory.createExperimentSimulator(config, new NullRunMonitor());
+        return simulator;
     }
 
-    private void runSimulation() throws IOException {
+    private SimulatorConfig createSimulatorConfig() {
+        Random randomGenerator = crateRandomGenerator();
+        SimulatorConfig config = new SimulatorConfig(num_runs, randomGenerator);
+        return config;
+    }
+
+    private Random crateRandomGenerator() {
         Random randomGenerator = new Random();
         if (seed != null) {
             randomGenerator.setSeed(seed);
         }
-        SimulatorConfig config = new SimulatorConfig(num_runs, randomGenerator);
-        Simulator simulator = SimulatorFactory.createExperimentSimulator(config, new NullRunMonitor());
-        Path baseLocation = Paths.get(System.getProperty("user.dir"), "results");
-
-        final ISimulationRunner runner;
-        final String strategyName;
-        final IStrategyConfiguration strategyConfig;
-
-        strategyName = "none";
-        strategyConfig = null;
-        LOGGER.info("running without strategy");
-        runner = runNoAdaption(simulator);
-
-        ISimulationResult simulationResult = runner.run();
-        List<QoS> qos = simulationResult.getQoS();
-        QoSCalculator qoSCalculator = new QoSCalculator();
-        double energyConsumptionAverage = qoSCalculator.calcEnergyConsumptionAverage(qos);
-        double packetLossAverage = qoSCalculator.calcPacketLossAverage(qos);
-        double score = qoSCalculator.calcScore(qos);
-        LOGGER.info("result average energy {}, packet loss {}", energyConsumptionAverage, packetLossAverage);
-        LOGGER.info("result score: {}", score);
-
-        QoSResult qosResult = new QoSResult(simulationResult.getStrategyId(), qos, energyConsumptionAverage,
-                packetLossAverage, score);
-        IQOSWriter qosWriter = new JsonQOSWriter(baseLocation);
-        qosWriter.saveQoS(qosResult);
-
-        if (resultPath != null) {
-            Result result = new Result(strategyName, strategyConfig, num_runs, energyConsumptionAverage,
-                    packetLossAverage, score, qos);
-            writeResult(result, resultPath);
-        }
+        return randomGenerator;
     }
 
     private void writeResult(Result result, Path resultFile) throws IOException {
