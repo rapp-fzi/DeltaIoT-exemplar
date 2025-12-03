@@ -30,7 +30,9 @@ import mapek.strategy.IAdaptionStrategy;
 import mapek.strategy.IStrategyConfiguration;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.IExecutionExceptionHandler;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParseResult;
 import simulator.QoS;
 import simulator.QoSCalculator;
 import simulator.Simulator;
@@ -60,7 +62,18 @@ public class ConsoleMain implements Callable<Integer> {
     }
 
     public static void main(String[] args) {
-        int exitCode = new CommandLine(new ConsoleMain()).execute(args);
+        CommandLine commandLine = new CommandLine(new ConsoleMain());
+        IExecutionExceptionHandler exceptionHandler = new IExecutionExceptionHandler() {
+
+            @Override
+            public int handleExecutionException(Exception e, CommandLine commandLine, ParseResult fullParseResult)
+                    throws Exception {
+                LOGGER.error(e.getMessage(), e);
+                return 2;
+            }
+        };
+        commandLine.setExecutionExceptionHandler(exceptionHandler);
+        int exitCode = commandLine.execute(args);
         System.exit(exitCode);
     }
 
@@ -114,13 +127,8 @@ public class ConsoleMain implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        try {
-            runSimulation();
-            return 0;
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return 2;
+        runSimulation();
+        return 0;
     }
 
     private void runSimulation() throws IOException {
