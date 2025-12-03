@@ -37,7 +37,7 @@ class Simulator:
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             strategy_conf = self._create_strategy_conf(tmp_path, strategy, values)
-            base_args = ["-r", result_file]
+            base_args = ["-r", result_file, "--no_validation"]
             if seed is not None:
                 base_args.extend(["--seed", str(seed)])
             args = base_args + ["strategy", "-a", strategy.name, "-p", strategy_conf]
@@ -45,4 +45,4 @@ class Simulator:
             result_path = tmp_path / result_file
             with result_path.open("r", encoding="utf-8") as f:
                 result = json.load(f)
-                return result["score"]
+                return result["normalizedScore"]
