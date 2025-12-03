@@ -73,7 +73,7 @@ public class ConsoleMain {
                 return 1;
             }
 
-            runSimulation(args, strategy, parser);
+            runSimulation(args, parser);
             return 0;
         } catch (ParameterException e) {
             StringBuilder sb = new StringBuilder();
@@ -86,7 +86,7 @@ public class ConsoleMain {
         return 2;
     }
 
-    private void runSimulation(Args args, CommandStrategy strategy, JCommander parser) throws IOException {
+    private void runSimulation(Args args, JCommander parser) throws IOException {
         Random randomGenerator = new Random();
         if (args.seed != null) {
             randomGenerator.setSeed(args.seed);
@@ -100,7 +100,12 @@ public class ConsoleMain {
         final String strategyName;
         final IStrategyConfiguration strategyConfig;
         String command = parser.getParsedCommand();
+
         if (CommandStrategy.ID.equals(command)) {
+            JCommander commander = parser.getCommands()
+                .get(command);
+            CommandStrategy strategy = (CommandStrategy) commander.getObjects()
+                .get(0);
             strategyName = strategy.strategyKind.name();
             LOGGER.info("running with strategy: {}", strategy.strategyKind);
             strategyConfig = readStrategyParameter(strategy.parameterFile,
