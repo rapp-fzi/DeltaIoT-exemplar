@@ -133,67 +133,6 @@ class EAFeedbackLoopStrategy2b extends FeedbackLoop {
         POWER_UPPER[16] = POWER_MAX[16] - config.CHANGE_POWER_VALUE17 + 1;
     }
 
-    /**
-     * 
-     * @param link
-     * @return link number in range 1-17
-     */
-    protected int getLinkNumber(Link link) {
-        if ((link.getSource() == 13) && (link.getDest() == 11)) {
-            return 1;
-        }
-        if ((link.getSource() == 14) && (link.getDest() == 12)) {
-            return 2;
-        }
-        if ((link.getSource() == 15) && (link.getDest() == 12)) {
-            return 3;
-        }
-        if ((link.getSource() == 11) && (link.getDest() == 7)) {
-            return 4;
-        }
-        if ((link.getSource() == 12) && (link.getDest() == 7)) {
-            return 5;
-        }
-        if ((link.getSource() == 12) && (link.getDest() == 3)) {
-            return 6;
-        }
-        if ((link.getSource() == 7) && (link.getDest() == 3)) {
-            return 7;
-        }
-        if ((link.getSource() == 7) && (link.getDest() == 2)) {
-            return 8;
-        }
-        if ((link.getSource() == 2) && (link.getDest() == 4)) {
-            return 9;
-        }
-        if ((link.getSource() == 3) && (link.getDest() == 1)) {
-            return 10;
-        }
-        if ((link.getSource() == 8) && (link.getDest() == 1)) {
-            return 11;
-        }
-        if ((link.getSource() == 4) && (link.getDest() == 1)) {
-            return 12;
-        }
-        if ((link.getSource() == 9) && (link.getDest() == 1)) {
-            return 13;
-        }
-        if ((link.getSource() == 6) && (link.getDest() == 4)) {
-            return 14;
-        }
-        if ((link.getSource() == 10) && (link.getDest() == 6)) {
-            return 15;
-        }
-        if ((link.getSource() == 10) && (link.getDest() == 5)) {
-            return 16;
-        }
-        if ((link.getSource() == 5) && (link.getDest() == 9)) {
-            return 17;
-        }
-
-        throw new RuntimeException(String.format("unknown link %d -> %d", link.getSource(), link.getDest()));
-    }
-
     @Override
     protected boolean adaptationRequiredPower(Link link) {
         int linkNumber = getLinkNumber(link);
