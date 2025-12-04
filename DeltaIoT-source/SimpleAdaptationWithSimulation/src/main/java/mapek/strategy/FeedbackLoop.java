@@ -65,7 +65,8 @@ class FeedbackLoop implements IAdaptionStrategy {
         LOGGER.info("******** Network configuration of {} *******", run);
         for (Mote mote : motes) {
             for (Link link : mote.getLinks()) {
-                LOGGER.info(link.toString());
+                int linkNumber = getLinkNumber(link);
+                LOGGER.info(String.format("Link %02d: %s", linkNumber, link.toString()));
             }
         }
         LOGGER.info("******** END *******");
