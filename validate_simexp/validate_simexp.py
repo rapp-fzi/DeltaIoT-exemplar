@@ -91,6 +91,7 @@ class ValidateSimexp:
         parser.add_argument('-r', '--result', type=as_path, help="result json file")
         parser.add_argument('--seed', type=int, help="simulator seed")
         parser.add_argument('--count', type=int, default=30, help="amount of simulations to run" + default)
+        parser.add_argument('--no_validation', action='store_true', help="disable range validation")
         parser.add_argument('-t', '--type',
                                  choices=[type.type.lower() for type in InputType],
                                  default=InputType.JSON.name.lower(), help="select input file type" + default)
@@ -108,7 +109,7 @@ class ValidateSimexp:
                 entries = file_type.load(args.infile)
 
         score_builder = ScoreBuilder()
-        score_entries = score_builder.build_scores(entries, args.strategy, args.seed, args.count)
+        score_entries = score_builder.build_scores(entries, args.strategy, args.seed, args.no_validation, args.count)
 
         if args.result:
             self._write_result(args, entries, score_entries)
