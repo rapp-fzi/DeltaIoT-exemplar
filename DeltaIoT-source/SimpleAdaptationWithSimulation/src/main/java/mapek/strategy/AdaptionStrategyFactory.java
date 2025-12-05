@@ -8,6 +8,7 @@ public class AdaptionStrategyFactory {
         Default(StrategyConfigurationDefault.class), //
         Quality(StrategyConfigurationDefault.class), //
         EADefault(StrategyConfigurationDefault.class), //
+        EAStrategy0a(StrategyConfigurationEAStrategy0a.class), //
         EAStrategy1a(StrategyConfigurationEAStrategy1a.class), //
         EAStrategy1b(StrategyConfigurationEAStrategy1b.class), //
         EAStrategy1c(StrategyConfigurationEAStrategy1c.class), //
@@ -35,6 +36,8 @@ public class AdaptionStrategyFactory {
         case Default -> new FeedbackLoop(networkMgmt, moteWriter);
         case Quality -> new QualityBasedFeedbackLoop(networkMgmt, moteWriter);
         case EADefault -> new EADefaultFeedbackLoop(networkMgmt, moteWriter);
+        case EAStrategy0a -> new EAFeedbackLoopStrategy0a(networkMgmt, moteWriter,
+                (StrategyConfigurationEAStrategy0a) config);
         case EAStrategy1a -> new EAFeedbackLoopStrategy1a(networkMgmt, moteWriter,
                 (StrategyConfigurationEAStrategy1a) config);
         case EAStrategy1b -> new EAFeedbackLoopStrategy1b(networkMgmt, moteWriter,
