@@ -15,8 +15,6 @@ class EAFeedbackLoopStrategy0a extends FeedbackLoop {
     private static final int DIST_MIN_MAX_DELTA = 100;
     private static final int DIST_UPPER = DIST_MIN + DIST_MIN_MAX_DELTA;
     private static final int DIST_MAX = DIST_UPPER - CHANGE_DIST_VALUE + 1;
-    private static final int POWER_MIN = 0;
-    private static final int POWER_MAX = 15;
 
     private final StrategyConfigurationEAStrategy0a config;
 
@@ -24,17 +22,6 @@ class EAFeedbackLoopStrategy0a extends FeedbackLoop {
             StrategyConfigurationEAStrategy0a configuration) {
         super(networkMgmt, moteWriter);
         this.config = configuration;
-    }
-
-    @Override
-    protected boolean adaptationRequiredPower(Link link) {
-        if (link.getSNR() > 0 && link.getPower() > POWER_MIN) {
-            return true;
-        }
-        if (link.getSNR() < 0 && link.getPower() < POWER_MAX) {
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -46,12 +33,12 @@ class EAFeedbackLoopStrategy0a extends FeedbackLoop {
         for (Mote mote : motes) {
             for (Link link : mote.getLinks()) {
                 powerChanging = false;
-                if (link.getSNR() > 0 && link.getPower() > POWER_MIN) {
+                if (link.getSNR() > 0 && link.getPower() > 0) {
                     int maxChange = Math.min(config.CHANGE_POWER_VALUE, link.getPower());
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - maxChange));
                     powerChanging = true;
-                } else if (link.getSNR() < 0 && link.getPower() < POWER_MAX) {
-                    int maxChange = Math.min(config.CHANGE_POWER_VALUE, POWER_MAX - link.getPower());
+                } else if (link.getSNR() < 0 && link.getPower() < 15) {
+                    int maxChange = Math.min(config.CHANGE_POWER_VALUE, 15 - link.getPower());
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + maxChange));
                     powerChanging = true;
                 }
