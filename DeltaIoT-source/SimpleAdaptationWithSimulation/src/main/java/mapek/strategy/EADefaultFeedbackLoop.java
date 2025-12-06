@@ -1,5 +1,8 @@
 package mapek.strategy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
@@ -8,22 +11,14 @@ import mapek.Step;
 import util.IMoteWriter;
 
 class EADefaultFeedbackLoop extends FeedbackLoop {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EADefaultFeedbackLoop.class);
 
     private static int CHANGE_POWER_VALUE = 1;
     private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
     private static int UNIFORM_DIST_VALUE = 50;
-    private static int TOTAL_DIST_VALUE = 100;
 
     public EADefaultFeedbackLoop(SimulationClient networkMgmt, IMoteWriter moteWriter) {
         super(networkMgmt, moteWriter);
-    }
-
-    @Override
-    protected boolean adaptationRequiredPower(Link link) {
-        if (link.getSNR() > 0 && link.getPower() > 0 || link.getSNR() < 0 && link.getPower() < 15) {
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -33,12 +28,16 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
         boolean powerChanging = false;
         Link left, right;
         for (Mote mote : motes) {
+            powerChanging = false;
             for (Link link : mote.getLinks()) {
-                powerChanging = false;
                 if (link.getSNR() > 0 && link.getPower() > 0) {
+                    LOGGER.error(
+                            String.format("Link %02d: adapt link power: %d", getLinkNumber(link), -CHANGE_POWER_VALUE));
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - CHANGE_POWER_VALUE));
                     powerChanging = true;
                 } else if (link.getSNR() < 0 && link.getPower() < 15) {
+                    LOGGER.error(
+                            String.format("Link %02d: adapt link power: %d", getLinkNumber(link), +CHANGE_POWER_VALUE));
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + CHANGE_POWER_VALUE));
                     powerChanging = true;
                 }
@@ -52,18 +51,31 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
                 if (left.getPower() != right.getPower()) {
                     // If distribution of all links is 100 then change it to 50
                     // 50
-                    if (left.getDistribution() == TOTAL_DIST_VALUE && right.getDistribution() == TOTAL_DIST_VALUE) {
+                    if (left.getDistribution() == 100 && right.getDistribution() == 100) {
                         left.setDistribution(UNIFORM_DIST_VALUE);
                         right.setDistribution(UNIFORM_DIST_VALUE);
                     }
-                    if (left.getPower() > right.getPower() && left.getDistribution() < TOTAL_DIST_VALUE) {
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() + CHANGE_DIST_VALUE));
-                        steps.add(
-                                new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() - CHANGE_DIST_VALUE));
-                    } else if (right.getDistribution() < TOTAL_DIST_VALUE) {
-                        steps.add(
-                                new PlanningStep(Step.CHANGE_DIST, right, right.getDistribution() + CHANGE_DIST_VALUE));
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() - CHANGE_DIST_VALUE));
+
+                    // Optimize distribution factor of the links such that the messages are routed
+                    // to the link that uses less power.
+                    if (left.getPower() > right.getPower()) {
+                        if (right.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
+                            LOGGER
+                                .error(String.format("Mote %02d: change distribution: left > right", mote.getMoteid()));
+                            steps.add(new PlanningStep(Step.CHANGE_DIST, right,
+                                    right.getDistribution() + CHANGE_DIST_VALUE));
+                            steps.add(new PlanningStep(Step.CHANGE_DIST, left,
+                                    left.getDistribution() - CHANGE_DIST_VALUE));
+                        }
+                    } else {
+                        if (left.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
+                            LOGGER
+                                .error(String.format("Mote %02d: change distribution: right > left", mote.getMoteid()));
+                            steps.add(new PlanningStep(Step.CHANGE_DIST, left,
+                                    left.getDistribution() + CHANGE_DIST_VALUE));
+                            steps.add(new PlanningStep(Step.CHANGE_DIST, right,
+                                    right.getDistribution() - CHANGE_DIST_VALUE));
+                        }
                     }
                 }
             }
@@ -76,6 +88,6 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
 
     @Override
     public String getId() {
-        return "DeltaIoTDefaultReconfigurationStrategy";
+        return "EADefaultFeedbackLoop";
     }
 }
