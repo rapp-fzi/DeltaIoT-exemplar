@@ -31,12 +31,12 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
             powerChanging = false;
             for (Link link : mote.getLinks()) {
                 if (link.getSNR() > 0 && link.getPower() > 0) {
-                    LOGGER.error(
+                    LOGGER.debug(
                             String.format("Link %02d: adapt link power: %d", getLinkNumber(link), -CHANGE_POWER_VALUE));
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - CHANGE_POWER_VALUE));
                     powerChanging = true;
                 } else if (link.getSNR() < 0 && link.getPower() < 15) {
-                    LOGGER.error(
+                    LOGGER.debug(
                             String.format("Link %02d: adapt link power: %d", getLinkNumber(link), +CHANGE_POWER_VALUE));
                     steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + CHANGE_POWER_VALUE));
                     powerChanging = true;
@@ -61,7 +61,7 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
                     if (left.getPower() > right.getPower()) {
                         if (right.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
                             LOGGER
-                                .error(String.format("Mote %02d: change distribution: left > right", mote.getMoteid()));
+                                .debug(String.format("Mote %02d: change distribution: left > right", mote.getMoteid()));
                             steps.add(new PlanningStep(Step.CHANGE_DIST, right,
                                     right.getDistribution() + CHANGE_DIST_VALUE));
                             steps.add(new PlanningStep(Step.CHANGE_DIST, left,
@@ -70,7 +70,7 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
                     } else {
                         if (left.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
                             LOGGER
-                                .error(String.format("Mote %02d: change distribution: right > left", mote.getMoteid()));
+                                .debug(String.format("Mote %02d: change distribution: right > left", mote.getMoteid()));
                             steps.add(new PlanningStep(Step.CHANGE_DIST, left,
                                     left.getDistribution() + CHANGE_DIST_VALUE));
                             steps.add(new PlanningStep(Step.CHANGE_DIST, right,
