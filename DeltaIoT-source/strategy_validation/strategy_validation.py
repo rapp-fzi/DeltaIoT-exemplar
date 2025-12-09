@@ -41,13 +41,15 @@ class RangeEvaluator:
             result = json.load(f)
             return result
 
-    def _execute_simulator(self, strategy: StrategyKind, config_file, tmp_path: Path):
+    def _execute_simulator(self, strategy: StrategyKind, config_file, seed, tmp_path: Path):
         strategy_conf = tmp_path / ("%s.json" % "empty")
         with strategy_conf.open("w", encoding="utf-8") as f:
             f.write(json.dumps({}, indent=2))
 
         result_file = "result.json"
         args = ["-jar", self._jar_file, "-r", result_file]
+        if seed is not None:
+            args.extend(['--seed', str(seed)])
         args.append("--no_validation")
         args.extend(strategy.extra_arguments)
         if config_file:
@@ -62,18 +64,18 @@ class RangeEvaluator:
         result = self._read_result_file(expected_result_file)
         return result
 
-    def _collect_sample(self, strategy: StrategyKind, config_file):
+    def _collect_sample(self, strategy: StrategyKind, config_file, seed):
         with tempfile.TemporaryDirectory() as tmpdir_name:
-            result = self._execute_simulator(strategy, config_file, Path(tmpdir_name))
+            result = self._execute_simulator(strategy, config_file, seed, Path(tmpdir_name))
             return result["statistics"], result["normalizedScore"]
 
-    def _collect_samples(self, count, strategy: StrategyKind, config_file, max_workers):
+    def _collect_samples(self, count, strategy: StrategyKind, config_file, seed, max_workers):
         samples = []
         with Bar("Sampling %12s" % strategy.name, max=count) as bar:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
                 for i in range(0, count):
-                    future = executor.submit(self._collect_sample, strategy, config_file)
+                    future = executor.submit(self._collect_sample, strategy, config_file, seed)
                     futures.append(future)
                 for future in as_completed(futures):
                     samples.append(future.result())
@@ -81,7 +83,7 @@ class RangeEvaluator:
         return samples
 
     def _sample(self, sample_count, strategy, config_file, args):
-        samples = self._collect_samples(sample_count, strategy, config_file, args.max_workers)
+        samples = self._collect_samples(sample_count, strategy, config_file, args.seed, args.max_workers)
         energy_consumption_min = min([sample[0]["energyConsumption"]["min"] for sample in samples])
         energy_consumption_max = max([sample[0]["energyConsumption"]["max"] for sample in samples])
         energy_consumption_average = statistics.mean([sample[0]["energyConsumption"]["average"] for sample in samples])
@@ -109,6 +111,7 @@ class RangeEvaluator:
         default = ' (default: %(default)s)'
         parser.add_argument('--sample_count', type=int, default=30, help="sample count" + default)
         parser.add_argument('--max_workers', type=int, default=1, help="max worker threads" + default)
+        parser.add_argument('--seed', type=int, help="simulator seed")
         parser.add_argument('--strategy', action='append',
                             required=True,
                             type=strategy_config,
