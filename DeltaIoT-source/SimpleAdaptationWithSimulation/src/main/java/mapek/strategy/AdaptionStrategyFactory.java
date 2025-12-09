@@ -15,11 +15,8 @@ public class AdaptionStrategyFactory {
         EAStrategy1a(StrategyConfigurationEAStrategy1a.class), //
         EAStrategy1b(StrategyConfigurationEAStrategy1b.class), //
         EAStrategy1c(StrategyConfigurationEAStrategy1c.class), //
-        EAStrategy2a(StrategyConfigurationEAStrategy2a.class), //
-        EAStrategy2b(StrategyConfigurationEAStrategy2b.class), //
-        EAStrategy3a(StrategyConfigurationEAStrategy3a.class), //
-        EAStrategy3b(StrategyConfigurationEAStrategy3b.class), //
-        EAStrategy3c(StrategyConfigurationEAStrategy3c.class), //
+        EAStrategy1d(StrategyConfigurationEAStrategy1d.class), //
+        EAStrategy2d(StrategyConfigurationEAStrategy2d.class), //
         ;
 
         private final Class<? extends IStrategyConfiguration> strategyConfiguration;
@@ -53,16 +50,10 @@ public class AdaptionStrategyFactory {
                 (StrategyConfigurationEAStrategy1b) config);
         case EAStrategy1c -> new EAFeedbackLoopStrategy1c(networkMgmt, moteWriter,
                 (StrategyConfigurationEAStrategy1c) config);
-        case EAStrategy2a -> new EAFeedbackLoopStrategy2a(networkMgmt, moteWriter,
-                (StrategyConfigurationEAStrategy2a) config);
-        case EAStrategy2b -> new EAFeedbackLoopStrategy2b(networkMgmt, moteWriter,
-                (StrategyConfigurationEAStrategy2b) config);
-        case EAStrategy3a -> new EAFeedbackLoopStrategy3a(networkMgmt, moteWriter,
-                (StrategyConfigurationEAStrategy3a) config);
-        case EAStrategy3b -> new EAFeedbackLoopStrategy3b(networkMgmt, moteWriter,
-                (StrategyConfigurationEAStrategy3b) config);
-        case EAStrategy3c -> new EAFeedbackLoopStrategy3c(networkMgmt, moteWriter,
-                (StrategyConfigurationEAStrategy3c) config);
+        case EAStrategy1d -> new EAFeedbackLoopStrategy1d(networkMgmt, moteWriter,
+                (StrategyConfigurationEAStrategy1d) config);
+        case EAStrategy2d -> new EAFeedbackLoopStrategy2d(networkMgmt, moteWriter,
+                (StrategyConfigurationEAStrategy2d) config);
         };
     }
 }

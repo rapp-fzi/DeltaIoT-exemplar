@@ -7,44 +7,14 @@ import mapek.PlanningStep;
 import mapek.Step;
 import util.IMoteWriter;
 
-public class EAFeedbackLoopStrategy1b extends FeedbackLoop {
+public class EAFeedbackLoopStrategy1b extends EAFeedbackLoopStrategy1a {
 
-    // private static final int CHANGE_DIST_VALUE = 10;
-    private static final int UNIFORM_DIST_VALUE = 50;
-    private static final int DIST_MIN = 0;
-    private static final int DIST_MIN_MAX_DELTA = 100;
-    private static final int DIST_UPPER = DIST_MIN + DIST_MIN_MAX_DELTA;
-    // private static final int DIST_MAX = DIST_UPPER - CHANGE_DIST_VALUE + 1;
-
-    // will be assigned later down
-    private int POWER_LOWER = -1;
-    private int POWER_UPPER = -1;
-    private int POWER_MAX = -1;
-    private int DIST_MAX = -1;
-
-    private final StrategyConfigurationEAStrategy1b config;
+    private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
+    private static int UNIFORM_DIST_VALUE = 50;
 
     public EAFeedbackLoopStrategy1b(SimulationClient networkMgmt, IMoteWriter moteWriter,
             StrategyConfigurationEAStrategy1b configuration) {
-        super(networkMgmt, moteWriter);
-        this.config = configuration;
-    }
-
-    @Override
-    protected void initRun() {
-        DIST_MAX = DIST_UPPER - config.CHANGE_DIST_VALUE + 1;
-        POWER_LOWER = config.POWER_MIN + config.CHANGE_POWER_VALUE - 1;
-        POWER_MAX = config.POWER_MIN + config.POWER_MIN_MAX_DELTA;
-        POWER_UPPER = POWER_MAX - config.CHANGE_POWER_VALUE + 1;
-    }
-
-    @Override
-    protected boolean adaptationRequiredPower(Link link) {
-        if (link.getSNR() > 0 && link.getPower() > config.POWER_MIN
-                || link.getSNR() < 0 && link.getPower() < POWER_UPPER) {
-            return true;
-        }
-        return false;
+        super(networkMgmt, moteWriter, configuration);
     }
 
     @Override
@@ -54,18 +24,24 @@ public class EAFeedbackLoopStrategy1b extends FeedbackLoop {
         boolean powerChanging = false;
         Link left, right;
         for (Mote mote : motes) {
+            powerChanging = false;
             for (Link link : mote.getLinks()) {
-                powerChanging = false;
-                if (link.getSNR() > 0 && link.getPower() > POWER_LOWER) {
-                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - config.CHANGE_POWER_VALUE));
+                int linkNumber = getLinkNumber(link);
+                int changePowerValue = getChangePowerValue(linkNumber);
+
+                if (link.getSNR() > 0 && link.getPower() > 0) {
+                    int maxChange = Math.min(changePowerValue, link.getPower());
+                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - maxChange));
                     powerChanging = true;
-                } else if (link.getSNR() < 0 && link.getPower() < POWER_UPPER) {
-                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + config.CHANGE_POWER_VALUE));
+                } else if (link.getSNR() < 0 && link.getPower() < 15) {
+                    int maxChange = Math.min(changePowerValue, 15 - link.getPower());
+                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + maxChange));
                     powerChanging = true;
                 }
             }
+
             if (mote.getLinks()
-                .size() == 2 && powerChanging == false) {
+                .size() == 2 && planDistribution(powerChanging)) {
                 left = mote.getLinks()
                     .get(0);
                 right = mote.getLinks()
@@ -73,20 +49,27 @@ public class EAFeedbackLoopStrategy1b extends FeedbackLoop {
                 if (left.getPower() != right.getPower()) {
                     // If distribution of all links is 100 then change it to 50
                     // 50
-                    if (left.getDistribution() == DIST_UPPER && right.getDistribution() == DIST_UPPER) {
+                    if (left.getDistribution() == 100 && right.getDistribution() == 100) {
                         left.setDistribution(UNIFORM_DIST_VALUE);
                         right.setDistribution(UNIFORM_DIST_VALUE);
                     }
-                    if (left.getPower() > right.getPower() && left.getDistribution() < DIST_MAX) {
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, left,
-                                left.getDistribution() + config.CHANGE_DIST_VALUE));
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, right,
-                                right.getDistribution() - config.CHANGE_DIST_VALUE));
-                    } else if (right.getDistribution() < DIST_MAX) {
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, right,
-                                right.getDistribution() + config.CHANGE_DIST_VALUE));
-                        steps.add(new PlanningStep(Step.CHANGE_DIST, left,
-                                left.getDistribution() - config.CHANGE_DIST_VALUE));
+
+                    // Optimize distribution factor of the links such that the messages are routed
+                    // to the link that uses less power.
+                    if (left.getPower() > right.getPower()) {
+                        if (right.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
+                            steps.add(new PlanningStep(Step.CHANGE_DIST, right,
+                                    right.getDistribution() + CHANGE_DIST_VALUE));
+                            steps.add(new PlanningStep(Step.CHANGE_DIST, left,
+                                    left.getDistribution() - CHANGE_DIST_VALUE));
+                        }
+                    } else {
+                        if (left.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
+                            steps.add(new PlanningStep(Step.CHANGE_DIST, left,
+                                    left.getDistribution() + CHANGE_DIST_VALUE));
+                            steps.add(new PlanningStep(Step.CHANGE_DIST, right,
+                                    right.getDistribution() - CHANGE_DIST_VALUE));
+                        }
                     }
                 }
             }
@@ -99,6 +82,6 @@ public class EAFeedbackLoopStrategy1b extends FeedbackLoop {
 
     @Override
     public String getId() {
-        return "DeltaIoTEAStrategy1bReconfigurationStrategy";
+        return "EAFeedbackLoopStrategy1b";
     }
 }

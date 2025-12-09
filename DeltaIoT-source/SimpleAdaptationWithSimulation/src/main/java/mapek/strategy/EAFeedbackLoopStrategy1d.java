@@ -7,26 +7,14 @@ import mapek.PlanningStep;
 import mapek.Step;
 import util.IMoteWriter;
 
-public class EAFeedbackLoopStrategy1c extends EAFeedbackLoopStrategy1a {
-    private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
-    protected static int UNIFORM_DIST_VALUE = 50;
+public class EAFeedbackLoopStrategy1d extends EAFeedbackLoopStrategy1c {
 
-    private final StrategyConfigurationEAStrategy1c config;
+    private final StrategyConfigurationEAStrategy1d config;
 
-    public EAFeedbackLoopStrategy1c(SimulationClient networkMgmt, IMoteWriter moteWriter,
-            StrategyConfigurationEAStrategy1c configuration) {
+    public EAFeedbackLoopStrategy1d(SimulationClient networkMgmt, IMoteWriter moteWriter,
+            StrategyConfigurationEAStrategy1d configuration) {
         super(networkMgmt, moteWriter, configuration);
         this.config = configuration;
-    }
-
-    @Override
-    protected boolean planDistribution(boolean powerChanging) {
-        if (config.TIKTOK_ADAPTION) {
-            if (powerChanging) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
@@ -69,18 +57,18 @@ public class EAFeedbackLoopStrategy1c extends EAFeedbackLoopStrategy1a {
                     // Optimize distribution factor of the links such that the messages are routed
                     // to the link that uses less power.
                     if (left.getPower() > right.getPower()) {
-                        if (right.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
+                        if (right.getDistribution() <= 100 - config.CHANGE_DIST_VALUE) {
                             steps.add(new PlanningStep(Step.CHANGE_DIST, right,
-                                    right.getDistribution() + CHANGE_DIST_VALUE));
+                                    right.getDistribution() + config.CHANGE_DIST_VALUE));
                             steps.add(new PlanningStep(Step.CHANGE_DIST, left,
-                                    left.getDistribution() - CHANGE_DIST_VALUE));
+                                    left.getDistribution() - config.CHANGE_DIST_VALUE));
                         }
                     } else {
-                        if (left.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
+                        if (left.getDistribution() <= 100 - config.CHANGE_DIST_VALUE) {
                             steps.add(new PlanningStep(Step.CHANGE_DIST, left,
-                                    left.getDistribution() + CHANGE_DIST_VALUE));
+                                    left.getDistribution() + config.CHANGE_DIST_VALUE));
                             steps.add(new PlanningStep(Step.CHANGE_DIST, right,
-                                    right.getDistribution() - CHANGE_DIST_VALUE));
+                                    right.getDistribution() - config.CHANGE_DIST_VALUE));
                         }
                     }
                 }
@@ -94,6 +82,6 @@ public class EAFeedbackLoopStrategy1c extends EAFeedbackLoopStrategy1a {
 
     @Override
     public String getId() {
-        return "DeltaIoTEAStrategy1cReconfigurationStrategy";
+        return "EAFeedbackLoopStrategy1d";
     }
 }

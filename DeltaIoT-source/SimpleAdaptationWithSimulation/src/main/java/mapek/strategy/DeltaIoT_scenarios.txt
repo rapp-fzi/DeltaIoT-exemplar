@@ -3,7 +3,9 @@ Optimization scenarios for DeltaIoT case study
 
 Base without optimizations is DeltaIoTDefaultReconfigurationStrategy.smodel
 - #links: 15
-- per link: power consumption setting, distribution factor setting
+identical for all 15 links
+	- change power
+	- distribution factor setting
 
 -------------
 Scenario 0a: optimize power setting, no distribution adaption

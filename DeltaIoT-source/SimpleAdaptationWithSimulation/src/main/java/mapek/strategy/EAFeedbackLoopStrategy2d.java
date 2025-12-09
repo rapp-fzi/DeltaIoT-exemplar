@@ -7,26 +7,14 @@ import mapek.PlanningStep;
 import mapek.Step;
 import util.IMoteWriter;
 
-public class EAFeedbackLoopStrategy1c extends EAFeedbackLoopStrategy1a {
-    private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
-    protected static int UNIFORM_DIST_VALUE = 50;
+public class EAFeedbackLoopStrategy2d extends EAFeedbackLoopStrategy1c {
 
-    private final StrategyConfigurationEAStrategy1c config;
+    private final StrategyConfigurationEAStrategy2d config;
 
-    public EAFeedbackLoopStrategy1c(SimulationClient networkMgmt, IMoteWriter moteWriter,
-            StrategyConfigurationEAStrategy1c configuration) {
+    public EAFeedbackLoopStrategy2d(SimulationClient networkMgmt, IMoteWriter moteWriter,
+            StrategyConfigurationEAStrategy2d configuration) {
         super(networkMgmt, moteWriter, configuration);
         this.config = configuration;
-    }
-
-    @Override
-    protected boolean planDistribution(boolean powerChanging) {
-        if (config.TIKTOK_ADAPTION) {
-            if (powerChanging) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
@@ -68,19 +56,20 @@ public class EAFeedbackLoopStrategy1c extends EAFeedbackLoopStrategy1a {
 
                     // Optimize distribution factor of the links such that the messages are routed
                     // to the link that uses less power.
+                    int changeDistValue = getChangeDistValue(left, right);
                     if (left.getPower() > right.getPower()) {
-                        if (right.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
+                        if (right.getDistribution() <= 100 - changeDistValue) {
                             steps.add(new PlanningStep(Step.CHANGE_DIST, right,
-                                    right.getDistribution() + CHANGE_DIST_VALUE));
-                            steps.add(new PlanningStep(Step.CHANGE_DIST, left,
-                                    left.getDistribution() - CHANGE_DIST_VALUE));
+                                    right.getDistribution() + changeDistValue));
+                            steps.add(
+                                    new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() - changeDistValue));
                         }
                     } else {
-                        if (left.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
-                            steps.add(new PlanningStep(Step.CHANGE_DIST, left,
-                                    left.getDistribution() + CHANGE_DIST_VALUE));
+                        if (left.getDistribution() <= 100 - changeDistValue) {
+                            steps.add(
+                                    new PlanningStep(Step.CHANGE_DIST, left, left.getDistribution() + changeDistValue));
                             steps.add(new PlanningStep(Step.CHANGE_DIST, right,
-                                    right.getDistribution() - CHANGE_DIST_VALUE));
+                                    right.getDistribution() - changeDistValue));
                         }
                     }
                 }
@@ -92,8 +81,28 @@ public class EAFeedbackLoopStrategy1c extends EAFeedbackLoopStrategy1a {
         }
     }
 
+    private int getChangeDistValue(Link left, Link right) {
+        // CHANGE_DIST_VALUE_7_8
+        if ((left.getDest() == 2) && (right.getDest() == 3)) {
+            return config.CHANGE_DIST_VALUE_7_8;
+        }
+
+        // CHANGE_DIST_VALUE_15_16
+        if ((left.getDest() == 6) && (right.getDest() == 5)) {
+            return config.CHANGE_DIST_VALUE_15_16;
+        }
+
+        // CHANGE_DIST_VALUE_5_6
+        if ((left.getDest() == 7) && (right.getDest() == 3)) {
+            return config.CHANGE_DIST_VALUE_5_6;
+        }
+
+        throw new RuntimeException(String.format("unknown Link left: %d->%d right: %d->%d", left.getSource(),
+                left.getDest(), right.getSource(), right.getDest()));
+    }
+
     @Override
     public String getId() {
-        return "DeltaIoTEAStrategy1cReconfigurationStrategy";
+        return "EAFeedbackLoopStrategy2d";
     }
 }
