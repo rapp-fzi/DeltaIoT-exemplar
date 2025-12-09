@@ -92,6 +92,6 @@ class EAFeedbackLoopStrategy0c extends FeedbackLoop {
 
     @Override
     public String getId() {
-        return "EAFeedbackLoopStrategy0b";
+        return "EAFeedbackLoopStrategy0c";
     }
 }

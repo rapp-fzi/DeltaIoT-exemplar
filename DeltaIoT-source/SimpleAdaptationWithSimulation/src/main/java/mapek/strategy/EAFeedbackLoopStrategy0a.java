@@ -40,6 +40,6 @@ class EAFeedbackLoopStrategy0a extends FeedbackLoop {
 
     @Override
     public String getId() {
-        return "DeltaIoTEAStrategy0aReconfigurationStrategy";
+        return "EAFeedbackLoopStrategy0a";
     }
 }
