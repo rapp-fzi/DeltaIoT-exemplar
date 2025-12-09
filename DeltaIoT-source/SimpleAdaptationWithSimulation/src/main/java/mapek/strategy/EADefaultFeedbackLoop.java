@@ -86,13 +86,6 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
         }
     }
 
-    protected boolean planDistribution(boolean powerChanging) {
-        if (powerChanging) {
-            return false;
-        }
-        return true;
-    }
-
     @Override
     public String getId() {
         return "EADefaultFeedbackLoop";

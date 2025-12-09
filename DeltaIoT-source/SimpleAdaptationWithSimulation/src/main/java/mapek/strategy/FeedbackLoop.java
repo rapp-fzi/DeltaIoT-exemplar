@@ -185,6 +185,13 @@ class FeedbackLoop implements IAdaptionStrategy {
         return false;
     }
 
+    protected boolean planDistribution(boolean powerChanging) {
+        if (powerChanging) {
+            return false;
+        }
+        return true;
+    }
+
     void planning() {
 
         // Go through all links
@@ -202,7 +209,7 @@ class FeedbackLoop implements IAdaptionStrategy {
                 }
             }
             if (mote.getLinks()
-                .size() == 2 && powerChanging == false) {
+                .size() == 2 && planDistribution(powerChanging)) {
                 left = mote.getLinks()
                     .get(0);
                 right = mote.getLinks()
@@ -276,6 +283,6 @@ class FeedbackLoop implements IAdaptionStrategy {
 
     @Override
     public String getId() {
-        return "DefaultDeltaIoTStrategy";
+        return "FeedbackLoop";
     }
 }
