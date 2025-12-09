@@ -9,6 +9,6 @@ class Input:
 
 
 class StrategyKind(Input, Enum):
-    NONE = "none", []
+    NONE = "none", ["noadaption"]
     DEFAULT = "default", ["strategy", "-a", "Default", "-p", "empty.json"]
     EADEFAULT = "eadefault", ["strategy", "-a", "EADefault", "-p", "empty.json"]
