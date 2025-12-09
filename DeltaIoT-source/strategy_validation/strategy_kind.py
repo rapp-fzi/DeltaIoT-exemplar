@@ -4,11 +4,10 @@ from dataclasses import dataclass
 
 @dataclass
 class Input:
-    type: str
     extra_arguments: list
 
 
 class StrategyKind(Input, Enum):
-    NONE = "none", ["noadaption"]
-    DEFAULT = "default", ["strategy", "-a", "Default", "-p", "empty.json"]
-    EADEFAULT = "eadefault", ["strategy", "-a", "EADefault", "-p", "empty.json"]
+    NONE = ["noadaption"]
+    DEFAULT = ["strategy", "-a", "Default", "-p", "empty.json"]
+    EADEFAULT = ["strategy", "-a", "EADefault", "-p", "empty.json"]

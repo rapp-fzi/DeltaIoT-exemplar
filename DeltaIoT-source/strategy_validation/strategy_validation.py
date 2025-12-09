@@ -91,13 +91,19 @@ class RangeEvaluator:
                 packet_loss_max, packet_loss_average, normalized_score_average)
 
     def main(self):
+        def strategy_config(string):
+            strategy = StrategyKind[string.upper()]
+            return strategy
+
         parser = argparse.ArgumentParser(prog="strategy_validator", description="Validates DeltaIoT strategies")
         default = ' (default: %(default)s)'
         parser.add_argument('--sample_count', type=int, default=30, help="sample count" + default)
         parser.add_argument('--max_workers', type=int, default=1, help="max worker threads" + default)
         parser.add_argument('--strategy', action='append',
                             required=True,
-                            choices=[_type.type.lower() for _type in StrategyKind],
+                            type=strategy_config,
+                            choices=[_type for _type in StrategyKind],
+                            metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
                             help="adaption strategy")
 
         args = parser.parse_args()
@@ -109,8 +115,7 @@ class RangeEvaluator:
 
         strategies = []
         for strat in args.strategy:
-            strategy = StrategyKind[strat.upper()]
-            strategies.append(strategy)
+            strategies.append(strat)
         print(f"strategy count: {len(strategies)}")
         print(f"sample count:   {args.sample_count}")
         samples = []
