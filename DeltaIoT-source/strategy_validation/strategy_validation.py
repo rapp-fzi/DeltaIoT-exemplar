@@ -41,7 +41,7 @@ class RangeEvaluator:
             result = json.load(f)
             return result
 
-    def _execute_simulator(self, strategy: StrategyKind, tmp_path):
+    def _execute_simulator(self, strategy: StrategyKind, config_file, tmp_path: Path):
         strategy_conf = tmp_path / ("%s.json" % "empty")
         with strategy_conf.open("w", encoding="utf-8") as f:
             f.write(json.dumps({}, indent=2))
@@ -50,6 +50,8 @@ class RangeEvaluator:
         args = ["-jar", self._jar_file, "-r", result_file]
         args.append("--no_validation")
         args.extend(strategy.extra_arguments)
+        if config_file:
+            args.extend(['-p', str(config_file)])
 
         proc = self._run_cli(args, cli=self._java_path, cwd=str(tmp_path))
         if proc.returncode != 0:
@@ -60,26 +62,26 @@ class RangeEvaluator:
         result = self._read_result_file(expected_result_file)
         return result
 
-    def _collect_sample(self, strategy: StrategyKind):
+    def _collect_sample(self, strategy: StrategyKind, config_file):
         with tempfile.TemporaryDirectory() as tmpdir_name:
-            result = self._execute_simulator(strategy, Path(tmpdir_name))
+            result = self._execute_simulator(strategy, config_file, Path(tmpdir_name))
             return result["statistics"], result["normalizedScore"]
 
-    def _collect_samples(self, count, strategy: StrategyKind, max_workers):
+    def _collect_samples(self, count, strategy: StrategyKind, config_file, max_workers):
         samples = []
         with Bar("Sampling %12s" % strategy.name, max=count) as bar:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
                 for i in range(0, count):
-                    future = executor.submit(self._collect_sample, strategy)
+                    future = executor.submit(self._collect_sample, strategy, config_file)
                     futures.append(future)
                 for future in as_completed(futures):
                     samples.append(future.result())
                     bar.next()
         return samples
 
-    def _sample(self, sample_count, strategy, args):
-        samples = self._collect_samples(sample_count, strategy, args.max_workers)
+    def _sample(self, sample_count, strategy, config_file, args):
+        samples = self._collect_samples(sample_count, strategy, config_file, args.max_workers)
         energy_consumption_min = min([sample[0]["energyConsumption"]["min"] for sample in samples])
         energy_consumption_max = max([sample[0]["energyConsumption"]["max"] for sample in samples])
         energy_consumption_average = statistics.mean([sample[0]["energyConsumption"]["average"] for sample in samples])
@@ -92,8 +94,16 @@ class RangeEvaluator:
 
     def main(self):
         def strategy_config(string):
-            strategy = StrategyKind[string.upper()]
-            return strategy
+            tokens = string.split(":")
+            strategy = StrategyKind[tokens[0].upper()]
+            if len(tokens) > 1:
+                config_file = Path(tokens[1])
+                config_file = config_file.resolve()
+                if not config_file.exists():
+                    raise ValueError("not found: %s" % config_file)
+            else:
+                config_file = None
+            return strategy, config_file
 
         parser = argparse.ArgumentParser(prog="strategy_validator", description="Validates DeltaIoT strategies")
         default = ' (default: %(default)s)'
@@ -102,10 +112,8 @@ class RangeEvaluator:
         parser.add_argument('--strategy', action='append',
                             required=True,
                             type=strategy_config,
-                            choices=[_type for _type in StrategyKind],
                             metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
-                            help="adaption strategy")
-
+                            help="adaption strategy format: strategy[:config file]")
         args = parser.parse_args()
 
         if not self._java_path:
@@ -119,9 +127,9 @@ class RangeEvaluator:
         print(f"strategy count: {len(strategies)}")
         print(f"sample count:   {args.sample_count}")
         samples = []
-        for strategy in strategies:
-            sample = self._sample(args.sample_count, strategy, args)
-            samples.append((strategy, sample))
+        for strat in strategies:
+            sample = self._sample(args.sample_count, strat[0], strat[1], args)
+            samples.append((strat[0], sample))
 
         table_entries = []
         for strategy, sample in samples:
