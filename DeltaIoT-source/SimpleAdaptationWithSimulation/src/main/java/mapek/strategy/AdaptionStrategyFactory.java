@@ -9,6 +9,9 @@ public class AdaptionStrategyFactory {
         Quality(StrategyConfigurationDefault.class), //
         EADefault(StrategyConfigurationDefault.class), //
         EAStrategy0a(StrategyConfigurationEAStrategy0a.class), //
+        EAStrategy0b(StrategyConfigurationEAStrategy0b.class), //
+        EAStrategy0c(StrategyConfigurationEAStrategy0c.class), //
+        EAStrategy0d(StrategyConfigurationEAStrategy0d.class), //
         EAStrategy1a(StrategyConfigurationEAStrategy1a.class), //
         EAStrategy1b(StrategyConfigurationEAStrategy1b.class), //
         EAStrategy1c(StrategyConfigurationEAStrategy1c.class), //
@@ -38,6 +41,12 @@ public class AdaptionStrategyFactory {
         case EADefault -> new EADefaultFeedbackLoop(networkMgmt, moteWriter);
         case EAStrategy0a -> new EAFeedbackLoopStrategy0a(networkMgmt, moteWriter,
                 (StrategyConfigurationEAStrategy0a) config);
+        case EAStrategy0b -> new EAFeedbackLoopStrategy0b(networkMgmt, moteWriter,
+                (StrategyConfigurationEAStrategy0b) config);
+        case EAStrategy0c -> new EAFeedbackLoopStrategy0c(networkMgmt, moteWriter,
+                (StrategyConfigurationEAStrategy0c) config);
+        case EAStrategy0d -> new EAFeedbackLoopStrategy0d(networkMgmt, moteWriter,
+                (StrategyConfigurationEAStrategy0d) config);
         case EAStrategy1a -> new EAFeedbackLoopStrategy1a(networkMgmt, moteWriter,
                 (StrategyConfigurationEAStrategy1a) config);
         case EAStrategy1b -> new EAFeedbackLoopStrategy1b(networkMgmt, moteWriter,

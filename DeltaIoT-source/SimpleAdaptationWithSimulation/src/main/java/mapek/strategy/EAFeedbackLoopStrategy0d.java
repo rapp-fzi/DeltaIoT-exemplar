@@ -1,8 +1,5 @@
 package mapek.strategy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import deltaiot.client.SimulationClient;
 import deltaiot.services.Link;
 import deltaiot.services.Mote;
@@ -10,15 +7,26 @@ import mapek.PlanningStep;
 import mapek.Step;
 import util.IMoteWriter;
 
-class EADefaultFeedbackLoop extends FeedbackLoop {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EADefaultFeedbackLoop.class);
+class EAFeedbackLoopStrategy0d extends FeedbackLoop {
 
-    private static int CHANGE_POWER_VALUE = 1;
-    private static int CHANGE_DIST_VALUE = 10; // original value from Paper: 10.0
     private static int UNIFORM_DIST_VALUE = 50;
 
-    public EADefaultFeedbackLoop(SimulationClient networkMgmt, IMoteWriter moteWriter) {
+    private final StrategyConfigurationEAStrategy0d config;
+
+    public EAFeedbackLoopStrategy0d(SimulationClient networkMgmt, IMoteWriter moteWriter,
+            StrategyConfigurationEAStrategy0d configuration) {
         super(networkMgmt, moteWriter);
+        this.config = configuration;
+    }
+
+    @Override
+    protected boolean planDistribution(boolean powerChanging) {
+        if (config.TIKTOK_ADAPTION) {
+            if (powerChanging) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -31,17 +39,16 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
             powerChanging = false;
             for (Link link : mote.getLinks()) {
                 if (link.getSNR() > 0 && link.getPower() > 0) {
-                    LOGGER.debug(
-                            String.format("Link %02d: adapt link power: %d", getLinkNumber(link), -CHANGE_POWER_VALUE));
-                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - CHANGE_POWER_VALUE));
+                    int maxChange = Math.min(config.CHANGE_POWER_VALUE, link.getPower());
+                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() - maxChange));
                     powerChanging = true;
                 } else if (link.getSNR() < 0 && link.getPower() < 15) {
-                    LOGGER.debug(
-                            String.format("Link %02d: adapt link power: %d", getLinkNumber(link), +CHANGE_POWER_VALUE));
-                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + CHANGE_POWER_VALUE));
+                    int maxChange = Math.min(config.CHANGE_POWER_VALUE, 15 - link.getPower());
+                    steps.add(new PlanningStep(Step.CHANGE_POWER, link, link.getPower() + maxChange));
                     powerChanging = true;
                 }
             }
+
             if (mote.getLinks()
                 .size() == 2 && planDistribution(powerChanging)) {
                 left = mote.getLinks()
@@ -59,22 +66,18 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
                     // Optimize distribution factor of the links such that the messages are routed
                     // to the link that uses less power.
                     if (left.getPower() > right.getPower()) {
-                        if (right.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
-                            LOGGER
-                                .error(String.format("Mote %02d: change distribution: left > right", mote.getMoteid()));
+                        if (right.getDistribution() <= 100 - config.CHANGE_DIST_VALUE) {
                             steps.add(new PlanningStep(Step.CHANGE_DIST, right,
-                                    right.getDistribution() + CHANGE_DIST_VALUE));
+                                    right.getDistribution() + config.CHANGE_DIST_VALUE));
                             steps.add(new PlanningStep(Step.CHANGE_DIST, left,
-                                    left.getDistribution() - CHANGE_DIST_VALUE));
+                                    left.getDistribution() - config.CHANGE_DIST_VALUE));
                         }
                     } else {
-                        if (left.getDistribution() <= 100 - CHANGE_DIST_VALUE) {
-                            LOGGER
-                                .error(String.format("Mote %02d: change distribution: right > left", mote.getMoteid()));
+                        if (left.getDistribution() <= 100 - config.CHANGE_DIST_VALUE) {
                             steps.add(new PlanningStep(Step.CHANGE_DIST, left,
-                                    left.getDistribution() + CHANGE_DIST_VALUE));
+                                    left.getDistribution() + config.CHANGE_DIST_VALUE));
                             steps.add(new PlanningStep(Step.CHANGE_DIST, right,
-                                    right.getDistribution() - CHANGE_DIST_VALUE));
+                                    right.getDistribution() - config.CHANGE_DIST_VALUE));
                         }
                     }
                 }
@@ -88,6 +91,6 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
 
     @Override
     public String getId() {
-        return "EADefaultFeedbackLoop";
+        return "EAFeedbackLoopStrategy0b";
     }
 }

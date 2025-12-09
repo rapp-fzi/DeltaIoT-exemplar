@@ -1,0 +1,96 @@
+Optimization scenarios for DeltaIoT case study
+------------------------------------------------
+
+Base without optimizations is DeltaIoTDefaultReconfigurationStrategy.smodel
+- #links: 15
+- per link: power consumption setting, distribution factor setting
+
+-------------
+Scenario 0a: optimize power setting, no distribution adaption
+identical for all 15 links
+                - change power
+
+-------------
+Scenario 0b: optimize power setting, tiktok adaption, constant distribution adaption
+identical for all 15 links
+                - change power
+
+-------------
+Scenario 0c: optimize power setting, optimize tiktok adaption, constant distribution adaption  
+identical for all 15 links
+                - change power
+
+-------------
+Scenario 0d: optimize power setting, optimize tiktok adaption, optimize distribution adaption
+identical for all 15 links
+                - change power
+                
+                
+
+-- old scenarios
+
+-------------
+Scenario 1a: constant distribution factor, optimize power setting
+identical for all 15 links
+                - change power
+                - min power
+                - delta (max) power
+
+-------------
+Scenario 1b: optimize distribution factor, optimize power setting
+identical for all 15 links
+                - change power
+                - min power
+                - delta (max) power
+
+-------------
+Scenario 1c: optimize distribution factor per connection, optimize power setting
+identical for all 15 links
+                - change power
+                - min power
+                - delta (max) power
+
+-------------
+Scenario 2a: constant distribution factor, optimize power setting
+identical for all 15 links
+                - min power
+                - delta (max) power
+
+per link
+                - change power
+
+-------------
+Scenario 2b: optimize distribution factor, optimize power setting
+identical for all 15 links
+                - min power
+                - delta (max) power
+
+per link
+                - change power
+
+---------------
+!!! NOTE: 
+- these tests still have not applied corrected monitor logic (see a49a373a96cbfd751df0908492bfb985b28522cb)
+- these tests still have the issue with > POWER_MIN instead of correct > POWER_LOWER (see 9b67a4894fe013756a916f3fcafa3961a3eb5ea4)
+- POWER_UPPER and POWER_MAX have been exchanged (see 26e58a6d5f91447c863c81ed964f24e985ae5929)
+- fix power max calculation (see 2020c9d02b5522259de378ded8cd8147f4c30b36)
+-------------
+Scenario 3a: constant distribution factor, optimize power setting
+per link
+                - change power
+                - min power
+                - delta (max) power
+
+---------------
+Scenario 3b: optimize distribution factor, optimize power setting
+per link
+                - change power
+                - min power
+                - delta (max) power
+
+---------------
+Scenario 3c: optimize distribution factor per connection, optimize power setting
+per link
+                - change power
+                - min power
+                - delta (max) power
