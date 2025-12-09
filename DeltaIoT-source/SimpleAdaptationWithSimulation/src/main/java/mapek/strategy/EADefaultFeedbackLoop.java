@@ -43,7 +43,7 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
                 }
             }
             if (mote.getLinks()
-                .size() == 2 && powerChanging == false) {
+                .size() == 2 && planDistribution(powerChanging)) {
                 left = mote.getLinks()
                     .get(0);
                 right = mote.getLinks()
@@ -84,6 +84,13 @@ class EADefaultFeedbackLoop extends FeedbackLoop {
         if (steps.size() > 0) {
             execution();
         }
+    }
+
+    protected boolean planDistribution(boolean powerChanging) {
+        if (powerChanging) {
+            return false;
+        }
+        return true;
     }
 
     @Override
