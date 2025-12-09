@@ -95,12 +95,10 @@ class RangeEvaluator:
         default = ' (default: %(default)s)'
         parser.add_argument('--sample_count', type=int, default=30, help="sample count" + default)
         parser.add_argument('--max_workers', type=int, default=1, help="max worker threads" + default)
-        parser.add_argument('--strategy1',
+        parser.add_argument('--strategy', action='append',
+                            required=True,
                             choices=[_type.type.lower() for _type in StrategyKind],
-                            required=True, help="select adaption strategy 1")
-        parser.add_argument('--strategy2',
-                            choices=[_type.type.lower() for _type in StrategyKind],
-                            required=True, help="select adaption strategy 2")
+                            help="adaption strategy")
 
         args = parser.parse_args()
 
@@ -109,15 +107,20 @@ class RangeEvaluator:
         if not self._jar_file:
             raise RuntimeError("unable to find: %s" % self._jar_file)
 
-        strategy1 = StrategyKind[args.strategy1.upper()]
-        strategy2 = StrategyKind[args.strategy2.upper()]
-        print(f"sample count: {args.sample_count}")
-        sample1 = self._sample(args.sample_count, strategy1, args)
-        sample2 = self._sample(args.sample_count, strategy2, args)
+        strategies = []
+        for strat in args.strategy:
+            strategy = StrategyKind[strat.upper()]
+            strategies.append(strategy)
+        print(f"strategy count: {len(strategies)}")
+        print(f"sample count:   {args.sample_count}")
+        samples = []
+        for strategy in strategies:
+            sample = self._sample(args.sample_count, strategy, args)
+            samples.append((strategy, sample))
 
         table_entries = []
-        table_entries.append([strategy1.name, *sample1])
-        table_entries.append([strategy2.name, *sample2])
+        for strategy, sample in samples:
+            table_entries.append([strategy.name, *sample])
         table_str = tabulate(table_entries,
                              headers=['Strategy', 'Energy Min', 'Energy Max', 'Energy Average', 'Packet Loss Min', 'Packet Loss Max', 'Packet Loss Average', 'Normalized Score Average'],
                              tablefmt="simple"
