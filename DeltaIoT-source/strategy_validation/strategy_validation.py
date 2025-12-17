@@ -1,4 +1,3 @@
-import os
 import argparse
 import subprocess
 from pathlib import Path
@@ -6,6 +5,7 @@ import shutil
 import tempfile
 import json
 import statistics
+import csv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from tabulate import tabulate
@@ -112,6 +112,7 @@ class RangeEvaluator:
         parser.add_argument('--sample_count', type=int, default=30, help="sample count" + default)
         parser.add_argument('--max_workers', type=int, default=1, help="max worker threads" + default)
         parser.add_argument('--seed', type=int, help="simulator seed")
+        parser.add_argument('-r', '--result', type=Path)
         parser.add_argument('--strategy', action='append',
                             required=True,
                             type=strategy_config,
@@ -132,13 +133,33 @@ class RangeEvaluator:
         samples = []
         for strat in strategies:
             sample = self._sample(args.sample_count, strat[0], strat[1], args)
-            samples.append((strat[0], sample))
+            samples.append((strat[0], strat[1], sample))
 
         table_entries = []
-        for strategy, sample in samples:
-            table_entries.append([strategy.name, *sample])
+        for strategy, config, sample in samples:
+            table_entries.append([strategy.name, config.name, *sample])
+
+        headers = ['Strategy', 'Config', 'Energy Min', 'Energy Max', 'Energy Average', 'Packet Loss Min',
+                   'Packet Loss Max', 'Packet Loss Average', 'Normalized Score Average']
+
+        if args.result:
+            with args.result.open("w", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=headers)
+                writer.writeheader()
+                for entry in table_entries:
+                    writer.writerow({'Strategy': entry[0],
+                                     'Config': entry[1],
+                                     'Energy Min': entry[2],
+                                     'Energy Max': entry[3],
+                                     'Energy Average': entry[4],
+                                     'Packet Loss Min': entry[5],
+                                     'Packet Loss Max': entry[6],
+                                     'Packet Loss Average': entry[7],
+                                     'Normalized Score Average': entry[8],
+                                     })
+
         table_str = tabulate(table_entries,
-                             headers=['Strategy', 'Energy Min', 'Energy Max', 'Energy Average', 'Packet Loss Min', 'Packet Loss Max', 'Packet Loss Average', 'Normalized Score Average'],
+                             headers=headers,
                              tablefmt="simple"
                              )
         print(table_str)
