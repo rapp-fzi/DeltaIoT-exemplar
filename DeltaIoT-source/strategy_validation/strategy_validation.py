@@ -71,7 +71,8 @@ class RangeEvaluator:
 
     def _collect_samples(self, count, strategy: StrategyKind, config_file, seed, max_workers):
         samples = []
-        with Bar("Sampling %12s" % strategy.name, max=count) as bar:
+        strat_id = "%s:%s" % (strategy.name, config_file.stem)
+        with Bar("Sampling %18s" % strat_id, max=count) as bar:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
                 for i in range(0, count):
