@@ -8,7 +8,7 @@ import statistics
 import csv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from tabulate import tabulate
+import tabulate
 from progress.bar import Bar
 
 from strategy_kind import StrategyKind
@@ -158,7 +158,15 @@ class RangeEvaluator:
                                      'Normalized Score Average': entry[8],
                                      })
 
-        table_str = tabulate(table_entries,
+        table_entries.append(tabulate.SEPARATING_LINE)
+        table_entries.append(["total", None,
+                              min([stats[0] for _,_,stats in samples]), max([stats[1] for _,_,stats in samples]), statistics.mean([stats[2] for _,_,stats in samples]),
+                              min([stats[3] for _,_,stats in samples]), max([stats[4] for _,_,stats in samples]),
+                              statistics.mean([stats[5] for _,_,stats in samples]),
+                              None
+                              ])
+
+        table_str = tabulate.tabulate(table_entries,
                              headers=headers,
                              tablefmt="simple"
                              )
