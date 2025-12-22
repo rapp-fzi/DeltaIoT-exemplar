@@ -38,19 +38,19 @@ public class QoSCalculator {
     }
 
     public double normalizedScore(List<QoS> qos) {
-        DoubleSummaryStatistics energyStats = qos.stream()
-            .map(e -> normalize(e.getEnergyConsumption(), QoS.RANGE_ENERGY_CONSUMPTION))
-            .collect(Collectors.summarizingDouble((Double::doubleValue)));
-        DoubleSummaryStatistics packetStats = qos.stream()
-            .map(e -> normalize(e.getPacketLoss(), QoS.RANGE_PACKET_LOSS))
-            .collect(Collectors.summarizingDouble((Double::doubleValue)));
-
-        double energyConsumptionAverage = energyStats.getAverage();
-        double packetLossAverage = packetStats.getAverage();
-        return (energyConsumptionAverage + packetLossAverage) / 2;
+        double score = qos.stream()
+            .mapToDouble(e -> normalizedScore(e))
+            .sum();
+        return score;
     }
 
-    double normalize(double value, Range<Double> range) {
+    private double normalizedScore(QoS qos) {
+        double normalizedEnergyConsumption = normalize(qos.getEnergyConsumption(), QoS.RANGE_ENERGY_CONSUMPTION);
+        double normalizedPacketLoss = normalize(qos.getPacketLoss(), QoS.RANGE_PACKET_LOSS);
+        return (normalizedEnergyConsumption + normalizedPacketLoss) / 2;
+    }
+
+    double normalize_(double value, Range<Double> range) {
         if (value > range.getMaximum()) {
             return 1;
         }
@@ -60,5 +60,17 @@ public class QoSCalculator {
         }
 
         return (value - range.getMinimum()) / (range.getMaximum() - range.getMinimum());
+    }
+
+    double normalize(double value, Range<Double> range) {
+        if (value > range.getMaximum()) {
+            return 0;
+        }
+
+        if (value < range.getMinimum()) {
+            return 1;
+        }
+
+        return (1 / (range.getMaximum() - range.getMinimum())) * (range.getMaximum() - value);
     }
 }

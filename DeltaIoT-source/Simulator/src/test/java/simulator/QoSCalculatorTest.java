@@ -48,11 +48,11 @@ public class QoSCalculatorTest {
 
     @Test
     public void testNormalizedScore() {
-        List<QoS> qos = Arrays.asList(new QoS(0, 0.1, 10), new QoS(0, 0.2, 20));
+        List<QoS> qos = Arrays.asList(new QoS(0, 0.1, 10), new QoS(0, 0.23, 15));
 
         double actualScore = calculator.normalizedScore(qos);
 
-        assertEquals(0.51339, actualScore, EPSILON);
+        assertEquals(1.41253, actualScore, EPSILON);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class QoSCalculatorTest {
 
         double actualNormalized = calculator.normalize(5, range);
 
-        assertEquals(0.25, actualNormalized, EPSILON);
+        assertEquals(0.75, actualNormalized, EPSILON);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class QoSCalculatorTest {
 
         double actualNormalized = calculator.normalize(5, range);
 
-        assertEquals(0.0, actualNormalized, EPSILON);
+        assertEquals(1.0, actualNormalized, EPSILON);
     }
 
     @Test
@@ -79,6 +79,6 @@ public class QoSCalculatorTest {
 
         double actualNormalized = calculator.normalize(22, range);
 
-        assertEquals(1.0, actualNormalized, EPSILON);
+        assertEquals(0.0, actualNormalized, EPSILON);
     }
 }
