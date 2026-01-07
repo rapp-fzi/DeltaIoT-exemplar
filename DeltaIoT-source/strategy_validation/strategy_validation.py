@@ -64,34 +64,34 @@ class RangeEvaluator:
         result = self._read_result_file(expected_result_file)
         return result
 
-    def _collect_sample(self, strategy: StrategyKind, config_file, seed):
+    def _execute_run(self, strategy: StrategyKind, config_file, seed):
         with tempfile.TemporaryDirectory() as tmpdir_name:
             result = self._execute_simulator(strategy, config_file, seed, Path(tmpdir_name))
             return result["statistics"], result["normalizedScore"]
 
-    def _collect_samples(self, count, strategy: StrategyKind, config_file, seed, max_workers):
-        samples = []
+    def _collect_qas(self, count, strategy: StrategyKind, config_file, seed, max_workers):
+        qas = []
         strat_id = "%s:%s" % (strategy.name, config_file.stem)
-        with Bar("Sampling %18s" % strat_id, max=count) as bar:
+        with Bar("Execute %18s" % strat_id, max=count) as bar:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
                 for i in range(0, count):
-                    future = executor.submit(self._collect_sample, strategy, config_file, seed)
+                    future = executor.submit(self._execute_run, strategy, config_file, seed)
                     futures.append(future)
                 for future in as_completed(futures):
-                    samples.append(future.result())
+                    qas.append(future.result())
                     bar.next()
-        return samples
+        return qas
 
-    def _sample(self, sample_count, strategy, config_file, args):
-        samples = self._collect_samples(sample_count, strategy, config_file, args.seed, args.max_workers)
-        energy_consumption_min = min([sample[0]["energyConsumption"]["min"] for sample in samples])
-        energy_consumption_max = max([sample[0]["energyConsumption"]["max"] for sample in samples])
-        energy_consumption_average = statistics.mean([sample[0]["energyConsumption"]["average"] for sample in samples])
-        packet_loss_min = min([sample[0]["packetLoss"]["min"] for sample in samples])
-        packet_loss_max = max([sample[0]["packetLoss"]["max"] for sample in samples])
-        packet_loss_average = statistics.mean([sample[0]["packetLoss"]["average"] for sample in samples])
-        normalized_score_average = statistics.mean([sample[1] for sample in samples])
+    def _execute_runs(self, runs, strategy, config_file, args):
+        qas = self._collect_qas(runs, strategy, config_file, args.seed, args.max_workers)
+        energy_consumption_min = min([qa[0]["energyConsumption"]["min"] for qa in qas])
+        energy_consumption_max = max([qa[0]["energyConsumption"]["max"] for qa in qas])
+        energy_consumption_average = statistics.mean([qa[0]["energyConsumption"]["average"] for qa in qas])
+        packet_loss_min = min([qa[0]["packetLoss"]["min"] for qa in qas])
+        packet_loss_max = max([qa[0]["packetLoss"]["max"] for qa in qas])
+        packet_loss_average = statistics.mean([qa[0]["packetLoss"]["average"] for qa in qas])
+        normalized_score_average = statistics.mean([qa[1] for qa in qas])
         return (energy_consumption_min, energy_consumption_max, energy_consumption_average, packet_loss_min,
                 packet_loss_max, packet_loss_average, normalized_score_average)
 
@@ -110,7 +110,7 @@ class RangeEvaluator:
 
         parser = argparse.ArgumentParser(prog="strategy_validator", description="Validates DeltaIoT strategies")
         default = ' (default: %(default)s)'
-        parser.add_argument('--sample_count', type=int, default=30, help="sample count" + default)
+        parser.add_argument('--runs', type=int, default=30, help="run count" + default)
         parser.add_argument('--max_workers', type=int, default=1, help="max worker threads" + default)
         parser.add_argument('--seed', type=int, help="simulator seed")
         parser.add_argument('-r', '--result', type=Path)
@@ -131,14 +131,14 @@ class RangeEvaluator:
             strategies.append(strat)
         print(f"strategy count: {len(strategies)}")
         print(f"sample count:   {args.sample_count}")
-        samples = []
+        runs = []
         for strat in strategies:
-            sample = self._sample(args.sample_count, strat[0], strat[1], args)
-            samples.append((strat[0], strat[1], sample))
+            run = self._execute_runs(args.runs, strat[0], strat[1], args)
+            runs.append((strat[0], strat[1], run))
 
         table_entries = []
-        for strategy, config, sample in samples:
-            table_entries.append([strategy.name, config.name, *sample])
+        for strategy, config, run in runs:
+            table_entries.append([strategy.name, config.name, *run])
 
         headers = ['Strategy', 'Config', 'Energy Min', 'Energy Max', 'Energy Average', 'Packet Loss Min',
                    'Packet Loss Max', 'Packet Loss Average', 'Normalized Score Average']
@@ -161,9 +161,9 @@ class RangeEvaluator:
 
         table_entries.append(tabulate.SEPARATING_LINE)
         table_entries.append(["total", None,
-                              min([stats[0] for _,_,stats in samples]), max([stats[1] for _,_,stats in samples]), statistics.mean([stats[2] for _,_,stats in samples]),
-                              min([stats[3] for _,_,stats in samples]), max([stats[4] for _,_,stats in samples]),
-                              statistics.mean([stats[5] for _,_,stats in samples]),
+                              min([stats[0] for _,_,stats in runs]), max([stats[1] for _,_,stats in runs]), statistics.mean([stats[2] for _,_,stats in runs]),
+                              min([stats[3] for _,_,stats in runs]), max([stats[4] for _,_,stats in runs]),
+                              statistics.mean([stats[5] for _,_,stats in runs]),
                               None
                               ])
 
