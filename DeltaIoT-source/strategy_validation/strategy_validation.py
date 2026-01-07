@@ -130,7 +130,7 @@ class RangeEvaluator:
         for strat in args.strategy:
             strategies.append(strat)
         print(f"strategy count: {len(strategies)}")
-        print(f"sample count:   {args.sample_count}")
+        print(f"sample count:   {args.runs}")
         runs = []
         for strat in strategies:
             run = self._execute_runs(args.runs, strat[0], strat[1], args)
