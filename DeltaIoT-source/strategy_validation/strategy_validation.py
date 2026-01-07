@@ -67,7 +67,7 @@ class RangeEvaluator:
     def _execute_run(self, strategy: StrategyKind, config_file, seed):
         with tempfile.TemporaryDirectory() as tmpdir_name:
             result = self._execute_simulator(strategy, config_file, seed, Path(tmpdir_name))
-            return result["statistics"], result["normalizedScore"]
+            return result["statistics"], result["normalizedScore"], result
 
     def _collect_qas(self, count, strategy: StrategyKind, config_file, seed, max_workers):
         qas = []
@@ -143,6 +143,28 @@ class RangeEvaluator:
                              )
         print(table_str)
 
+    def _extract_quality_attributes(self, args):
+        print(f"strategy:       {args.strategy[0]}")
+        print(f"runs:           {args.runs}")
+
+        qa_list = self._collect_qas(args.runs, args.strategy[0], args.strategy[1], args.seed, args.max_workers)
+
+        headers = ['ID', 'Values', 'Run', 'Sample', 'Energy', 'Packet Loss']
+        with args.result.open("w", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=headers)
+            writer.writeheader()
+            for r, qa_entry in enumerate(qa_list):
+                optimizables = ["%s=%s" % (key, value) for key, value in qa_entry[2]["strategyConfig"].items()]
+                values = ",".join(optimizables)
+                for s, sample in enumerate(qa_entry[2]["qos"]):
+                    writer.writerow({'ID': "simulator",
+                                 'Values': values,
+                                 'Run': r,
+                                 'Sample': s,
+                                 'Energy': sample["powerConsumption"],
+                                 'Packet Loss': sample["packetLoss"],
+                                 })
+
     def main(self):
         def strategy_config(string):
             tokens = string.split(":")
@@ -171,6 +193,15 @@ class RangeEvaluator:
                             metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
                             help="adaption strategy format: strategy[:config file]")
         parser_quality_attributes.set_defaults(func=self._analyze_quality_attributes)
+
+        parser_quality_attributes_raw = subparsers.add_parser('qa_raw', help='raw quality attributes extractor')
+        parser_quality_attributes_raw.add_argument('-r', '--result', type=Path, required=True)
+        parser_quality_attributes_raw.add_argument('--strategy',
+                            required=True,
+                            type=strategy_config,
+                            metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
+                            help="adaption strategy format: strategy[:config file]")
+        parser_quality_attributes_raw.set_defaults(func=self._extract_quality_attributes)
 
         args = parser.parse_args()
 
