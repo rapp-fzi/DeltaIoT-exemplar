@@ -145,27 +145,37 @@ class RangeEvaluator:
 
     def _extract_quality_attributes(self, args):
         print(f"strategy:       {args.strategy[0].name}")
+        print(f"config count:   {len(args.config)}")
         print(f"runs:           {args.runs}")
 
-        qa_list = self._collect_qas(args.runs, args.strategy[0], args.strategy[1], args.seed, args.max_workers)
+        runs = []
+        for config in args.config:
+            run = self._collect_qas(args.runs, args.strategy[0], config.resolve(), args.seed, args.max_workers)
+            runs.append(run)
 
         headers = ['ID', 'Values', 'Run', 'Sample', 'Energy', 'Packet Loss']
         with args.result.open("w", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=headers)
             writer.writeheader()
-            for r, qa_entry in enumerate(qa_list):
-                optimizables = ["%s=%s" % (key, value) for key, value in qa_entry[2]["strategyConfig"].items()]
-                values = ",".join(optimizables)
-                for s, sample in enumerate(qa_entry[2]["qos"]):
-                    writer.writerow({'ID': args.strategy[0].name,
-                                 'Values': values,
-                                 'Run': r,
-                                 'Sample': s,
-                                 'Energy': sample["powerConsumption"],
-                                 'Packet Loss': sample["packetLoss"],
-                                 })
+            #for r, qa_entry in enumerate(qa_list):
+            for c, qa_list in enumerate(runs):
+                for r, qa_entry in enumerate(qa_list):
+                    optimizables = ["%s=%s" % (key, value) for key, value in qa_entry[2]["strategyConfig"].items()]
+                    values = ",".join(optimizables)
+                    for s, sample in enumerate(qa_entry[2]["qos"]):
+                        writer.writerow({'ID': c,
+                                     'Values': values,
+                                     'Run': r,
+                                     'Sample': s,
+                                     'Energy': sample["powerConsumption"],
+                                     'Packet Loss': sample["packetLoss"],
+                                     })
 
     def main(self):
+        def strategy_name(string):
+            strategy = StrategyKind[string.upper()]
+            return strategy
+
         def strategy_config(string):
             tokens = string.split(":")
             strategy = StrategyKind[tokens[0].upper()]
@@ -187,7 +197,7 @@ class RangeEvaluator:
         subparsers = parser.add_subparsers(required=True, help='available subcommands')
         parser_quality_attributes = subparsers.add_parser('qa', help='quality attributes analyzer')
         parser_quality_attributes.add_argument('-r', '--result', type=Path)
-        parser_quality_attributes.add_argument('--strategy', action='append',
+        parser_quality_attributes.add_argument('--strategy',
                             required=True,
                             type=strategy_config,
                             metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
@@ -196,11 +206,15 @@ class RangeEvaluator:
 
         parser_quality_attributes_raw = subparsers.add_parser('qa_raw', help='raw quality attributes extractor')
         parser_quality_attributes_raw.add_argument('-r', '--result', type=Path, required=True)
-        parser_quality_attributes_raw.add_argument('--strategy',
+        parser_quality_attributes_raw.add_argument('--strategy', action='append',
                             required=True,
-                            type=strategy_config,
+                            type=strategy_name,
                             metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
-                            help="adaption strategy format: strategy[:config file]")
+                            help="adaption strategy")
+        parser_quality_attributes_raw.add_argument('--config', action='append',
+                            required=True,
+                            type=Path,
+                            help="adaption strategy config file")
         parser_quality_attributes_raw.set_defaults(func=self._extract_quality_attributes)
 
         args = parser.parse_args()
