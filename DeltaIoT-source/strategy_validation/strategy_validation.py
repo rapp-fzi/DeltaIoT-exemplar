@@ -95,37 +95,7 @@ class RangeEvaluator:
         return (energy_consumption_min, energy_consumption_max, energy_consumption_average, packet_loss_min,
                 packet_loss_max, packet_loss_average, normalized_score_average)
 
-    def main(self):
-        def strategy_config(string):
-            tokens = string.split(":")
-            strategy = StrategyKind[tokens[0].upper()]
-            if len(tokens) > 1:
-                config_file = Path(tokens[1])
-                config_file = config_file.resolve()
-                if not config_file.exists():
-                    raise ValueError("not found: %s" % config_file)
-            else:
-                config_file = None
-            return strategy, config_file
-
-        parser = argparse.ArgumentParser(prog="strategy_validator", description="Validates DeltaIoT strategies")
-        default = ' (default: %(default)s)'
-        parser.add_argument('--runs', type=int, default=30, help="run count" + default)
-        parser.add_argument('--max_workers', type=int, default=1, help="max worker threads" + default)
-        parser.add_argument('--seed', type=int, help="simulator seed")
-        parser.add_argument('-r', '--result', type=Path)
-        parser.add_argument('--strategy', action='append',
-                            required=True,
-                            type=strategy_config,
-                            metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
-                            help="adaption strategy format: strategy[:config file]")
-        args = parser.parse_args()
-
-        if not self._java_path:
-            raise RuntimeError("unable to find: %s" % self.BINARY_JAVA)
-        if not self._jar_file:
-            raise RuntimeError("unable to find: %s" % self._jar_file)
-
+    def _analyze_quality_attributes(self, args):
         strategies = []
         for strat in args.strategy:
             strategies.append(strat)
@@ -172,6 +142,45 @@ class RangeEvaluator:
                              tablefmt="simple"
                              )
         print(table_str)
+
+    def main(self):
+        def strategy_config(string):
+            tokens = string.split(":")
+            strategy = StrategyKind[tokens[0].upper()]
+            if len(tokens) > 1:
+                config_file = Path(tokens[1])
+                config_file = config_file.resolve()
+                if not config_file.exists():
+                    raise ValueError("not found: %s" % config_file)
+            else:
+                config_file = None
+            return strategy, config_file
+
+        parser = argparse.ArgumentParser(prog="strategy_validator", description="Validates DeltaIoT strategies")
+        default = ' (default: %(default)s)'
+        parser.add_argument('--runs', type=int, default=30, help="run count" + default)
+        parser.add_argument('--max_workers', type=int, default=1, help="max worker threads" + default)
+        parser.add_argument('--seed', type=int, help="simulator seed")
+
+        subparsers = parser.add_subparsers(required=True, help='available subcommands')
+        parser_quality_attributes = subparsers.add_parser('qa', help='quality attributes analyzer')
+        parser_quality_attributes.add_argument('-r', '--result', type=Path)
+        parser_quality_attributes.add_argument('--strategy', action='append',
+                            required=True,
+                            type=strategy_config,
+                            metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
+                            help="adaption strategy format: strategy[:config file]")
+        parser_quality_attributes.set_defaults(func=self._analyze_quality_attributes)
+
+        args = parser.parse_args()
+
+        if not self._java_path:
+            raise RuntimeError("unable to find: %s" % self.BINARY_JAVA)
+        if not self._jar_file:
+            raise RuntimeError("unable to find: %s" % self._jar_file)
+
+        args.func(args)
+
 
 
 if __name__ == '__main__':
