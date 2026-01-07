@@ -144,7 +144,7 @@ class RangeEvaluator:
         print(table_str)
 
     def _extract_quality_attributes(self, args):
-        print(f"strategy:       {args.strategy[0]}")
+        print(f"strategy:       {args.strategy[0].name}")
         print(f"runs:           {args.runs}")
 
         qa_list = self._collect_qas(args.runs, args.strategy[0], args.strategy[1], args.seed, args.max_workers)
@@ -157,7 +157,7 @@ class RangeEvaluator:
                 optimizables = ["%s=%s" % (key, value) for key, value in qa_entry[2]["strategyConfig"].items()]
                 values = ",".join(optimizables)
                 for s, sample in enumerate(qa_entry[2]["qos"]):
-                    writer.writerow({'ID': "simulator",
+                    writer.writerow({'ID': args.strategy[0].name,
                                  'Values': values,
                                  'Run': r,
                                  'Sample': s,
