@@ -152,7 +152,6 @@ class StrategyValidator:
         with args.result.open("w", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=headers)
             writer.writeheader()
-            #for r, qa_entry in enumerate(qa_list):
             for c, qa_list in enumerate(runs):
                 for r, qa_entry in enumerate(qa_list):
                     optimizables = ["%s=%s" % (key, value) for key, value in qa_entry[2]["strategyConfig"].items()]
