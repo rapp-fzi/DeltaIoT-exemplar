@@ -14,7 +14,7 @@ from progress.bar import Bar
 from strategy_kind import StrategyKind
 
 
-class RangeEvaluator:
+class StrategyValidator:
     BINARY_JAVA = "java"
 
     def __init__(self):
@@ -229,5 +229,5 @@ class RangeEvaluator:
 
 
 if __name__ == '__main__':
-    e = RangeEvaluator()
-    e.main()
+    v = StrategyValidator()
+    v.main()
