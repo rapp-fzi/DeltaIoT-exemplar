@@ -36,11 +36,6 @@ class StrategyValidator:
         )
         return proc
 
-    def _read_result_file(self, result_file):
-        with result_file.open("r", encoding="utf-8") as f:
-            result = json.load(f)
-            return result
-
     def _execute_simulator(self, strategy: StrategyKind, config_file, seed, tmp_path: Path):
         strategy_conf = tmp_path / ("%s.json" % "empty")
         with strategy_conf.open("w", encoding="utf-8") as f:
@@ -61,7 +56,7 @@ class StrategyValidator:
             raise RuntimeError(f"return code: {proc.returncode}\noutput:\n{out}")
 
         expected_result_file = tmp_path / result_file
-        result = self._read_result_file(expected_result_file)
+        result = self._read_json_file(expected_result_file)
         return result
 
     def _execute_run(self, strategy: StrategyKind, config_file, seed):
@@ -69,7 +64,7 @@ class StrategyValidator:
             result = self._execute_simulator(strategy, config_file, seed, Path(tmpdir_name))
             return result["statistics"], result["normalizedScore"], result
 
-    def _collect_qas(self, count, strategy: StrategyKind, config_file, seed, max_workers):
+    def _collect_simulation_data(self, count, strategy: StrategyKind, config_file, seed, max_workers):
         qas = []
         strat_id = "%s:%s" % (strategy.name, config_file.stem)
         with Bar("Execute %18s" % strat_id, max=count) as bar:
@@ -84,7 +79,7 @@ class StrategyValidator:
         return qas
 
     def _execute_runs(self, runs, strategy, config_file, args):
-        qas = self._collect_qas(runs, strategy, config_file, args.seed, args.max_workers)
+        qas = self._collect_simulation_data(runs, strategy, config_file, args.seed, args.max_workers)
         energy_consumption_min = min([qa[0]["energyConsumption"]["min"] for qa in qas])
         energy_consumption_max = max([qa[0]["energyConsumption"]["max"] for qa in qas])
         energy_consumption_average = statistics.mean([qa[0]["energyConsumption"]["average"] for qa in qas])
@@ -150,7 +145,7 @@ class StrategyValidator:
 
         runs = []
         for config in args.config:
-            run = self._collect_qas(args.runs, args.strategy[0], config.resolve(), args.seed, args.max_workers)
+            run = self._collect_simulation_data(args.runs, args.strategy[0], config.resolve(), args.seed, args.max_workers)
             runs.append(run)
 
         headers = ['ID', 'Values', 'Run', 'Sample', 'Energy', 'Packet Loss']
@@ -170,6 +165,73 @@ class StrategyValidator:
                                      'Energy': sample["powerConsumption"],
                                      'Packet Loss': sample["packetLoss"],
                                      })
+
+    def _correlate_strategies(self, args):
+        print(f"correlate strategy: {args.strategy.name}")
+        print(f"task count:         {len(args.task_file)}")
+        print(f"runs:               {args.runs}")
+
+        all_tasks = []
+        for result_file in args.task_file:
+            stats = self._analyze_task_result(result_file)
+            all_tasks.append(stats)
+
+        all_data = []
+        for task_id, optimizables, reward in all_tasks:
+            with tempfile.TemporaryDirectory() as tmpdir_name:
+                tmp_path = Path(tmpdir_name)
+                config_file = self._create_strategy_conf(tmp_path, args.strategy, optimizables)
+                data = self._collect_simulation_data(args.runs, args.strategy, config_file, args.seed, args.max_workers)
+                score_average = statistics.mean([result[1] for result in data])
+                all_data.append((task_id, reward, score_average, optimizables))
+
+        table_entries = []
+        for task_id, reward, score_average, optimizables in all_data:
+            name_values = ["%s=%s" % (key, value) for key, value in optimizables.items()]
+            values = ",".join(name_values)
+            table_entries.append((task_id, reward, score_average, values))
+
+        headers = ['ID', 'Reward', 'Score', 'Values']
+
+        with args.result.open("w", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=headers)
+            writer.writeheader()
+            for entry in table_entries:
+                writer.writerow({'ID': entry[0],
+                                 'Reward': entry[1],
+                                 'Score': entry[2],
+                                 'Values': entry[3],
+                                 })
+
+        table_str = tabulate.tabulate(table_entries,
+                                      headers=headers,
+                                      tablefmt="simple"
+                                      )
+        print(table_str)
+
+    def _create_strategy_conf(self, folder, strategy, values):
+        strategy_path = folder / ("%s_conf.json" % strategy.name)
+        with strategy_path.open("w", encoding="utf-8") as f:
+            json.dump(values, f, indent=2)
+        return strategy_path
+
+    def _analyze_task_result(self, result_file):
+        task_result = self._read_json_file(result_file)
+        task_id = task_result["result"]["id"]
+        reward = task_result["result"]["reward"]
+        optimizables = task_result["optimizables"]
+
+        result = (
+            task_id,
+            optimizables,
+            reward
+        )
+        return result
+
+    def _read_json_file(self, json_file):
+        with json_file.open("r", encoding="utf-8") as f:
+            result = json.load(f)
+            return result
 
     def main(self):
         def strategy_name(string):
@@ -217,6 +279,16 @@ class StrategyValidator:
                             help="adaption strategy config file")
         parser_quality_attributes_raw.set_defaults(func=self._extract_quality_attributes)
 
+        parser_correlate = subparsers.add_parser('correlate', help='generate correlation data')
+        parser_correlate.add_argument('task_file', type=Path, nargs='+')
+        parser_correlate.add_argument('-r', '--result', type=Path, required=True, help="CSV result file")
+        parser_correlate.add_argument('--strategy',
+                            required=True,
+                            type=strategy_name,
+                            metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
+                            help="adaption strategy")
+        parser_correlate.set_defaults(func=self._correlate_strategies)
+
         args = parser.parse_args()
 
         if not self._java_path:
@@ -225,7 +297,6 @@ class StrategyValidator:
             raise RuntimeError("unable to find: %s" % self._jar_file)
 
         args.func(args)
-
 
 
 if __name__ == '__main__':
