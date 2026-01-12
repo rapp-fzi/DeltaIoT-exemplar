@@ -64,10 +64,9 @@ class StrategyValidator:
             result = self._execute_simulator(strategy, config_file, seed, Path(tmpdir_name))
             return result["statistics"], result["normalizedScore"], result
 
-    def _collect_simulation_data(self, count, strategy: StrategyKind, config_file, seed, max_workers):
+    def _collect_simulation_data(self, count, name, strategy: StrategyKind, config_file, seed, max_workers):
         qas = []
-        strat_id = "%s:%s" % (strategy.name, config_file.stem)
-        with Bar("Execute %18s" % strat_id, max=count) as bar:
+        with Bar("Execute %18s" % name, max=count) as bar:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
                 for i in range(0, count):
@@ -79,7 +78,8 @@ class StrategyValidator:
         return qas
 
     def _execute_runs(self, runs, strategy, config_file, args):
-        qas = self._collect_simulation_data(runs, strategy, config_file, args.seed, args.max_workers)
+        strat_id = "%s:%s" % (strategy.name, config_file.stem)
+        qas = self._collect_simulation_data(runs, strat_id, strategy, config_file, args.seed, args.max_workers)
         energy_consumption_min = min([qa[0]["energyConsumption"]["min"] for qa in qas])
         energy_consumption_max = max([qa[0]["energyConsumption"]["max"] for qa in qas])
         energy_consumption_average = statistics.mean([qa[0]["energyConsumption"]["average"] for qa in qas])
@@ -181,7 +181,8 @@ class StrategyValidator:
             with tempfile.TemporaryDirectory() as tmpdir_name:
                 tmp_path = Path(tmpdir_name)
                 config_file = self._create_strategy_conf(tmp_path, args.strategy, optimizables)
-                data = self._collect_simulation_data(args.runs, args.strategy, config_file, args.seed, args.max_workers)
+                strat_id = "%s:%s" % (args.strategy.name, task_id)
+                data = self._collect_simulation_data(args.runs, strat_id, args.strategy, config_file, args.seed, args.max_workers)
                 score_average = statistics.mean([result[1] for result in data])
                 all_data.append((task_id, reward, score_average, optimizables))
 
