@@ -17,15 +17,34 @@ class StrategyValidator:
         simulator = Simulator()
         simulator.init()
         qas = simulator.collect_simulation_data(simulator, runs, strat_id, strategy, config_file, args.seed, args.max_workers)
+
+        run_qas = [qa[2]["qos"] for qa in qas]
+        qas_energy = []
+        for qa in run_qas:
+            for sample in qa:
+                qe = sample["powerConsumption"]
+                qas_energy.append(qe)
+        qas_packet_loss = []
+        for qa in run_qas:
+            for sample in qa:
+                qe = sample["packetLoss"]
+                qas_packet_loss.append(qe)
+
         energy_consumption_min = min([qa[0]["energyConsumption"]["min"] for qa in qas])
         energy_consumption_max = max([qa[0]["energyConsumption"]["max"] for qa in qas])
         energy_consumption_average = statistics.mean([qa[0]["energyConsumption"]["average"] for qa in qas])
+        energy_consumption_sd = statistics.stdev(qas_energy)
+
         packet_loss_min = min([qa[0]["packetLoss"]["min"] for qa in qas])
         packet_loss_max = max([qa[0]["packetLoss"]["max"] for qa in qas])
         packet_loss_average = statistics.mean([qa[0]["packetLoss"]["average"] for qa in qas])
+        packet_loss_sd = statistics.stdev(qas_packet_loss)
+
         normalized_score_average = statistics.mean([qa[1] for qa in qas])
-        return (energy_consumption_min, energy_consumption_max, energy_consumption_average, packet_loss_min,
-                packet_loss_max, packet_loss_average, normalized_score_average)
+
+        return (energy_consumption_min, energy_consumption_max, energy_consumption_average, energy_consumption_sd,
+                packet_loss_min, packet_loss_max, packet_loss_average, packet_loss_sd,
+                normalized_score_average)
 
     def _analyze_quality_attributes(self, args):
         strategies = []
@@ -40,10 +59,12 @@ class StrategyValidator:
 
         table_entries = []
         for strategy, config, run in runs:
-            table_entries.append([strategy.name, config.name, *run])
+            table_entries.append([strategy.name, config.stem, *run])
 
-        headers = ['Strategy', 'Config', 'Energy Min', 'Energy Max', 'Energy Average', 'Packet Loss Min',
-                   'Packet Loss Max', 'Packet Loss Average', 'Normalized Score Average']
+        headers = ['Strategy', 'Config',
+                   'Energy Min', 'Energy Max', 'Energy Average', 'Energy SD',
+                   'Packet Loss Min', 'Packet Loss Max', 'Packet Loss Average', 'Packet Loss SD',
+                   'Score']
 
         if args.result:
             with args.result.open("w", encoding="utf-8") as f:
@@ -55,17 +76,19 @@ class StrategyValidator:
                                      'Energy Min': entry[2],
                                      'Energy Max': entry[3],
                                      'Energy Average': entry[4],
-                                     'Packet Loss Min': entry[5],
-                                     'Packet Loss Max': entry[6],
-                                     'Packet Loss Average': entry[7],
-                                     'Normalized Score Average': entry[8],
+                                     'Energy SD': entry[5],
+                                     'Packet Loss Min': entry[6],
+                                     'Packet Loss Max': entry[7],
+                                     'Packet Loss Average': entry[8],
+                                     'Packet Loss SD': entry[9],
+                                     'Score': entry[10],
                                      })
 
         table_entries.append(tabulate.SEPARATING_LINE)
         table_entries.append(["total", None,
-                              min([stats[0] for _,_,stats in runs]), max([stats[1] for _,_,stats in runs]), statistics.mean([stats[2] for _,_,stats in runs]),
+                              min([stats[0] for _,_,stats in runs]), max([stats[1] for _,_,stats in runs]), statistics.mean([stats[2] for _,_,stats in runs]), None,
                               min([stats[3] for _,_,stats in runs]), max([stats[4] for _,_,stats in runs]),
-                              statistics.mean([stats[5] for _,_,stats in runs]),
+                              statistics.mean([stats[5] for _,_,stats in runs]), None,
                               None
                               ])
 
@@ -130,11 +153,11 @@ class StrategyValidator:
         subparsers = parser.add_subparsers(required=True, help='available subcommands')
         parser_quality_attributes = subparsers.add_parser('qa', help='quality attributes analyzer')
         parser_quality_attributes.add_argument('-r', '--result', type=Path)
-        parser_quality_attributes.add_argument('--strategy',
+        parser_quality_attributes.add_argument('--strategy', action='append',
                             required=True,
                             type=strategy_config,
                             metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
-                            help="adaption strategy format: strategy[:config file]")
+                            help="adaption strategy format: strategy:config_file")
         parser_quality_attributes.set_defaults(func=self._analyze_quality_attributes)
 
         parser_quality_attributes_raw = subparsers.add_parser('qa_raw', help='raw quality attributes extractor')
