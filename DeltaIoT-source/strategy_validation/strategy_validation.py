@@ -1,7 +1,5 @@
 import argparse
-import subprocess
 from pathlib import Path
-import shutil
 import tempfile
 import json
 import statistics
@@ -12,65 +10,22 @@ import tabulate
 from progress.bar import Bar
 
 from strategy_kind import StrategyKind
+from simulator import Simulator
 
 
 class StrategyValidator:
-    BINARY_JAVA = "java"
-
-    def __init__(self):
-        script_dir = Path(__file__).resolve().parent
-        self._jar_file = script_dir.joinpath("../SimulatorConsole/target/SimulatorConsole-0.0.1-SNAPSHOT.jar")
-        self._java_path = shutil.which(self.BINARY_JAVA)
-
-    def _run_cli(self, cmd_args, cli, cwd):
-        """
-        Run external CLI and return subprocess.CompletedProcess.
-        - cmd_args: list of args (not including binary)
-        - cli: path to binary
-        """
-        proc = subprocess.run(
-            [cli, *cmd_args],
-            text=True,
-            capture_output=True,
-            cwd=cwd,
-        )
-        return proc
-
-    def _execute_simulator(self, strategy: StrategyKind, config_file, seed, tmp_path: Path):
-        strategy_conf = tmp_path / ("%s.json" % "empty")
-        with strategy_conf.open("w", encoding="utf-8") as f:
-            f.write(json.dumps({}, indent=2))
-
-        result_file = "result.json"
-        args = ["-jar", self._jar_file, "-r", result_file]
-        if seed is not None:
-            args.extend(['--seed', str(seed)])
-        args.append("--no_validation")
-        args.extend(strategy.extra_arguments)
-        if config_file:
-            args.extend(['-p', str(config_file)])
-
-        proc = self._run_cli(args, cli=self._java_path, cwd=str(tmp_path))
-        if proc.returncode != 0:
-            out = (proc.stdout or "") + (proc.stderr or "")
-            raise RuntimeError(f"return code: {proc.returncode}\noutput:\n{out}")
-
-        expected_result_file = tmp_path / result_file
-        result = self._read_json_file(expected_result_file)
-        return result
-
-    def _execute_run(self, strategy: StrategyKind, config_file, seed):
+    def _execute_run(self, simulator, strategy: StrategyKind, config_file, seed):
         with tempfile.TemporaryDirectory() as tmpdir_name:
-            result = self._execute_simulator(strategy, config_file, seed, Path(tmpdir_name))
+            result = simulator.execute_simulator(strategy, config_file, seed, Path(tmpdir_name))
             return result["statistics"], result["normalizedScore"], result
 
-    def _collect_simulation_data(self, count, name, strategy: StrategyKind, config_file, seed, max_workers):
+    def _collect_simulation_data(self, simulator, count, name, strategy: StrategyKind, config_file, seed, max_workers):
         qas = []
         with Bar("Execute %18s" % name, max=count) as bar:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
                 for i in range(0, count):
-                    future = executor.submit(self._execute_run, strategy, config_file, seed)
+                    future = executor.submit(self._execute_run, simulator, strategy, config_file, seed)
                     futures.append(future)
                 for future in as_completed(futures):
                     qas.append(future.result())
@@ -79,7 +34,9 @@ class StrategyValidator:
 
     def _execute_runs(self, runs, strategy, config_file, args):
         strat_id = "%s:%s" % (strategy.name, config_file.stem)
-        qas = self._collect_simulation_data(runs, strat_id, strategy, config_file, args.seed, args.max_workers)
+        simulator = Simulator()
+        simulator.init()
+        qas = self._collect_simulation_data(simulator, runs, strat_id, strategy, config_file, args.seed, args.max_workers)
         energy_consumption_min = min([qa[0]["energyConsumption"]["min"] for qa in qas])
         energy_consumption_max = max([qa[0]["energyConsumption"]["max"] for qa in qas])
         energy_consumption_average = statistics.mean([qa[0]["energyConsumption"]["average"] for qa in qas])
@@ -144,8 +101,10 @@ class StrategyValidator:
         print(f"runs:           {args.runs}")
 
         runs = []
+        simulator = Simulator()
+        simulator.init()
         for config in args.config:
-            run = self._collect_simulation_data(args.runs, args.strategy[0], config.resolve(), args.seed, args.max_workers)
+            run = self._collect_simulation_data(simulator, args.runs, args.strategy[0], config.resolve(), args.seed, args.max_workers)
             runs.append(run)
 
         headers = ['ID', 'Values', 'Run', 'Sample', 'Energy', 'Packet Loss']
@@ -176,12 +135,14 @@ class StrategyValidator:
             all_tasks.append(stats)
 
         all_data = []
+        simulator = Simulator()
+        simulator.init()
         for task_id, optimizables, reward in all_tasks:
             with tempfile.TemporaryDirectory() as tmpdir_name:
                 tmp_path = Path(tmpdir_name)
                 config_file = self._create_strategy_conf(tmp_path, args.strategy, optimizables)
                 strat_id = "%s:%s" % (args.strategy.name, task_id)
-                data = self._collect_simulation_data(args.runs, strat_id, args.strategy, config_file, args.seed, args.max_workers)
+                data = self._collect_simulation_data(simulator, args.runs, strat_id, args.strategy, config_file, args.seed, args.max_workers)
                 score_average = statistics.mean([result[1] for result in data])
                 all_data.append((task_id, reward, score_average, optimizables))
 
@@ -290,11 +251,6 @@ class StrategyValidator:
         parser_correlate.set_defaults(func=self._correlate_strategies)
 
         args = parser.parse_args()
-
-        if not self._java_path:
-            raise RuntimeError("unable to find: %s" % self.BINARY_JAVA)
-        if not self._jar_file:
-            raise RuntimeError("unable to find: %s" % self._jar_file)
 
         args.func(args)
 
