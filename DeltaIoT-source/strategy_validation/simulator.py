@@ -40,7 +40,11 @@ class Simulator:
     def _execute_run(self, simulator, strategy: StrategyKind, config_file, seed):
         with tempfile.TemporaryDirectory() as tmpdir_name:
             result = self._execute_simulator(strategy, config_file, seed, Path(tmpdir_name))
-            return result["statistics"], result["normalizedScore"], result
+            return {
+                "statistics": result["statistics"],
+                "score": result["normalizedScore"],
+                "result": result,
+            }
 
     def _execute_simulator(self, strategy: StrategyKind, config_file, seed, tmp_path: Path):
         strategy_conf = tmp_path / ("%s.json" % "empty")

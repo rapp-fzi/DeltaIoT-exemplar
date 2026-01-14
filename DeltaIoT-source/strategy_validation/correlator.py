@@ -81,7 +81,8 @@ class Correlator:
 
     def _qos_to_runs(self, simulator_runs):
         runs = []
-        for _, _, result in simulator_runs:
+        for data in simulator_runs:
+            result = data["result"]
             run_entry = {}
             quality_attributes = {}
             packet_loss = []

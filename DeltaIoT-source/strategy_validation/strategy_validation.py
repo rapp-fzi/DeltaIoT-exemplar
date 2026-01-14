@@ -18,7 +18,7 @@ class StrategyValidator:
         simulator.init()
         qas = simulator.collect_simulation_data(simulator, runs, strat_id, strategy, config_file, args.seed, args.max_workers)
 
-        run_qas = [qa[2]["qos"] for qa in qas]
+        run_qas = [qa["result"]["qos"] for qa in qas]
         qas_energy = []
         for qa in run_qas:
             for sample in qa:
@@ -30,17 +30,17 @@ class StrategyValidator:
                 qe = sample["packetLoss"]
                 qas_packet_loss.append(qe)
 
-        energy_consumption_min = min([qa[0]["energyConsumption"]["min"] for qa in qas])
-        energy_consumption_max = max([qa[0]["energyConsumption"]["max"] for qa in qas])
-        energy_consumption_average = statistics.mean([qa[0]["energyConsumption"]["average"] for qa in qas])
+        energy_consumption_min = min([qa["statistics"]["energyConsumption"]["min"] for qa in qas])
+        energy_consumption_max = max([qa["statistics"]["energyConsumption"]["max"] for qa in qas])
+        energy_consumption_average = statistics.mean([qa["statistics"]["energyConsumption"]["average"] for qa in qas])
         energy_consumption_sd = statistics.stdev(qas_energy)
 
-        packet_loss_min = min([qa[0]["packetLoss"]["min"] for qa in qas])
-        packet_loss_max = max([qa[0]["packetLoss"]["max"] for qa in qas])
-        packet_loss_average = statistics.mean([qa[0]["packetLoss"]["average"] for qa in qas])
+        packet_loss_min = min([qa["statistics"]["packetLoss"]["min"] for qa in qas])
+        packet_loss_max = max([qa["statistics"]["packetLoss"]["max"] for qa in qas])
+        packet_loss_average = statistics.mean([qa["statistics"]["packetLoss"]["average"] for qa in qas])
         packet_loss_sd = statistics.stdev(qas_packet_loss)
 
-        normalized_score_average = statistics.mean([qa[1] for qa in qas])
+        normalized_score_average = statistics.mean([qa["score"] for qa in qas])
 
         return (energy_consumption_min, energy_consumption_max, energy_consumption_average, energy_consumption_sd,
                 packet_loss_min, packet_loss_max, packet_loss_average, packet_loss_sd,
@@ -116,9 +116,9 @@ class StrategyValidator:
             writer.writeheader()
             for c, qa_list in enumerate(runs):
                 for r, qa_entry in enumerate(qa_list):
-                    optimizables = ["%s=%s" % (key, value) for key, value in qa_entry[2]["strategyConfig"].items()]
+                    optimizables = ["%s=%s" % (key, value) for key, value in qa_entry["result"]["strategyConfig"].items()]
                     values = ",".join(optimizables)
-                    for s, sample in enumerate(qa_entry[2]["qos"]):
+                    for s, sample in enumerate(qa_entry["result"]["qos"]):
                         writer.writerow({'ID': c,
                                      'Values': values,
                                      'Run': r,
