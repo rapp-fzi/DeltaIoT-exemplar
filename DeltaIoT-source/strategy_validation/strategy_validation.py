@@ -181,7 +181,8 @@ class StrategyValidator:
                             type=strategy_name,
                             metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
                             help="adaption strategy")
-        parser_correlate.add_argument('--calc_average_reward', action='store_true')
+        parser_correlate.add_argument('--calc_average_reward', action='store_true', help="calculate reward bases on QA data")
+        parser_correlate.add_argument('--calc_average_score', action='store_true', help="calculate score bases on QA data")
         parser_correlate.set_defaults(func=Correlator().correlate_strategies)
 
         args = parser.parse_args()

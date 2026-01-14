@@ -15,3 +15,8 @@ class Normalizer:
             return 1
 
         return (1 / (upper - lower)) * (upper - value)
+
+
+class NullNormalizer(Normalizer):
+    def normalize(self, value: float) -> float:
+        return 0

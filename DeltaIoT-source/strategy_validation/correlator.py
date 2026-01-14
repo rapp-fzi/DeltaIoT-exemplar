@@ -7,8 +7,8 @@ import json
 import tabulate
 
 from simulator import Simulator
-from normalizer import Normalizer
-from reward_calculator import RewardCalculator, AverageTotalRewardCalculator
+from normalizer import Normalizer, NullNormalizer
+from reward_calculator import AverageTotalRewardCalculator, SimexpRewardCalculator, SimulatorRewardCalculator
 
 class Correlator:
     def correlate_strategies(self, args):
@@ -25,8 +25,10 @@ class Correlator:
 
         energy_normalizer = Normalizer(9, 26)
         packet_loss_normalizer = Normalizer(0.02, 0.4)
-        reward_calculator = RewardCalculator(energy_normalizer, packet_loss_normalizer)
-        total_reward_calculator = AverageTotalRewardCalculator(reward_calculator)
+        simexp_reward_calculator = SimexpRewardCalculator(energy_normalizer, packet_loss_normalizer)
+        total_reward_calculator = AverageTotalRewardCalculator(simexp_reward_calculator)
+        simulator_reward_calculator = SimulatorRewardCalculator(energy_normalizer, packet_loss_normalizer)
+        score_calculator = AverageTotalRewardCalculator(simulator_reward_calculator)
 
         all_data = []
         simulator = Simulator()
@@ -37,7 +39,12 @@ class Correlator:
                 config_file = self._create_strategy_conf(tmp_path, args.strategy, task_data["optimizables"])
                 strat_id = "%s:%s" % (args.strategy.name, task_data["id"])
                 data = simulator.collect_simulation_data(simulator, args.runs, strat_id, args.strategy, config_file, args.seed, args.max_workers)
-                score_average = statistics.mean([result[1] for result in data])
+                if args.calc_average_score:
+                    simulator_runs = self._qos_to_runs(data)
+                    score = score_calculator.total_reward(simulator_runs)
+                else:
+                    score = statistics.mean([result[1] for result in data])
+
                 if args.calc_average_reward:
                     reward_type = "AVERAGE"
                     reward = total_reward_calculator.total_reward(task_data["runs"])
@@ -45,13 +52,13 @@ class Correlator:
                     reward = task_data["reward"]
                     reward_type = task_data["reward_type"]
 
-                all_data.append((task_data["id"], reward, reward_type, score_average, task_data["optimizables"]))
+                all_data.append((task_data["id"], reward, reward_type, score, task_data["optimizables"]))
 
         table_entries = []
-        for task_id, reward, reward_type, score_average, optimizables in all_data:
+        for task_id, reward, reward_type, score, optimizables in all_data:
             name_values = ["%s=%s" % (key, value) for key, value in optimizables.items()]
             values = ",".join(name_values)
-            table_entries.append((task_id, reward, reward_type, score_average, values))
+            table_entries.append((task_id, reward, reward_type, score, values))
 
         headers = ['ID', 'Reward', 'Reward type', 'Score', 'Values']
 
@@ -71,6 +78,25 @@ class Correlator:
                                       tablefmt="simple"
                                       )
         print(table_str)
+
+    def _qos_to_runs(self, simulator_runs):
+        runs = []
+        for _, _, result in simulator_runs:
+            run_entry = {}
+            quality_attributes = {}
+            packet_loss = []
+            energy = []
+            qos = result["qos"]
+            for qos_entry in qos:
+                packet_loss.append(qos_entry["packetLoss"])
+                energy.append(qos_entry["powerConsumption"])
+
+            quality_attributes["PacketLoss.props"] = packet_loss
+            quality_attributes["EnergyConsumption.props"] = energy
+            run_entry["quality_attributes"] = quality_attributes
+            runs.append(run_entry)
+
+        return runs
 
     def _create_strategy_conf(self, folder, strategy, values):
         strategy_path = folder / ("%s_conf.json" % strategy.name)

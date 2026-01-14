@@ -1,7 +1,11 @@
 import statistics
 import math
 
+
 class RewardCalculator:
+    pass
+
+class SimexpRewardCalculator(RewardCalculator):
     def __init__(self, energy_normalizer, packet_loss_normalizer):
         self._energy_normalizer = energy_normalizer
         self._packet_loss_normalizer = packet_loss_normalizer
@@ -10,6 +14,18 @@ class RewardCalculator:
         normalized_energy_consumption = self._energy_normalizer.normalize(energy)
         normalized_packet_loss = self._packet_loss_normalizer.normalize(packet_loss)
         normalized_reward = normalized_packet_loss + normalized_energy_consumption
+        return normalized_reward
+
+
+class SimulatorRewardCalculator(RewardCalculator):
+    def __init__(self, energy_normalizer, packet_loss_normalizer):
+        self._energy_normalizer = energy_normalizer
+        self._packet_loss_normalizer = packet_loss_normalizer
+
+    def calc_reward(self, energy: float, packet_loss: float) -> float:
+        normalized_energy_consumption = self._energy_normalizer.normalize(energy)
+        normalized_packet_loss = self._packet_loss_normalizer.normalize(packet_loss)
+        normalized_reward = (normalized_packet_loss + normalized_energy_consumption) / 2
         return normalized_reward
 
 
