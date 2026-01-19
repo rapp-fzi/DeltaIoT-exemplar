@@ -10,6 +10,7 @@ from simulator import Simulator
 from normalizer import Normalizer, NullNormalizer
 from reward_calculator import AverageTotalRewardCalculator, SimexpRewardCalculator, SimulatorRewardCalculator
 
+
 class Correlator:
     def correlate_strategies(self, args):
         print(f"correlate strategy: {args.strategy.name}")
@@ -43,7 +44,7 @@ class Correlator:
                     simulator_runs = self._qos_to_runs(data)
                     score = score_calculator.total_reward(simulator_runs)
                 else:
-                    score = statistics.mean([result[1] for result in data])
+                    score = statistics.mean([result["score"] for result in data])
 
                 if args.calc_average_reward:
                     reward_type = "AVERAGE"
