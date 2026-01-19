@@ -8,6 +8,7 @@ import tabulate
 from strategy_kind import StrategyKind
 from simulator import Simulator
 from correlator import Correlator
+from correlator_calc import CorrelatorCalc
 
 
 class StrategyValidator:
@@ -190,7 +191,7 @@ class StrategyValidator:
 
         parser_correlate_calc = corr_subparsers.add_parser('calc', help='calculate correlation values')
         parser_correlate_calc.add_argument('--correlation', type=Path, required=True, help="CSV correlation file")
-        parser_correlate_calc.set_defaults(func=Correlator().calc_correlation)
+        parser_correlate_calc.set_defaults(func=CorrelatorCalc().calc_correlation)
 
         args = parser.parse_args()
 
