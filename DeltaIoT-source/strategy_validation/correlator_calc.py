@@ -4,6 +4,7 @@ from typing import Callable
 
 import tabulate
 import pandas as pd
+from progress.bar import Bar
 
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
@@ -16,8 +17,8 @@ class MethodMixin:
 
 
 class CorrelationMethod(MethodMixin, Enum):
-    PEARSON = "pearson", pearsonr
-    SPEARMAN = "spearman", spearmanr
+    PEARSON = "Pearson", pearsonr
+    SPEARMAN = "Spearman", spearmanr
 
 
 class CorrelatorCalc:
@@ -28,14 +29,23 @@ class CorrelatorCalc:
         if args.seed is not None:
             np.random.seed(args.seed)
 
-        headers = ['Kind', 'Correlation']
+        headers = ['Kind', 'Correlation', 'p value', 'CI lower', 'CI upper', 'CI', 'Sample size']
+
         table_entries = []
 
         corr_pearson = self._correlation_with_ci(df["Reward"], df["Score"], CorrelationMethod.PEARSON)
-        table_entries.append(("Pearson", corr_pearson["correlation"]))
+        table_entries.append((corr_pearson["corr_name"], corr_pearson["correlation"],
+                              corr_pearson["p_value"],
+                              corr_pearson["ci_lower"], corr_pearson["ci_upper"], corr_pearson["ci"],
+                              len(df["Reward"])
+                              ))
 
         corr_spearman = self._correlation_with_ci(df["Reward"], df["Score"], CorrelationMethod.SPEARMAN)
-        table_entries.append(("Spearman", corr_spearman["correlation"]))
+        table_entries.append((corr_spearman["corr_name"], corr_spearman["correlation"],
+                              corr_spearman["p_value"],
+                              corr_spearman["ci_lower"], corr_spearman["ci_upper"], corr_spearman["ci"],
+                              len(df["Reward"])
+                              ))
 
         table_str = tabulate.tabulate(table_entries,
                                       headers=headers,
@@ -60,13 +70,14 @@ class CorrelatorCalc:
         corr, p_value = corr_method.method(x, y)
 
         # Bootstrap confidence intervals
-        print("Bootstrap confidence intervals for: %s" % corr_method.corr_name)
         boot_corrs = []
         n = len(x)
-        for _ in range(n_boot):
-            idx = np.random.choice(n, n, replace=True)
-            boot_corr, _ = corr_method.method(x[idx], y[idx])
-            boot_corrs.append(boot_corr)
+        with Bar("Bootstrap confidence intervals for: %s" % corr_method.corr_name, max=n_boot) as bar:
+            for _ in range(n_boot):
+                idx = np.random.choice(n, n, replace=True)
+                boot_corr, _ = corr_method.method(x[idx], y[idx])
+                boot_corrs.append(boot_corr)
+                bar.next()
 
         # Two-sided CI
         alpha = (100 - ci) / 2
@@ -74,8 +85,10 @@ class CorrelatorCalc:
         ci_upper = np.percentile(boot_corrs, 100 - alpha)
 
         return {
+            'corr_name': corr_method.corr_name,
             'correlation': corr,
             'p_value': p_value,
             'ci_lower': ci_lower,
-            'ci_upper': ci_upper
+            'ci_upper': ci_upper,
+            'ci': ci,
         }
