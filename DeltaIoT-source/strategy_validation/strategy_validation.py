@@ -173,17 +173,24 @@ class StrategyValidator:
                             help="adaption strategy config file")
         parser_quality_attributes_raw.set_defaults(func=self._extract_quality_attributes)
 
-        parser_correlate = subparsers.add_parser('correlate', help='generate correlation data')
-        parser_correlate.add_argument('task_file', type=Path, nargs='+')
-        parser_correlate.add_argument('-r', '--result', type=Path, required=True, help="CSV result file")
-        parser_correlate.add_argument('--strategy',
+        subparser_correlate = subparsers.add_parser('correlate', help='generate correlation data')
+        corr_subparsers = subparser_correlate.add_subparsers(required=True, help='available correlation subcommands')
+
+        parser_correlate_gen = corr_subparsers.add_parser('gen', help='generate correlation data')
+        parser_correlate_gen.add_argument('task_file', type=Path, nargs='+')
+        parser_correlate_gen.add_argument('-r', '--result', type=Path, required=True, help="CSV result file")
+        parser_correlate_gen.add_argument('--strategy',
                             required=True,
                             type=strategy_name,
                             metavar="{%s}" % ",".join([_type.name for _type in StrategyKind]),
                             help="adaption strategy")
-        parser_correlate.add_argument('--calc_average_reward', action='store_true', help="calculate reward bases on QA data")
-        parser_correlate.add_argument('--calc_average_score', action='store_true', help="calculate score bases on QA data")
-        parser_correlate.set_defaults(func=Correlator().correlate_strategies)
+        parser_correlate_gen.add_argument('--calc_average_reward', action='store_true', help="calculate reward bases on QA data")
+        parser_correlate_gen.add_argument('--calc_average_score', action='store_true', help="calculate score bases on QA data")
+        parser_correlate_gen.set_defaults(func=Correlator().correlate_strategies)
+
+        parser_correlate_calc = corr_subparsers.add_parser('calc', help='calculate correlation values')
+        parser_correlate_calc.add_argument('--correlation', type=Path, required=True, help="CSV correlation file")
+        parser_correlate_calc.set_defaults(func=Correlator().calc_correlation)
 
         args = parser.parse_args()
 
