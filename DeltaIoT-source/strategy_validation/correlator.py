@@ -34,12 +34,14 @@ class Correlator:
         all_data = []
         simulator = Simulator()
         simulator.init()
-        for task_data in all_tasks:
+        score_type = "AVERAGE"
+        for i, task_data in enumerate(all_tasks):
             with tempfile.TemporaryDirectory() as tmpdir_name:
                 tmp_path = Path(tmpdir_name)
                 config_file = self._create_strategy_conf(tmp_path, args.strategy, task_data["optimizables"])
                 strat_id = "%s:%s" % (args.strategy.name, task_data["id"])
-                data = simulator.collect_simulation_data(simulator, args.runs, strat_id, args.strategy, config_file, args.seed, args.max_workers)
+                suffix = " [%d/%d]" % (i+1, len(all_tasks))
+                data = simulator.collect_simulation_data(simulator, args.runs, strat_id, args.strategy, config_file, args.seed, args.max_workers, suffix=suffix)
                 if args.calc_average_score:
                     simulator_runs = self._qos_to_runs(data)
                     score = score_calculator.total_reward(simulator_runs)
@@ -53,15 +55,15 @@ class Correlator:
                     reward = task_data["reward"]
                     reward_type = task_data["reward_type"]
 
-                all_data.append((task_data["id"], reward, reward_type, score, task_data["optimizables"]))
+                all_data.append((task_data["id"], reward, reward_type, score, score_type, task_data["optimizables"]))
 
         table_entries = []
-        for task_id, reward, reward_type, score, optimizables in all_data:
+        for task_id, reward, reward_type, score, score_type, optimizables in all_data:
             name_values = ["%s=%s" % (key, value) for key, value in optimizables.items()]
             values = ",".join(name_values)
-            table_entries.append((task_id, reward, reward_type, score, values))
+            table_entries.append((task_id, reward, reward_type, score, score_type, values))
 
-        headers = ['ID', 'Reward', 'Reward type', 'Score', 'Values']
+        headers = ['ID', 'Reward', 'Reward type', 'Score', 'Score type', 'Values']
 
         with args.result.open("w", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=headers)
@@ -71,7 +73,8 @@ class Correlator:
                                  'Reward': entry[1],
                                  'Reward type': entry[2],
                                  'Score': entry[3],
-                                 'Values': entry[4],
+                                 'Score type': entry[4],
+                                 'Values': entry[5],
                                  })
 
         table_str = tabulate.tabulate(table_entries,

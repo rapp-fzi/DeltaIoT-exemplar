@@ -24,9 +24,13 @@ class Simulator:
         if not self._jar_file:
             raise RuntimeError("unable to find: %s" % self._jar_file)
 
-    def collect_simulation_data(self, simulator, count, name, strategy: StrategyKind, config_file, seed, max_workers):
+    def collect_simulation_data(self, simulator, count, name, strategy: StrategyKind, config_file, seed, max_workers, suffix=None):
         qas = []
-        with Bar("Execute %18s" % name, max=count) as bar:
+        if suffix is None:
+            suffix = '%(index)d/%(max)d'
+        else:
+            suffix = '%(index)d/%(max)d ' + suffix
+        with Bar("Execute %18s" % name, max=count, suffix=suffix) as bar:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
                 for i in range(0, count):
