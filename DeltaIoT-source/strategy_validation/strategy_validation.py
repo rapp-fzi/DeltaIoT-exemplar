@@ -190,7 +190,7 @@ class StrategyValidator:
         parser_correlate_gen.set_defaults(func=Correlator().correlate_strategies)
 
         parser_correlate_calc = corr_subparsers.add_parser('calc', help='calculate correlation values')
-        parser_correlate_calc.add_argument('--correlation', type=Path, required=True, help="CSV correlation file")
+        parser_correlate_calc.add_argument('--correlation', type=Path, required=True, help="CSV correlation input file")
         parser_correlate_calc.set_defaults(func=CorrelatorCalc().calc_correlation)
 
         args = parser.parse_args()
