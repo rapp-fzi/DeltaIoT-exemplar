@@ -1,12 +1,11 @@
 import argparse
 from pathlib import Path
 
-from tabulate import tabulate, SEPARATING_LINE
 
 from input_type import InputType
 from strategy import Strategy
 from generator import Generator
-from grouper import group_entries
+from show import Show
 
 
 def validate_file_exists(f) -> Path:
@@ -17,33 +16,14 @@ def validate_file_exists(f) -> Path:
 
 
 class ValidateSimexp:
-
-    def _process_generations(self, entries, score_entries):
-        table_entries = []
-        groups = group_entries(entries)
-        for i, entry in enumerate(groups.items()):
-            group, group_generations = entry
-            for generation in group_generations[:-1]:
-                table_entries.append([generation["Generation"], generation["Reward"], None])
-            generation = group_generations[-1]
-            score = score_entries[group]["average_score"]
-            table_entries.append([generation["Generation"], generation["Reward"], score])
-            if i < len(groups.values()) - 1:
-                table_entries.append(SEPARATING_LINE)
-
-        table_str = tabulate(table_entries,
-                             headers=['Generation', 'Reward', 'Average Score'],
-                             tablefmt="simple"
-                             )
-        print(table_str)
-
     def _generate(self, args):
         file_type = InputType[args.type.upper()]
         generator = Generator()
         entries, score_entries = generator.generate(file_type, args.infile, args.strategy, args.seed,
                                                     args.no_validation, args.count, args.result)
 
-        self._process_generations(entries, score_entries)
+        show = Show()
+        show.show_generations(entries, score_entries)
 
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
