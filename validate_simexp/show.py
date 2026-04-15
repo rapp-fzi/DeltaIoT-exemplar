@@ -3,8 +3,6 @@ import json
 
 from tabulate import tabulate, SEPARATING_LINE
 
-from grouper import group_entries
-
 
 class Show:
     def show_result(self, result_file: Path) -> None:
