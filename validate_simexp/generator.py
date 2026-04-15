@@ -33,12 +33,16 @@ class Generator:
 
         if result:
             print("Generate result file: %s" % result)
-            self._write_result(result, strategy, entries, score_entries)
+            result_content = self._generate_result(strategy, entries, score_entries)
+            self._write_result(result, result_content)
 
-    def _write_result(self, result_file: Path, strategy: Strategy, entries, score_entries):
+    def _generate_result(self, strategy: Strategy, entries, score_entries):
         groups = group_entries(entries)
         grouped_entries = []
+        last_group = None
+        last_reward = None
         for i, entry in enumerate(groups.items()):
+            current_reward = None
             group, group_generations = entry
             group_generation_entries = []
             for generation in group_generations:
@@ -46,11 +50,30 @@ class Generator:
                     "generation": generation["Generation"],
                     "reward": generation["Reward"],
                 })
+                if current_reward is None:
+                    current_reward = generation["Reward"]
+
+            m_ordenal_r = None
+            m_ordenal_s = None
+            if last_group:
+                m_ordenal_r = 0 if current_reward >= last_reward else 1
+
+                last_score = score_entries[last_group]["average_score"]
+                current_score = score_entries[group]["average_score"]
+                m_ordenal_s = 0 if current_score >= last_score else 1
+            else:
+                last_group = group
+                last_reward = current_reward
+
             grouped_entries.append({
                 "optimizable values": {name: value for name, value in group_generations[0]["Values"].items()},
                 "score": {
                     "average": score_entries[group]["average_score"],
                     "scores": score_entries[group]["scores"],
+                },
+            "mordenal": {
+                    "reward": m_ordenal_r,
+                    "score": m_ordenal_s,
                 },
                 "entries": group_generation_entries,
             })
@@ -62,6 +85,8 @@ class Generator:
             'date': now,
             'groups': grouped_entries,
         }
+        return result
 
+    def _write_result(self, result_file: Path, result_content):
         with result_file.open("w", encoding="utf-8") as f:
-            json.dump(result, f, indent=2, cls=DateTimeEncoder)
+            json.dump(result_content, f, indent=2, cls=DateTimeEncoder)
