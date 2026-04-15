@@ -20,7 +20,7 @@ class Generator:
         pass
 
     def generate(self, file_type: InputType, infile: Path, strategy: Strategy, seed: int, no_validation: bool,
-                 count: int, result: Path | None):
+                 count: int, result: Path | None) -> None:
         entries = None
         match file_type:
             case InputType.JSON:
@@ -33,8 +33,6 @@ class Generator:
 
         if result:
             self._write_result(result, strategy, entries, score_entries)
-
-        return entries, score_entries
 
     def _write_result(self, result_file: Path, strategy: Strategy, entries, score_entries):
         groups = group_entries(entries)

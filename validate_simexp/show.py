@@ -1,23 +1,23 @@
+from pathlib import Path
+import json
+
 from tabulate import tabulate, SEPARATING_LINE
 
 from grouper import group_entries
 
 
 class Show:
-    def __init__(self):
-        pass
-
-    def show_generations(self, entries, score_entries):
+    def show_result(self, result_file: Path) -> None:
         table_entries = []
-        groups = group_entries(entries)
-        for i, entry in enumerate(groups.items()):
-            group, group_generations = entry
-            for generation in group_generations[:-1]:
-                table_entries.append([generation["Generation"], generation["Reward"], None])
-            generation = group_generations[-1]
-            score = score_entries[group]["average_score"]
-            table_entries.append([generation["Generation"], generation["Reward"], score])
-            if i < len(groups.values()) - 1:
+        groups = self._load_results(result_file)
+        for i, group in enumerate(groups):
+            average_score = group["score"]["average"]
+            for index, entry in enumerate(group["entries"]):
+                score = None
+                if index == len(group["entries"]) - 1:
+                    score = average_score
+                table_entries.append([entry["generation"], entry["reward"], score])
+            if i < len(groups) - 1:
                 table_entries.append(SEPARATING_LINE)
 
         table_str = tabulate(table_entries,
@@ -25,3 +25,8 @@ class Show:
                              tablefmt="simple"
                              )
         print(table_str)
+
+    def _load_results(self, result_file: Path) -> list:
+        with result_file.open("r", encoding="utf-8") as f:
+            content = json.load(f)
+        return content["groups"]

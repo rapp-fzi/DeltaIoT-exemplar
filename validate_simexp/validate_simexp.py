@@ -19,11 +19,11 @@ class ValidateSimexp:
     def _generate(self, args):
         file_type = InputType[args.type.upper()]
         generator = Generator()
-        entries, score_entries = generator.generate(file_type, args.infile, args.strategy, args.seed,
-                                                    args.no_validation, args.count, args.result)
+        generator.generate(file_type, args.infile, args.strategy, args.seed, args.no_validation, args.count,
+                           args.result)
 
         show = Show()
-        show.show_generations(entries, score_entries)
+        show.show_result(args.result)
 
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
