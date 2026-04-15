@@ -56,9 +56,11 @@ class Generator:
                 "entries": group_generation_entries,
             })
 
+        now = datetime.datetime.now(datetime.timezone.utc)
+        now = now.astimezone()
         result = {
             'strategy': strategy,
-            'date': datetime.datetime.now(datetime.timezone.utc),
+            'date': now,
             'groups': grouped_entries,
         }
 
