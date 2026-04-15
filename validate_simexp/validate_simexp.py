@@ -84,6 +84,22 @@ class ValidateSimexp:
             groups.setdefault(key, []).append(item)
         return groups
 
+    def _generate(self, args):
+        entries = None
+        file_type = InputType[args.type.upper()]
+        match file_type:
+            case InputType.JSON:
+                entries = file_type.load(args.infile)
+            case InputType.CSV:
+                entries = file_type.load(args.infile)
+
+        score_builder = ScoreBuilder()
+        score_entries = score_builder.build_scores(entries, args.strategy, args.seed, args.no_validation, args.count)
+
+        if args.result:
+            self._write_result(args, entries, score_entries)
+        self._process_generations(entries, score_entries)
+
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
         default = ' (default: %(default)s)'
@@ -100,20 +116,7 @@ class ValidateSimexp:
                             help="strategy to execute")
         args = parser.parse_args()
 
-        entries = None
-        file_type = InputType[args.type.upper()]
-        match file_type:
-            case InputType.JSON:
-                entries = file_type.load(args.infile)
-            case InputType.CSV:
-                entries = file_type.load(args.infile)
-
-        score_builder = ScoreBuilder()
-        score_entries = score_builder.build_scores(entries, args.strategy, args.seed, args.no_validation, args.count)
-
-        if args.result:
-            self._write_result(args, entries, score_entries)
-        self._process_generations(entries, score_entries)
+        self._generate(args)
 
 
 if __name__ == '__main__':
