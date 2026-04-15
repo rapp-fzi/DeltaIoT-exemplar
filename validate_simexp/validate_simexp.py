@@ -22,6 +22,7 @@ class ValidateSimexp:
         generator.generate(file_type, args.infile, args.strategy, args.seed, args.no_validation, args.count,
                            args.result)
 
+    def _show(self, args):
         show = Show()
         show.show_result(args.result)
 
@@ -32,7 +33,7 @@ class ValidateSimexp:
         subparsers = parser.add_subparsers(required=True, dest="subcommand", title='subcommands',
                                            description='valid subcommands', help='sub-command help')
 
-        parser_generate = subparsers.add_parser('generate', help="generate ")
+        parser_generate = subparsers.add_parser('generate', help="generate result file")
         parser_generate.add_argument('infile', type=validate_file_exists)
         parser_generate.add_argument('-r', '--result', type=Path, help="result json file")
         parser_generate.add_argument('--seed', type=int, help="simulator seed")
@@ -45,6 +46,10 @@ class ValidateSimexp:
                                      choices=[strategy.name for strategy in Strategy],
                                      help="strategy to execute")
         parser_generate.set_defaults(func=self._generate)
+
+        parser_show = subparsers.add_parser('show', help="show result table")
+        parser_show.add_argument('-r', '--result', type=Path, required=True, help="result json file to show")
+        parser_show.set_defaults(func=self._show)
 
         args = parser.parse_args()
         args.func(args)

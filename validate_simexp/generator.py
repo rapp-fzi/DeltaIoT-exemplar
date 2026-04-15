@@ -32,6 +32,7 @@ class Generator:
         score_entries = score_builder.build_scores(entries, strategy, seed, no_validation, count)
 
         if result:
+            print("Generate result file: %s" % result)
             self._write_result(result, strategy, entries, score_entries)
 
     def _write_result(self, result_file: Path, strategy: Strategy, entries, score_entries):
