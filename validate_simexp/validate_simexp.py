@@ -1,20 +1,11 @@
 import argparse
-import json
-import datetime
 from pathlib import Path
 
 from tabulate import tabulate, SEPARATING_LINE
 
 from input_type import InputType
 from strategy import Strategy
-from score_builder import ScoreBuilder
-
-
-class DateTimeEncoder(json.JSONEncoder):
-    # Override the default method
-    def default(self, obj):
-        if isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.isoformat()
+from generator import Generator
 
 
 def validate_file_exists(f) -> Path:
@@ -24,39 +15,7 @@ def validate_file_exists(f) -> Path:
     return path
 
 
-def as_path(f) -> Path:
-    return Path(f)
-
-
 class ValidateSimexp:
-    def _write_result(self, args, entries, score_entries):
-        groups = self.group_entries(entries)
-        group_entries = []
-        for i, entry in enumerate(groups.items()):
-            group, group_generations = entry
-            group_generation_entries = []
-            for generation in group_generations:
-                group_generation_entries.append({
-                    "generation": generation["Generation"],
-                    "reward": generation["Reward"],
-                })
-            group_entries.append({
-                "optimizable values": {name: value for name, value in group_generations[0]["Values"].items()},
-                "score": {
-                    "average": score_entries[group]["average_score"],
-                    "scores": score_entries[group]["scores"],
-                },
-                "entries": group_generation_entries,
-            })
-
-        result = {
-            'strategy': args.strategy,
-            'date': datetime.datetime.now(datetime.timezone.utc),
-            'groups': group_entries,
-        }
-
-        with args.result.open("w", encoding="utf-8") as f:
-            json.dump(result, f, indent=2, cls=DateTimeEncoder)
 
     def _process_generations(self, entries, score_entries):
         table_entries = []
@@ -85,19 +44,11 @@ class ValidateSimexp:
         return groups
 
     def _generate(self, args):
-        entries = None
         file_type = InputType[args.type.upper()]
-        match file_type:
-            case InputType.JSON:
-                entries = file_type.load(args.infile)
-            case InputType.CSV:
-                entries = file_type.load(args.infile)
+        generator = Generator()
+        entries, score_entries = generator.generate(file_type, args.infile, args.strategy, args.seed,
+                                                    args.no_validation, args.count, args.result)
 
-        score_builder = ScoreBuilder()
-        score_entries = score_builder.build_scores(entries, args.strategy, args.seed, args.no_validation, args.count)
-
-        if args.result:
-            self._write_result(args, entries, score_entries)
         self._process_generations(entries, score_entries)
 
     def main(self):
@@ -109,7 +60,7 @@ class ValidateSimexp:
 
         parser_generate = subparsers.add_parser('generate', help="generate ")
         parser_generate.add_argument('infile', type=validate_file_exists)
-        parser_generate.add_argument('-r', '--result', type=as_path, help="result json file")
+        parser_generate.add_argument('-r', '--result', type=Path, help="result json file")
         parser_generate.add_argument('--seed', type=int, help="simulator seed")
         parser_generate.add_argument('--count', type=int, default=30, help="amount of simulations to run" + default)
         parser_generate.add_argument('--no_validation', action='store_true', help="disable range validation")
@@ -128,4 +79,3 @@ class ValidateSimexp:
 if __name__ == '__main__':
     v = ValidateSimexp()
     v.main()
-
