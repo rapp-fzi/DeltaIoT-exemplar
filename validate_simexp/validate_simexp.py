@@ -103,20 +103,26 @@ class ValidateSimexp:
     def main(self):
         parser = argparse.ArgumentParser(prog="validate_simexp", description="Validates SimExp results")
         default = ' (default: %(default)s)'
-        parser.add_argument('infile', type=validate_file_exists)
-        parser.add_argument('-r', '--result', type=as_path, help="result json file")
-        parser.add_argument('--seed', type=int, help="simulator seed")
-        parser.add_argument('--count', type=int, default=30, help="amount of simulations to run" + default)
-        parser.add_argument('--no_validation', action='store_true', help="disable range validation")
-        parser.add_argument('-t', '--type',
-                                 choices=[type.type.lower() for type in InputType],
-                                 default=InputType.JSON.name.lower(), help="select input file type" + default)
-        parser.add_argument('-s', '--strategy', required=True,
-                            choices=[strategy.name for strategy in Strategy],
-                            help="strategy to execute")
-        args = parser.parse_args()
 
-        self._generate(args)
+        subparsers = parser.add_subparsers(required=True, dest="subcommand", title='subcommands',
+                                           description='valid subcommands', help='sub-command help')
+
+        parser_generate = subparsers.add_parser('generate', help="generate ")
+        parser_generate.add_argument('infile', type=validate_file_exists)
+        parser_generate.add_argument('-r', '--result', type=as_path, help="result json file")
+        parser_generate.add_argument('--seed', type=int, help="simulator seed")
+        parser_generate.add_argument('--count', type=int, default=30, help="amount of simulations to run" + default)
+        parser_generate.add_argument('--no_validation', action='store_true', help="disable range validation")
+        parser_generate.add_argument('-t', '--type',
+                                     choices=[type.type.lower() for type in InputType],
+                                     default=InputType.JSON.name.lower(), help="select input file type" + default)
+        parser_generate.add_argument('-s', '--strategy', required=True,
+                                     choices=[strategy.name for strategy in Strategy],
+                                     help="strategy to execute")
+        parser_generate.set_defaults(func=self._generate)
+
+        args = parser.parse_args()
+        args.func(args)
 
 
 if __name__ == '__main__':
