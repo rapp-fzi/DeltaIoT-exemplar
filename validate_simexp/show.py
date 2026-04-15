@@ -15,10 +15,12 @@ class Show:
         for i, group in enumerate(groups):
             average_score = group["score"]["average"]
             for index, entry in enumerate(group["entries"]):
+                reward = None
                 score = None
-                if index == len(group["entries"]) - 1:
+                if index == 0:
+                    reward = entry["reward"]
                     score = average_score
-                table_entries.append([entry["generation"], entry["reward"], score])
+                table_entries.append([entry["generation"], reward, score])
             if i < len(groups) - 1:
                 table_entries.append(SEPARATING_LINE)
 
