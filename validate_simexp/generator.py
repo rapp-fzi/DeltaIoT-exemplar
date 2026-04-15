@@ -5,6 +5,7 @@ from pathlib import Path
 from input_type import InputType
 from score_builder import ScoreBuilder
 from strategy import Strategy
+from grouper import group_entries
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -36,8 +37,8 @@ class Generator:
         return entries, score_entries
 
     def _write_result(self, result_file: Path, strategy: Strategy, entries, score_entries):
-        groups = self.group_entries(entries)
-        group_entries = []
+        groups = group_entries(entries)
+        grouped_entries = []
         for i, entry in enumerate(groups.items()):
             group, group_generations = entry
             group_generation_entries = []
@@ -46,7 +47,7 @@ class Generator:
                     "generation": generation["Generation"],
                     "reward": generation["Reward"],
                 })
-            group_entries.append({
+            grouped_entries.append({
                 "optimizable values": {name: value for name, value in group_generations[0]["Values"].items()},
                 "score": {
                     "average": score_entries[group]["average_score"],
@@ -58,16 +59,8 @@ class Generator:
         result = {
             'strategy': strategy,
             'date': datetime.datetime.now(datetime.timezone.utc),
-            'groups': group_entries,
+            'groups': grouped_entries,
         }
 
         with result_file.open("w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, cls=DateTimeEncoder)
-
-    def group_entries(self, entries):
-        groups = {}
-        for item in entries:
-            key = str(item['Values'])
-            groups.setdefault(key, []).append(item)
-        return groups
-

@@ -6,6 +6,7 @@ from tabulate import tabulate, SEPARATING_LINE
 from input_type import InputType
 from strategy import Strategy
 from generator import Generator
+from grouper import group_entries
 
 
 def validate_file_exists(f) -> Path:
@@ -19,7 +20,7 @@ class ValidateSimexp:
 
     def _process_generations(self, entries, score_entries):
         table_entries = []
-        groups = self.group_entries(entries)
+        groups = group_entries(entries)
         for i, entry in enumerate(groups.items()):
             group, group_generations = entry
             for generation in group_generations[:-1]:
@@ -35,13 +36,6 @@ class ValidateSimexp:
                              tablefmt="simple"
                              )
         print(table_str)
-
-    def group_entries(self, entries):
-        groups = {}
-        for item in entries:
-            key = str(item['Values'])
-            groups.setdefault(key, []).append(item)
-        return groups
 
     def _generate(self, args):
         file_type = InputType[args.type.upper()]
