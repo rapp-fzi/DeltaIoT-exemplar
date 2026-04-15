@@ -9,7 +9,9 @@ from grouper import group_entries
 class Show:
     def show_result(self, result_file: Path) -> None:
         table_entries = []
-        groups = self._load_results(result_file)
+        content = self._load_results(result_file)
+        print("Results of: %s" % content["strategy"])
+        groups = content["groups"]
         for i, group in enumerate(groups):
             average_score = group["score"]["average"]
             for index, entry in enumerate(group["entries"]):
@@ -29,4 +31,4 @@ class Show:
     def _load_results(self, result_file: Path) -> list:
         with result_file.open("r", encoding="utf-8") as f:
             content = json.load(f)
-        return content["groups"]
+            return content
