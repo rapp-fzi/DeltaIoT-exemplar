@@ -147,7 +147,7 @@ class StrategyValidator:
 
         parser = argparse.ArgumentParser(prog="strategy_validator", description="Validates DeltaIoT strategies")
         default = ' (default: %(default)s)'
-        parser.add_argument('--runs', type=int, default=30, help="run count" + default)
+        parser.add_argument('--runs', type=int, default=10, help="run count" + default)
         parser.add_argument('--max_workers', type=int, default=1, help="max worker threads" + default)
         parser.add_argument('--seed', type=int, help="simulator seed")
 
