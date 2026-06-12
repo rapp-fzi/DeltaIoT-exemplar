@@ -37,7 +37,7 @@ class ValidateSimexp:
         parser_generate.add_argument('infile', type=validate_file_exists)
         parser_generate.add_argument('-r', '--result', type=Path, help="result json file")
         parser_generate.add_argument('--seed', type=int, help="simulator seed")
-        parser_generate.add_argument('--count', type=int, default=30, help="amount of simulations to run" + default)
+        parser_generate.add_argument('--count', type=int, default=10, help="amount of simulations to run" + default)
         parser_generate.add_argument('--no_validation', action='store_true', help="disable range validation")
         parser_generate.add_argument('-t', '--type',
                                      choices=[type.type.lower() for type in InputType],
