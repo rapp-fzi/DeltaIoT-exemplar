@@ -26,7 +26,7 @@ class Show:
                 table_entries.append(SEPARATING_LINE)
 
         table_str = tabulate(table_entries,
-                             headers=['Generation', 'Reward', 'Average Score', "MordenalR", "MordenalS"],
+                             headers=['Generation', 'Reward', 'Average Score', "MordinalR", "MordinalS"],
                              tablefmt="simple"
                              )
         print(table_str)
